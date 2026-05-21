@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AssistIA Digital</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f8fafc;
+      color: #111827;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #111827, #1f2937);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 48px;
+      margin: 0 0 15px;
+    }
+
+    header p {
+      font-size: 20px;
+      color: #d1d5db;
+      max-width: 800px;
+      margin: 0 auto 35px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: #2563eb;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 17px;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    section {
+      max-width: 1100px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    h2 {
+      font-size: 34px;
+      margin-bottom: 15px;
+      color: #111827;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .intro {
+      max-width: 800px;
+      margin: 0 auto;
+      color: #4b5563;
+      font-size: 18px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 22px;
+      margin-top: 35px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #111827;
+      font-size: 22px;
+    }
+
+    .card p {
+      color: #4b5563;
+    }
+
+    .highlight {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      padding: 40px 25px;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      color: #6b7280;
+      padding: 35px 20px;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 70px;
+      background: white;
+    }
+
+    @media (max-width: 700px) {
+      header h1 {
+        font-size: 36px;
+      }
+
+      header p {
+        font-size: 18px;
+      }
+
+      h2 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>AssistIA Digital</h1>
+    <p>
+      Des solutions d’intelligence artificielle simples et utiles pour aider les petites entreprises
+      à gagner du temps, comprendre leurs clients et améliorer leurs services.
+    </p>
+
+    <a class="btn" href="https://reviewpro-ai.streamlit.app/" target="_blank">
+      Tester ReviewPro IA
+    </a>
+  </header>
+
+  <section>
+    <h2 class="center">Notre première solution : ReviewPro IA</h2>
+    <p class="intro center">
+      ReviewPro IA analyse les avis clients d’une entreprise et génère un rapport clair
+      avec les points forts, les points faibles et des recommandations concrètes.
+    </p>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Analyse des avis clients</h3>
+        <p>
+          L’application recherche l’établissement, récupère les informations disponibles
+          et génère une analyse avec l’intelligence artificielle.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Rapport clair</h3>
+        <p>
+          Le propriétaire reçoit un résumé, les points positifs, les critiques principales
+          et les actions à améliorer.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Export PDF</h3>
+        <p>
+          Le rapport peut être téléchargé en PDF ou TXT pour être partagé avec un client,
+          une équipe ou un responsable.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="center">Pour quelles entreprises ?</h2>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Restaurants & cafés</h3>
+        <p>
+          Comprendre les avis sur la qualité des plats, le service, l’attente,
+          l’accueil et l’ambiance.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Hôtels</h3>
+        <p>
+          Analyser les retours sur l’accueil, la propreté, le confort, le bruit,
+          l’emplacement et les services.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Petites entreprises</h3>
+        <p>
+          Salons de coiffure, garages, boutiques, instituts, agences, cabinets,
+          salles de sport et autres services locaux.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="highlight">
+    <h2>Essayez la démonstration</h2>
+    <p class="intro">
+      Entrez le nom d’une entreprise, choisissez le bon établissement et générez
+      un rapport IA en quelques secondes.
+    </p>
+
+    <br />
+
+    <a class="btn" href="https://reviewpro-ai.streamlit.app/" target="_blank">
+      Ouvrir ReviewPro IA
+    </a>
+  </section>
+
+  <footer>
+    © 2026 AssistIA Digital — Solutions IA pour petites entreprises
+  </footer>
+
+</body>
+</html>
