@@ -4,16 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>AssistIA Digital | AI solutions for small businesses</title>
+  <title>AssistIA Digital | ReviewPro IA</title>
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZPVL9VQMR"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-SZPVL9VQMR');
+    gtag("js", new Date());
+    gtag("config", "G-SZPVL9VQMR");
   </script>
 
   <style>
@@ -32,7 +31,7 @@
     header {
       background: linear-gradient(135deg, #111827, #1f2937);
       color: white;
-      padding: 35px 20px 85px;
+      padding: 30px 20px 85px;
       text-align: center;
     }
 
@@ -45,13 +44,18 @@
     }
 
     .language-switcher button {
-      background: rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.08);
       color: white;
-      border: 1px solid rgba(255,255,255,0.25);
-      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 9px 16px;
       border-radius: 999px;
       cursor: pointer;
       font-weight: bold;
+      font-size: 14px;
+    }
+
+    .language-switcher button:hover {
+      background: rgba(255, 255, 255, 0.18);
     }
 
     .language-switcher button.active {
@@ -82,7 +86,6 @@
       font-size: 17px;
       transition: 0.2s;
       margin: 8px;
-      border: none;
     }
 
     .btn:hover {
@@ -149,19 +152,12 @@
       margin-bottom: 0;
     }
 
-    .highlight {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 18px;
-      padding: 45px 25px;
-      text-align: center;
-    }
-
     .dark-section {
       background: #111827;
       color: white;
       padding: 55px 25px;
       border-radius: 22px;
+      text-align: center;
     }
 
     .dark-section h2 {
@@ -170,6 +166,17 @@
 
     .dark-section p {
       color: #d1d5db;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 5px;
     }
 
     .steps {
@@ -200,15 +207,12 @@
       font-weight: bold;
     }
 
-    .badge {
-      display: inline-block;
-      background: #dbeafe;
-      color: #1e40af;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: bold;
-      margin: 5px;
+    .highlight {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      padding: 45px 25px;
+      text-align: center;
     }
 
     footer {
@@ -244,71 +248,69 @@
 
   <header>
     <div class="language-switcher">
-      <button onclick="setLanguage('fr')" id="btn-fr">Français</button>
-      <button onclick="setLanguage('en')" id="btn-en">English</button>
-      <button onclick="setLanguage('de')" id="btn-de">Deutsch</button>
+      <button type="button" id="btn-fr" onclick="setLanguage('fr')">Français</button>
+      <button type="button" id="btn-en" onclick="setLanguage('en')">English</button>
+      <button type="button" id="btn-de" onclick="setLanguage('de')">Deutsch</button>
     </div>
 
     <h1 data-i18n="hero_title">AssistIA Digital</h1>
 
     <p data-i18n="hero_subtitle">
-      Des solutions d’intelligence artificielle simples et utiles pour aider les petites entreprises
-      à comprendre leurs clients, améliorer leur réputation et prendre de meilleures décisions.
+      Des solutions d’intelligence artificielle simples et utiles pour aider les petites entreprises à comprendre leurs clients, améliorer leur réputation et prendre de meilleures décisions.
     </p>
 
     <a
       class="btn"
       href="https://reviewpro-ai.streamlit.app/"
       target="_blank"
-      onclick="trackReviewProClick('Hero')"
+      onclick="trackReviewProClick('hero')"
       data-i18n="hero_button"
     >
       Tester ReviewPro IA
     </a>
 
-    <a class="btn btn-secondary" href="#fonctionnalites" data-i18n="features_button">
+    <a class="btn btn-secondary" href="#features" data-i18n="features_button">
       Voir les fonctionnalités
     </a>
   </header>
 
   <section>
-    <h2 class="center" data-i18n="solution_title">Notre première solution : ReviewPro IA</h2>
+    <h2 class="center" data-i18n="solution_title">
+      Notre première solution : ReviewPro IA
+    </h2>
 
     <p class="intro center" data-i18n="solution_text">
-      ReviewPro IA transforme les avis clients en véritable audit de réputation.
-      L’application ne se limite pas à afficher une note Google : elle compare l’entreprise
-      avec son marché local, calcule un score de réputation et propose un plan d’action concret.
+      ReviewPro IA transforme les avis clients en véritable audit de réputation. L’application ne se limite pas à afficher une note Google : elle compare l’entreprise avec son marché local, calcule un score de réputation et propose un plan d’action concret.
     </p>
 
     <div class="cards">
       <div class="card">
         <h3 data-i18n="card_search_title">Recherche d’entreprise</h3>
         <p data-i18n="card_search_text">
-          L’utilisateur entre le nom d’une entreprise et une ville. L’application recherche
-          l’établissement via Google Places et affiche les résultats pertinents.
+          L’utilisateur entre le nom d’une entreprise et une ville. L’application recherche l’établissement via Google Places et affiche les résultats pertinents.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="card_ai_title">Analyse IA des avis</h3>
         <p data-i18n="card_ai_text">
-          L’intelligence artificielle analyse les informations disponibles, les avis clients
-          et les signaux de réputation pour produire un rapport clair.
+          L’intelligence artificielle analyse les informations disponibles, les avis clients et les signaux de réputation pour produire un rapport clair.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="card_pdf_title">Rapport PDF/TXT</h3>
         <p data-i18n="card_pdf_text">
-          Le rapport peut être téléchargé en PDF ou TXT pour être envoyé au client,
-          présenté en rendez-vous ou conservé comme audit.
+          Le rapport peut être téléchargé en PDF ou TXT pour être envoyé au client, présenté en rendez-vous ou conservé comme audit.
         </p>
       </div>
     </div>
   </section>
 
-  <section id="fonctionnalites">
-    <h2 class="center" data-i18n="difference_title">Ce qui rend ReviewPro IA différent de Google Reviews</h2>
+  <section id="features">
+    <h2 class="center" data-i18n="difference_title">
+      Ce qui rend ReviewPro IA différent de Google Reviews
+    </h2>
 
     <p class="intro center" data-i18n="difference_text">
       Google Reviews montre les avis. ReviewPro IA aide à comprendre, comparer et agir.
@@ -318,61 +320,53 @@
       <div class="card">
         <h3 data-i18n="benchmark_title">Benchmark local</h3>
         <p data-i18n="benchmark_text">
-          Compare l’établissement avec les concurrents de la même ville et du même secteur :
-          note moyenne locale, volume moyen d’avis et positionnement concurrentiel.
+          Compare l’établissement avec les concurrents de la même ville et du même secteur : note moyenne locale, volume moyen d’avis et positionnement concurrentiel.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="score_title">Score de réputation</h3>
         <p data-i18n="score_text">
-          Génère un score simple sur 100 pour évaluer rapidement la réputation de l’entreprise :
-          Excellent, Bon, Moyen, À améliorer ou Critique.
+          Génère un score simple sur 100 pour évaluer rapidement la réputation de l’entreprise.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="action_title">Plan d’action 30 jours</h3>
         <p data-i18n="action_text">
-          Propose des actions concrètes semaine par semaine pour améliorer la satisfaction client,
-          la réputation et la visibilité locale.
+          Propose des actions concrètes semaine par semaine pour améliorer la satisfaction client, la réputation et la visibilité locale.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="strengths_title">Points forts et points faibles</h3>
         <p data-i18n="strengths_text">
-          Identifie les qualités appréciées par les clients et les problèmes à surveiller,
-          comme l’attente, l’accueil, le prix, la propreté ou le service.
+          Identifie les qualités appréciées par les clients et les problèmes à surveiller.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="recommendations_title">Recommandations concrètes</h3>
         <p data-i18n="recommendations_text">
-          Donne 3 à 5 recommandations simples et actionnables pour aider le propriétaire
-          à améliorer son entreprise.
+          Donne 3 à 5 recommandations simples et actionnables pour aider le propriétaire à améliorer son entreprise.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="message_title">Message commercial</h3>
         <p data-i18n="message_text">
-          Génère un court message prêt à utiliser pour expliquer au client la valeur
-          de l’analyse et les prochaines actions possibles.
+          Génère un court message prêt à utiliser pour expliquer au client la valeur de l’analyse.
         </p>
       </div>
     </div>
   </section>
 
   <section>
-    <div class="dark-section center">
+    <div class="dark-section">
       <h2 data-i18n="why_title">Pourquoi une entreprise en a besoin ?</h2>
 
       <p class="intro" data-i18n="why_text">
-        Lire des avis un par un prend du temps. ReviewPro IA transforme les avis en un rapport
-        professionnel qui montre où l’entreprise se situe par rapport à ses concurrents et ce qu’elle
-        peut améliorer en priorité.
+        Lire des avis un par un prend du temps. ReviewPro IA transforme les avis en un rapport professionnel qui montre où l’entreprise se situe par rapport à ses concurrents et ce qu’elle peut améliorer en priorité.
       </p>
 
       <br />
@@ -447,24 +441,21 @@
       <div class="card">
         <h3 data-i18n="restaurants_title">Restaurants & cafés</h3>
         <p data-i18n="restaurants_text">
-          Comprendre les avis sur la qualité des plats, le service, l’attente,
-          l’accueil, la propreté et l’ambiance.
+          Comprendre les avis sur la qualité des plats, le service, l’attente, l’accueil, la propreté et l’ambiance.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="hotels_title">Hôtels</h3>
         <p data-i18n="hotels_text">
-          Analyser les retours sur l’accueil, la propreté, le confort, le bruit,
-          l’emplacement, le petit-déjeuner et les services.
+          Analyser les retours sur l’accueil, la propreté, le confort, le bruit, l’emplacement, le petit-déjeuner et les services.
         </p>
       </div>
 
       <div class="card">
         <h3 data-i18n="services_title">Commerces & services</h3>
         <p data-i18n="services_text">
-          Salons de coiffure, garages, boutiques, instituts, agences, cabinets,
-          salles de sport et autres services locaux.
+          Salons de coiffure, garages, boutiques, instituts, agences, cabinets, salles de sport et autres services locaux.
         </p>
       </div>
     </div>
@@ -474,8 +465,7 @@
     <h2 data-i18n="demo_title">Essayez la démonstration</h2>
 
     <p class="intro" data-i18n="demo_text">
-      Entrez le nom d’une entreprise, choisissez le bon établissement, calculez son benchmark local
-      et générez un rapport IA en quelques secondes.
+      Entrez le nom d’une entreprise, choisissez le bon établissement, calculez son benchmark local et générez un rapport IA en quelques secondes.
     </p>
 
     <br />
@@ -484,7 +474,7 @@
       class="btn"
       href="https://reviewpro-ai.streamlit.app/"
       target="_blank"
-      onclick="trackReviewProClick('Bottom')"
+      onclick="trackReviewProClick('bottom')"
       data-i18n="demo_button"
     >
       Ouvrir ReviewPro IA
@@ -519,15 +509,15 @@
         benchmark_title: "Benchmark local",
         benchmark_text: "Compare l’établissement avec les concurrents de la même ville et du même secteur : note moyenne locale, volume moyen d’avis et positionnement concurrentiel.",
         score_title: "Score de réputation",
-        score_text: "Génère un score simple sur 100 pour évaluer rapidement la réputation de l’entreprise : Excellent, Bon, Moyen, À améliorer ou Critique.",
+        score_text: "Génère un score simple sur 100 pour évaluer rapidement la réputation de l’entreprise.",
         action_title: "Plan d’action 30 jours",
         action_text: "Propose des actions concrètes semaine par semaine pour améliorer la satisfaction client, la réputation et la visibilité locale.",
         strengths_title: "Points forts et points faibles",
-        strengths_text: "Identifie les qualités appréciées par les clients et les problèmes à surveiller, comme l’attente, l’accueil, le prix, la propreté ou le service.",
+        strengths_text: "Identifie les qualités appréciées par les clients et les problèmes à surveiller.",
         recommendations_title: "Recommandations concrètes",
         recommendations_text: "Donne 3 à 5 recommandations simples et actionnables pour aider le propriétaire à améliorer son entreprise.",
         message_title: "Message commercial",
-        message_text: "Génère un court message prêt à utiliser pour expliquer au client la valeur de l’analyse et les prochaines actions possibles.",
+        message_text: "Génère un court message prêt à utiliser pour expliquer au client la valeur de l’analyse.",
 
         why_title: "Pourquoi une entreprise en a besoin ?",
         why_text: "Lire des avis un par un prend du temps. ReviewPro IA transforme les avis en un rapport professionnel qui montre où l’entreprise se situe par rapport à ses concurrents et ce qu’elle peut améliorer en priorité.",
@@ -565,7 +555,7 @@
 
       en: {
         hero_title: "AssistIA Digital",
-        hero_subtitle: "Simple and useful artificial intelligence solutions to help small businesses understand their customers, improve their reputation and make better decisions.",
+        hero_subtitle: "Simple and useful AI solutions to help small businesses understand their customers, improve their reputation and make better decisions.",
         hero_button: "Try ReviewPro AI",
         features_button: "View features",
 
@@ -575,7 +565,7 @@
         card_search_title: "Business search",
         card_search_text: "The user enters a business name and a city. The app searches the business through Google Places and displays relevant results.",
         card_ai_title: "AI review analysis",
-        card_ai_text: "Artificial intelligence analyzes available information, customer reviews and reputation signals to produce a clear report.",
+        card_ai_text: "AI analyzes available information, customer reviews and reputation signals to produce a clear report.",
         card_pdf_title: "PDF/TXT report",
         card_pdf_text: "The report can be downloaded as PDF or TXT to be sent to a client, presented in a meeting or kept as an audit.",
 
@@ -585,15 +575,15 @@
         benchmark_title: "Local benchmark",
         benchmark_text: "Compares the business with competitors in the same city and sector: local average rating, average review volume and competitive positioning.",
         score_title: "Reputation score",
-        score_text: "Generates a simple score out of 100 to quickly evaluate the business reputation: Excellent, Good, Average, Needs improvement or Critical.",
+        score_text: "Generates a simple score out of 100 to quickly evaluate the business reputation.",
         action_title: "30-day action plan",
         action_text: "Suggests concrete weekly actions to improve customer satisfaction, reputation and local visibility.",
         strengths_title: "Strengths and weaknesses",
-        strengths_text: "Identifies what customers appreciate and the problems to monitor, such as waiting time, welcome, price, cleanliness or service.",
+        strengths_text: "Identifies what customers appreciate and the problems to monitor.",
         recommendations_title: "Concrete recommendations",
         recommendations_text: "Provides 3 to 5 simple and actionable recommendations to help the owner improve the business.",
         message_title: "Commercial message",
-        message_text: "Generates a short ready-to-use message to explain the value of the analysis and the next possible actions.",
+        message_text: "Generates a short ready-to-use message to explain the value of the analysis to the client.",
 
         why_title: "Why does a business need it?",
         why_text: "Reading reviews one by one takes time. ReviewPro AI turns reviews into a professional report showing where the business stands compared with competitors and what should be improved first.",
@@ -610,7 +600,7 @@
         step3_title: "Calculate the local benchmark",
         step3_text: "ReviewPro AI compares the business with local competitors in the same sector.",
         step4_title: "Generate the AI report",
-        step4_text: "The AI produces a clear audit with score, local comparison, recommendations and a 30-day action plan.",
+        step4_text: "AI produces a clear audit with score, local comparison, recommendations and a 30-day action plan.",
         step5_title: "Download the report",
         step5_text: "The report is available as PDF or TXT to be shared with a client or used in a meeting.",
 
@@ -641,7 +631,7 @@
         card_search_title: "Unternehmenssuche",
         card_search_text: "Der Nutzer gibt den Namen eines Unternehmens und eine Stadt ein. Die Anwendung sucht das Unternehmen über Google Places und zeigt relevante Ergebnisse an.",
         card_ai_title: "KI-Analyse der Bewertungen",
-        card_ai_text: "Die künstliche Intelligenz analysiert verfügbare Informationen, Kundenbewertungen und Reputationssignale, um einen klaren Bericht zu erstellen.",
+        card_ai_text: "KI analysiert verfügbare Informationen, Kundenbewertungen und Reputationssignale, um einen klaren Bericht zu erstellen.",
         card_pdf_title: "PDF/TXT-Bericht",
         card_pdf_text: "Der Bericht kann als PDF oder TXT heruntergeladen werden, um ihn einem Kunden zu senden, in einem Termin zu präsentieren oder als Audit aufzubewahren.",
 
@@ -651,15 +641,15 @@
         benchmark_title: "Lokaler Benchmark",
         benchmark_text: "Vergleicht das Unternehmen mit Wettbewerbern in derselben Stadt und Branche: lokale Durchschnittsbewertung, durchschnittliches Bewertungsvolumen und Wettbewerbspositionierung.",
         score_title: "Reputationsscore",
-        score_text: "Erzeugt einen einfachen Score von 100, um die Reputation des Unternehmens schnell einzuschätzen: Ausgezeichnet, Gut, Durchschnittlich, Verbesserungswürdig oder Kritisch.",
+        score_text: "Erzeugt einen einfachen Score von 100, um die Reputation des Unternehmens schnell einzuschätzen.",
         action_title: "30-Tage-Aktionsplan",
         action_text: "Schlägt konkrete wöchentliche Maßnahmen vor, um Kundenzufriedenheit, Reputation und lokale Sichtbarkeit zu verbessern.",
         strengths_title: "Stärken und Schwächen",
-        strengths_text: "Erkennt, was Kunden schätzen, und welche Probleme beobachtet werden sollten, zum Beispiel Wartezeit, Empfang, Preis, Sauberkeit oder Service.",
+        strengths_text: "Erkennt, was Kunden schätzen, und welche Probleme beobachtet werden sollten.",
         recommendations_title: "Konkrete Empfehlungen",
         recommendations_text: "Gibt 3 bis 5 einfache und umsetzbare Empfehlungen, um dem Inhaber bei der Verbesserung des Unternehmens zu helfen.",
         message_title: "Verkaufsgespräch",
-        message_text: "Erstellt eine kurze, sofort nutzbare Botschaft, um dem Kunden den Wert der Analyse und die nächsten möglichen Schritte zu erklären.",
+        message_text: "Erstellt eine kurze, sofort nutzbare Botschaft, um dem Kunden den Wert der Analyse zu erklären.",
 
         why_title: "Warum braucht ein Unternehmen das?",
         why_text: "Bewertungen einzeln zu lesen kostet Zeit. ReviewPro KI verwandelt Bewertungen in einen professionellen Bericht, der zeigt, wo das Unternehmen im Vergleich zu Wettbewerbern steht und was zuerst verbessert werden sollte.",
@@ -676,7 +666,7 @@
         step3_title: "Lokalen Benchmark berechnen",
         step3_text: "ReviewPro KI vergleicht das Unternehmen mit lokalen Wettbewerbern derselben Branche.",
         step4_title: "KI-Bericht erstellen",
-        step4_text: "Die KI erstellt ein klares Audit mit Score, lokalem Vergleich, Empfehlungen und einem 30-Tage-Aktionsplan.",
+        step4_text: "KI erstellt ein klares Audit mit Score, lokalem Vergleich, Empfehlungen und einem 30-Tage-Aktionsplan.",
         step5_title: "Bericht herunterladen",
         step5_text: "Der Bericht ist als PDF oder TXT verfügbar und kann mit einem Kunden geteilt oder in einem Termin verwendet werden.",
 
@@ -697,27 +687,27 @@
     };
 
     function setLanguage(lang) {
-      const selectedTranslations = translations[lang] || translations.fr;
+      const selected = translations[lang] || translations.fr;
 
       document.documentElement.lang = lang;
 
-      document.querySelectorAll("[data-i18n]").forEach((element) => {
+      document.querySelectorAll("[data-i18n]").forEach(function(element) {
         const key = element.getAttribute("data-i18n");
-        if (selectedTranslations[key]) {
-          element.textContent = selectedTranslations[key];
+        if (selected[key]) {
+          element.textContent = selected[key];
         }
       });
 
-      ["fr", "en", "de"].forEach((code) => {
-        const button = document.getElementById("btn-" + code);
-        if (button) {
-          button.classList.remove("active");
+      ["fr", "en", "de"].forEach(function(code) {
+        const btn = document.getElementById("btn-" + code);
+        if (btn) {
+          btn.classList.remove("active");
         }
       });
 
-      const activeButton = document.getElementById("btn-" + lang);
-      if (activeButton) {
-        activeButton.classList.add("active");
+      const activeBtn = document.getElementById("btn-" + lang);
+      if (activeBtn) {
+        activeBtn.classList.add("active");
       }
 
       localStorage.setItem("assistia_language", lang);
@@ -732,8 +722,10 @@
       }
     }
 
-    const savedLanguage = localStorage.getItem("assistia_language") || "fr";
-    setLanguage(savedLanguage);
+    document.addEventListener("DOMContentLoaded", function() {
+      const saved = localStorage.getItem("assistia_language") || "fr";
+      setLanguage(saved);
+    });
   </script>
 
 </body>
