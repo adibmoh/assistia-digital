@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AssistIA Digital | Solutions IA pour petites entreprises</title>
+  <title>AssistIA Digital</title>
 
   <style>
     * {
@@ -21,19 +21,19 @@
     header {
       background: linear-gradient(135deg, #111827, #1f2937);
       color: white;
-      padding: 85px 20px;
+      padding: 80px 20px;
       text-align: center;
     }
 
     header h1 {
-      font-size: 50px;
+      font-size: 48px;
       margin: 0 0 15px;
     }
 
     header p {
       font-size: 20px;
       color: #d1d5db;
-      max-width: 850px;
+      max-width: 800px;
       margin: 0 auto 35px;
     }
 
@@ -47,7 +47,6 @@
       font-weight: bold;
       font-size: 17px;
       transition: 0.2s;
-      margin: 8px;
     }
 
     .btn:hover {
@@ -55,19 +54,9 @@
       transform: translateY(-2px);
     }
 
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid #93c5fd;
-      color: #dbeafe;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.1);
-    }
-
     section {
-      max-width: 1120px;
-      margin: 65px auto;
+      max-width: 1100px;
+      margin: 60px auto;
       padding: 0 20px;
     }
 
@@ -82,7 +71,7 @@
     }
 
     .intro {
-      max-width: 850px;
+      max-width: 800px;
       margin: 0 auto;
       color: #4b5563;
       font-size: 18px;
@@ -111,70 +100,14 @@
 
     .card p {
       color: #4b5563;
-      margin-bottom: 0;
     }
 
     .highlight {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
       border-radius: 18px;
-      padding: 45px 25px;
+      padding: 40px 25px;
       text-align: center;
-    }
-
-    .dark-section {
-      background: #111827;
-      color: white;
-      padding: 55px 25px;
-      border-radius: 22px;
-    }
-
-    .dark-section h2 {
-      color: white;
-    }
-
-    .dark-section p {
-      color: #d1d5db;
-    }
-
-    .steps {
-      counter-reset: step;
-      display: grid;
-      gap: 18px;
-      margin-top: 35px;
-    }
-
-    .step {
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 22px;
-      display: flex;
-      gap: 18px;
-      align-items: flex-start;
-    }
-
-    .step-number {
-      background: #2563eb;
-      color: white;
-      min-width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
-    }
-
-    .badge {
-      display: inline-block;
-      background: #dbeafe;
-      color: #1e40af;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: bold;
-      margin: 5px;
     }
 
     footer {
@@ -198,10 +131,6 @@
       h2 {
         font-size: 28px;
       }
-
-      .step {
-        flex-direction: column;
-      }
     }
   </style>
 </head>
@@ -211,181 +140,43 @@
   <header>
     <h1>AssistIA Digital</h1>
     <p>
-      Des solutions d’intelligence artificielle simples et utiles pour aider les petites entreprises
-      à comprendre leurs clients, améliorer leur réputation et prendre de meilleures décisions.
+      Des solutions d’intelligence artificielle utiles.
     </p>
 
     <a class="btn" href="https://reviewpro-ai.streamlit.app/" target="_blank">
-      Tester ReviewPro IA
-    </a>
-
-    <a class="btn btn-secondary" href="#fonctionnalites">
-      Voir les fonctionnalités
+      ReviewPro IA
     </a>
   </header>
 
   <section>
-    <h2 class="center">Notre première solution : ReviewPro IA</h2>
+    <h2 class="center">ReviewPro IA</h2>
     <p class="intro center">
-      ReviewPro IA transforme les avis clients en véritable audit de réputation locale.
-      L’application ne se limite pas à afficher une note Google : elle compare l’entreprise
-      avec son marché local, calcule un score de réputation et propose un plan d’action concret.
+      ReviewPro IA analyse les avis clients et génère un rapport clair mettant en évidence les points forts, les axes d’amélioration, un benchmark concurrentiel, une analyse des concurrents et des recommandations concrètes.
     </p>
 
     <div class="cards">
       <div class="card">
-        <h3>Recherche d’entreprise</h3>
+        <h3>Analyse des avis clients</h3>
         <p>
-          L’utilisateur entre le nom d’une entreprise et une ville. L’application recherche
-          l’établissement via Google Places et affiche les résultats pertinents.
+          L’application recherche l’établissement, récupère les informations disponibles
+          et génère une analyse avec l’intelligence artificielle.
         </p>
       </div>
 
       <div class="card">
-        <h3>Analyse IA des avis</h3>
+        <h3>Rapport clair</h3>
         <p>
-          L’intelligence artificielle analyse les informations disponibles, les avis clients
-          et les signaux de réputation pour produire un rapport clair.
+          Le propriétaire reçoit un résumé, les points positifs, les critiques principales
+          et les actions à améliorer.
         </p>
       </div>
 
       <div class="card">
-        <h3>Rapport PDF/TXT</h3>
+        <h3>Export PDF</h3>
         <p>
-          Le rapport peut être téléchargé en PDF ou TXT pour être envoyé au client,
-          présenté en rendez-vous ou conservé comme audit.
+          Le rapport peut être téléchargé en PDF ou TXT pour être partagé avec un client,
+          une équipe ou un responsable.
         </p>
-      </div>
-    </div>
-  </section>
-
-  <section id="fonctionnalites">
-    <h2 class="center">Ce qui rend ReviewPro IA différent de Google Reviews</h2>
-    <p class="intro center">
-      Google Reviews montre les avis. ReviewPro IA aide à comprendre, comparer et agir.
-    </p>
-
-    <div class="cards">
-      <div class="card">
-        <h3>Benchmark local</h3>
-        <p>
-          Compare l’établissement avec les concurrents de la même ville et du même secteur :
-          note moyenne locale, volume moyen d’avis et positionnement concurrentiel.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>Score de réputation</h3>
-        <p>
-          Génère un score simple sur 100 pour évaluer rapidement la réputation de l’entreprise :
-          Excellent, Bon, Moyen, À améliorer ou Critique.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>Plan d’action 30 jours</h3>
-        <p>
-          Propose des actions concrètes semaine par semaine pour améliorer la satisfaction client,
-          la réputation et la visibilité locale.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>Points forts et points faibles</h3>
-        <p>
-          Identifie les qualités appréciées par les clients et les problèmes à surveiller,
-          comme l’attente, l’accueil, le prix, la propreté ou le service.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>Recommandations concrètes</h3>
-        <p>
-          Donne 3 à 5 recommandations simples et actionnables pour aider le propriétaire
-          à améliorer son entreprise.
-        </p>
-      </div>
-
-      <div class="card">
-        <h3>Message commercial</h3>
-        <p>
-          Génère un court message prêt à utiliser pour expliquer au client la valeur
-          de l’analyse et les prochaines actions possibles.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="dark-section center">
-      <h2>Pourquoi une entreprise en a besoin ?</h2>
-      <p class="intro">
-        Lire des avis un par un prend du temps. ReviewPro IA transforme les avis en un rapport
-        professionnel qui montre où l’entreprise se situe par rapport à ses concurrents et ce qu’elle
-        peut améliorer en priorité.
-      </p>
-
-      <br />
-
-      <span class="badge">Benchmark local</span>
-      <span class="badge">Score réputation</span>
-      <span class="badge">Plan d’action</span>
-      <span class="badge">Rapport PDF</span>
-    </div>
-  </section>
-
-  <section>
-    <h2 class="center">Comment ça fonctionne ?</h2>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-number">1</div>
-        <div>
-          <h3>Choisir le type d’entreprise</h3>
-          <p>
-            Restaurant, hôtel, café, garage, salon, boutique, cabinet, salle de sport ou autre entreprise locale.
-          </p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">2</div>
-        <div>
-          <h3>Entrer le nom et la ville</h3>
-          <p>
-            L’application recherche l’établissement et filtre les résultats pour proposer les correspondances pertinentes.
-          </p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">3</div>
-        <div>
-          <h3>Calculer le benchmark local</h3>
-          <p>
-            ReviewPro IA compare l’établissement avec les concurrents locaux du même secteur.
-          </p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">4</div>
-        <div>
-          <h3>Générer le rapport IA</h3>
-          <p>
-            L’IA produit un audit clair avec score, comparaison locale, recommandations et plan d’action 30 jours.
-          </p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">5</div>
-        <div>
-          <h3>Télécharger le rapport</h3>
-          <p>
-            Le rapport est disponible en PDF ou TXT pour être partagé avec le client ou utilisé en rendez-vous.
-          </p>
-        </div>
       </div>
     </div>
   </section>
@@ -398,7 +189,7 @@
         <h3>Restaurants & cafés</h3>
         <p>
           Comprendre les avis sur la qualité des plats, le service, l’attente,
-          l’accueil, la propreté et l’ambiance.
+          l’accueil et l’ambiance.
         </p>
       </div>
 
@@ -406,12 +197,12 @@
         <h3>Hôtels</h3>
         <p>
           Analyser les retours sur l’accueil, la propreté, le confort, le bruit,
-          l’emplacement, le petit-déjeuner et les services.
+          l’emplacement et les services.
         </p>
       </div>
 
       <div class="card">
-        <h3>Commerces & services</h3>
+        <h3>Petites entreprises</h3>
         <p>
           Salons de coiffure, garages, boutiques, instituts, agences, cabinets,
           salles de sport et autres services locaux.
@@ -423,8 +214,8 @@
   <section class="highlight">
     <h2>Essayez la démonstration</h2>
     <p class="intro">
-      Entrez le nom d’une entreprise, choisissez le bon établissement, calculez son benchmark local
-      et générez un rapport IA en quelques secondes.
+      Entrez le nom d’une entreprise, choisissez le bon établissement et générez
+      un rapport IA en quelques secondes.
     </p>
 
     <br />
