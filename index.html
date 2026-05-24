@@ -412,9 +412,24 @@ footer:"© 2026 AssistAI — स्मार्ट समाधान"}
         gtag("event", "click_reviewpro_button", { event_category:"CTA", event_label: position + " - ReviewPro" });
       }
     }
+    function detectBrowserLanguage() {
+      const browserLang = (navigator.language || navigator.userLanguage || "fr").toLowerCase();
+
+      if (browserLang.startsWith("fr")) return "fr";
+      if (browserLang.startsWith("en")) return "en";
+      if (browserLang.startsWith("de")) return "de";
+      if (browserLang.startsWith("es")) return "es";
+      if (browserLang.startsWith("ar")) return "ar";
+      if (browserLang.startsWith("zh")) return "zh";
+      if (browserLang.startsWith("hi")) return "hi";
+
+      return "fr";
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
-      const saved = localStorage.getItem("assistia_language") || "fr";
-      setLanguage(saved);
+      const saved = localStorage.getItem("assistia_language");
+      const initialLanguage = saved || detectBrowserLanguage();
+      setLanguage(initialLanguage);
     });
   </script>
 </body>
