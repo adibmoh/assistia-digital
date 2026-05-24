@@ -20,6 +20,32 @@
 
   <style>
     * { box-sizing: border-box; }
+
+    .top-nav {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+    .top-nav a {
+      color: #dbeafe;
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    .top-nav a:hover {
+      color: #ffffff;
+      text-decoration: underline;
+    }
+    .footer-links a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
     body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#f8fafc; color:#111827; line-height:1.6; }
     header { background: radial-gradient(circle at top left, rgba(37,99,235,.36), transparent 35%), linear-gradient(135deg,#0f172a,#1e293b); color:white; padding:30px 20px 92px; text-align:center; }
     .language-switcher { display:flex; justify-content:center; gap:10px; margin-bottom:40px; flex-wrap:wrap; }
@@ -96,6 +122,15 @@
 </head>
 <body>
   <header>
+
+    <nav class="top-nav">
+      <a href="index.html">Home</a>
+      <a href="#features">ReviewPro</a>
+      <a href="#tools">Tools</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </nav>
     <div class="language-switcher">
       <button type="button" id="btn-fr" onclick="setLanguage('fr')">Français</button>
       <button type="button" id="btn-en" onclick="setLanguage('en')">English</button>
@@ -183,6 +218,43 @@
       <div class="step"><div class="step-number">3</div><div><h3 data-i18n="step3_title">Benchmark automatique</h3><p data-i18n="step3_text">Le benchmark local, le score et les principaux concurrents s’affichent directement.</p></div></div>
       <div class="step"><div class="step-number">4</div><div><h3 data-i18n="step4_title">Générer le rapport IA</h3><p data-i18n="step4_text">Le rapport est rédigé pour le propriétaire, le manager ou le responsable.</p></div></div>
       <div class="step"><div class="step-number">5</div><div><h3 data-i18n="step5_title">Exporter</h3><p data-i18n="step5_text">PDF pour les langues latines. TXT recommandé pour arabe, chinois et hindi.</p></div></div>
+    </div>
+  </section>
+
+
+  <section>
+    <h2 class="center">Why online reputation analysis matters</h2>
+    <p class="intro center">
+      Customer reviews are often one of the first signals people check before choosing a restaurant, hotel, service provider or local place. A rating alone does not tell the full story. ReviewPro helps transform public review signals into a clearer view of strengths, weaknesses, local positioning and practical next steps.
+    </p>
+    <div class="cards">
+      <div class="card"><h3>Understand customer expectations</h3><p>Reviews reveal repeated themes such as service quality, waiting time, communication, cleanliness, price perception and overall experience.</p></div>
+      <div class="card"><h3>Compare locally</h3><p>A score becomes more useful when compared with nearby alternatives in the same activity type and city.</p></div>
+      <div class="card"><h3>Act with clarity</h3><p>The goal is not only to read reviews, but to identify what can be improved first and what actions can create visible progress.</p></div>
+    </div>
+  </section>
+
+  <section id="tools">
+    <h2 class="center">Assist AI tools</h2>
+    <p class="intro center">
+      Assist AI is built as a family of focused tools. Each tool addresses a specific need with a simple interface, practical analysis and clear outputs.
+    </p>
+    <div class="cards">
+      <div class="card"><h3>ReviewPro</h3><p>Available now. ReviewPro helps analyze online reputation, local benchmarks, reputation score and improvement priorities.</p></div>
+      <div class="card"><h3>Trading Advisor</h3><p>In progress. Trading Advisor will focus on structured market observations, risk summaries and decision support. It will not replace professional financial advice.</p></div>
+      <div class="card"><h3>Future tools</h3><p>Assist AI may later include other specialized assistants for analysis, productivity and decision support.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="center">Frequently asked questions</h2>
+    <div class="cards">
+      <div class="card"><h3>Does ReviewPro replace Google Reviews?</h3><p>No. Google Reviews shows public reviews and ratings. ReviewPro helps interpret available reputation signals and turn them into a structured audit.</p></div>
+      <div class="card"><h3>Where does the data come from?</h3><p>ReviewPro uses public information and review signals available through Google Places, then organizes the result into a clearer analysis.</p></div>
+      <div class="card"><h3>Is the report professional advice?</h3><p>The report is informational decision support. It is not legal, financial, medical or regulated professional advice.</p></div>
+      <div class="card"><h3>Why PDF and TXT?</h3><p>PDF is convenient for Latin-based languages. TXT is recommended for Arabic, Chinese and Hindi to preserve characters more reliably.</p></div>
+      <div class="card"><h3>Who is the report for?</h3><p>The report is designed for an owner, manager or responsible person who wants a clear view of reputation and practical next steps.</p></div>
+      <div class="card"><h3>Can anyone use the app?</h3><p>The app can be public while the source code remains private. Access and usage rules can evolve as Assist AI grows.</p></div>
     </div>
   </section>
 
