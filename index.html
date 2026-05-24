@@ -1,436 +1,317 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AssistAI | ReviewPro</title>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>AssistAI | ReviewPro</title>
 
-  <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8966992932095198"
-       crossorigin="anonymous"></script>
+ <!-- Google AdSense -->
+ <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8966992932095198"
+ crossorigin="anonymous"></script>
 
-  <!-- Google Analytics: remplace G-SZPVL9VQMR par ton vrai ID -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZPVL9VQMR"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag("js", new Date());
-    gtag("config", "G-SZPVL9VQMR");
-  </script>
+ <!-- Google Analytics: remplace G-SZPVL9VQMR par ton vrai ID -->
+ <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZPVL9VQMR"></script>
+ <script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){dataLayer.push(arguments);}
+ gtag("js", new Date());
+ gtag("config", "G-SZPVL9VQMR");
+ </script>
 
-  <style>
-    * { box-sizing: border-box; }
+ <style>
+ * { box-sizing: border-box; }.top-nav {
+ display: flex;
+ justify-content: center;
+ gap: 18px;
+ flex-wrap: wrap;
+ margin-bottom: 28px;
+ font-size: 14px;
+ }.top-nav a {
+ color: #dbeafe;
+ text-decoration: none;
+ opacity: 0.9;
+ }.top-nav a:hover {
+ color: #ffffff;
+ text-decoration: underline;
+ }.footer-links a {
+ color: #2563eb;
+ text-decoration: none;
+ }.footer-links a:hover {
+ text-decoration: underline;
+ }
 
-    .top-nav {
-      display: flex;
-      justify-content: center;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-      font-size: 14px;
-    }
-    .top-nav a {
-      color: #dbeafe;
-      text-decoration: none;
-      opacity: 0.9;
-    }
-    .top-nav a:hover {
-      color: #ffffff;
-      text-decoration: underline;
-    }
-    .footer-links a {
-      color: #2563eb;
-      text-decoration: none;
-    }
-    .footer-links a:hover {
-      text-decoration: underline;
-    }
+ body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#f8fafc; color:#111827; line-height:1.6; }
+ header { background: radial-gradient(circle at top left, rgba(37,99,235,.36), transparent 35%), linear-gradient(135deg,#0f172a,#1e293b); color:white; padding:30px 20px 92px; text-align:center; }.language-switcher { display:flex; justify-content:center; gap:10px; margin-bottom:40px; flex-wrap:wrap; }.language-switcher button { background:rgba(255,255,255,.08); color:white; border:1px solid rgba(255,255,255,.35); padding:9px 16px; border-radius:999px; cursor:pointer; font-weight:500; font-size:14px; }.language-switcher button:hover { background:rgba(255,255,255,.18); }.language-switcher button.active { background:#2563eb; border-color:#2563eb; }.logo-word { font-size:54px; font-weight:500; letter-spacing:-1.8px; margin-bottom:8px; }.logo-word.ai { color:#93c5fd; }.logo-sub { color:#bfdbfe; font-weight:600; letter-spacing:.5px; margin-bottom:18px; }
+ header p { font-size:21px; color:#dbeafe; max-width:860px; margin:0 auto 35px; }.btn { display:inline-block; background:#2563eb; color:white; padding:15px 30px; border-radius:12px; text-decoration:none; font-weight:500; font-size:17px; transition:.2s; margin:8px; box-shadow:0 12px 26px rgba(37,99,235,.22); }.btn:hover { background:#1d4ed8; transform:translateY(-2px); }.btn-disabled {
+ background: rgba(255,255,255,0.10);
+ border: 1px solid rgba(147,197,253,0.45);
+ color: #cbd5e1;
+ cursor: not-allowed;
+ box-shadow: none;
+ }.btn-disabled:hover {
+ background: rgba(255,255,255,0.10);
+ transform: none;
+ }.hero-link-wrap {
+ margin-top: 18px;
+ }.hero-link {
+ color: #bfdbfe;
+ text-decoration: none;
+ font-weight: 500;
+ border-bottom: 1px solid rgba(191, 219, 254, 0.55);
+ padding-bottom: 3px;
+ }.hero-link:hover {
+ color: #ffffff;
+ border-bottom-color: #ffffff;
+ }.btn-secondary { background:transparent; border:1px solid #93c5fd; color:#dbeafe; box-shadow:none; }
+ section { max-width:1120px; margin:68px auto; padding:0 20px; }
+ h2 { font-size:34px; margin-bottom:15px; color:#111827; }.center { text-align:center; }.intro { max-width:850px; margin:0 auto; color:#4b5563; font-size:18px; }.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px; margin-top:35px; }.card { background:white; border:1px solid #e5e7eb; border-radius:18px; padding:28px; box-shadow:0 10px 26px rgba(15,23,42,.05); }.card h3 { margin-top:0; color:#111827; font-size:22px; }.card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(15, 23, 42, 0.09); transition: 0.2s; }.card p { color:#4b5563; margin-bottom:0; }.dark-section { background: radial-gradient(circle at top right, rgba(124,58,237,.28), transparent 35%), #111827; color:white; padding:58px 25px; border-radius:26px; text-align:center; box-shadow:0 20px 45px rgba(15,23,42,.16); }.dark-section h2 { color:white; }.dark-section p { color:#d1d5db; }.badge { display:inline-block; background:#dbeafe; color:#1e40af; padding:8px 13px; border-radius:999px; font-size:14px; font-weight:500; margin:5px; }.steps { display:grid; gap:18px; margin-top:35px; }.step { background:white; border:1px solid #e5e7eb; border-radius:16px; padding:22px; display:flex; gap:18px; align-items:flex-start; box-shadow:0 8px 22px rgba(15,23,42,.04); }.step-number { background:linear-gradient(135deg,#2563eb,#7c3aed); color:white; min-width:36px; height:36px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:500; }.highlight { background:#eff6ff; border:1px solid #bfdbfe; border-radius:20px; padding:48px 25px; text-align:center; }
+ footer a {
+ color: #2563eb;
+ text-decoration: none;
+ }
 
-    body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#f8fafc; color:#111827; line-height:1.6; }
-    header { background: radial-gradient(circle at top left, rgba(37,99,235,.36), transparent 35%), linear-gradient(135deg,#0f172a,#1e293b); color:white; padding:30px 20px 92px; text-align:center; }
-    .language-switcher { display:flex; justify-content:center; gap:10px; margin-bottom:40px; flex-wrap:wrap; }
-    .language-switcher button { background:rgba(255,255,255,.08); color:white; border:1px solid rgba(255,255,255,.35); padding:9px 16px; border-radius:999px; cursor:pointer; font-weight:500; font-size:14px; }
-    .language-switcher button:hover { background:rgba(255,255,255,.18); }
-    .language-switcher button.active { background:#2563eb; border-color:#2563eb; }
-    .logo-word { font-size:54px; font-weight:500; letter-spacing:-1.8px; margin-bottom:8px; }
-    .logo-word .ai { color:#93c5fd; }
-    .logo-sub { color:#bfdbfe; font-weight:600; letter-spacing:.5px; margin-bottom:18px; }
-    header p { font-size:21px; color:#dbeafe; max-width:860px; margin:0 auto 35px; }
-    .btn { display:inline-block; background:#2563eb; color:white; padding:15px 30px; border-radius:12px; text-decoration:none; font-weight:500; font-size:17px; transition:.2s; margin:8px; box-shadow:0 12px 26px rgba(37,99,235,.22); }
-    .btn:hover { background:#1d4ed8; transform:translateY(-2px); }
-    .btn-disabled {
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(147,197,253,0.45);
-      color: #cbd5e1;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+ footer a:hover {
+ text-decoration: underline;
+ }
 
-    .btn-disabled:hover {
-      background: rgba(255,255,255,0.10);
-      transform: none;
-    }
-
-    .hero-link-wrap {
-      margin-top: 18px;
-    }
-
-    .hero-link {
-      color: #bfdbfe;
-      text-decoration: none;
-      font-weight: 500;
-      border-bottom: 1px solid rgba(191, 219, 254, 0.55);
-      padding-bottom: 3px;
-    }
-
-    .hero-link:hover {
-      color: #ffffff;
-      border-bottom-color: #ffffff;
-    }
-
-    .btn-secondary { background:transparent; border:1px solid #93c5fd; color:#dbeafe; box-shadow:none; }
-    section { max-width:1120px; margin:68px auto; padding:0 20px; }
-    h2 { font-size:34px; margin-bottom:15px; color:#111827; }
-    .center { text-align:center; }
-    .intro { max-width:850px; margin:0 auto; color:#4b5563; font-size:18px; }
-    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px; margin-top:35px; }
-    .card { background:white; border:1px solid #e5e7eb; border-radius:18px; padding:28px; box-shadow:0 10px 26px rgba(15,23,42,.05); }
-    .card h3 { margin-top:0; color:#111827; font-size:22px; }
-    .card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(15, 23, 42, 0.09); transition: 0.2s; }
-
-    .card p { color:#4b5563; margin-bottom:0; }
-    .dark-section { background: radial-gradient(circle at top right, rgba(124,58,237,.28), transparent 35%), #111827; color:white; padding:58px 25px; border-radius:26px; text-align:center; box-shadow:0 20px 45px rgba(15,23,42,.16); }
-    .dark-section h2 { color:white; }
-    .dark-section p { color:#d1d5db; }
-    .badge { display:inline-block; background:#dbeafe; color:#1e40af; padding:8px 13px; border-radius:999px; font-size:14px; font-weight:500; margin:5px; }
-    .steps { display:grid; gap:18px; margin-top:35px; }
-    .step { background:white; border:1px solid #e5e7eb; border-radius:16px; padding:22px; display:flex; gap:18px; align-items:flex-start; box-shadow:0 8px 22px rgba(15,23,42,.04); }
-    .step-number { background:linear-gradient(135deg,#2563eb,#7c3aed); color:white; min-width:36px; height:36px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:500; }
-    .highlight { background:#eff6ff; border:1px solid #bfdbfe; border-radius:20px; padding:48px 25px; text-align:center; }
-    footer a {
-      color: #2563eb;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    footer { text-align:center; color:#6b7280; padding:35px 20px; border-top:1px solid #e5e7eb; margin-top:70px; background:white; }
-    @media (max-width:700px){ .logo-word{font-size:40px;} header p{font-size:18px;} h2{font-size:28px;} .step{flex-direction:column;} }
-  </style>
+ footer { text-align:center; color:#6b7280; padding:35px 20px; border-top:1px solid #e5e7eb; margin-top:70px; background:white; }
+ @media (max-width:700px){.logo-word{font-size:40px;} header p{font-size:18px;} h2{font-size:28px;}.step{flex-direction:column;} }
+ </style>
 </head>
 <body>
-  <header>
+ <header>
 
-    <nav class="top-nav">
-      <a href="index.html">Home</a>
-      <a href="contact.html">Contact</a>
-      <a href="privacy.html">Privacy</a>
-      <a href="terms.html">Terms</a>
-    </nav>
-    <div class="language-switcher">
-      <button type="button" id="btn-fr" onclick="setLanguage('fr')">Français</button>
-      <button type="button" id="btn-en" onclick="setLanguage('en')">English</button>
-      <button type="button" id="btn-de" onclick="setLanguage('de')">Deutsch</button>
-      <button type="button" id="btn-es" onclick="setLanguage('es')">Español</button>
-      <button type="button" id="btn-ar" onclick="setLanguage('ar')">العربية</button>
-      <button type="button" id="btn-zh" onclick="setLanguage('zh')">中文</button>
-      <button type="button" id="btn-hi" onclick="setLanguage('hi')">हिन्दी</button>
-    </div>
+ <nav class="top-nav">
+ <a href="index.html">Home</a>
+ <a href="contact.html">Contact</a>
+ <a href="privacy.html">Privacy</a>
+ <a href="terms.html">Terms</a>
+ </nav>
+ <div class="language-switcher">
+ <button type="button" id="btn-fr" onclick="setLanguage('fr')">Français</button>
+ <button type="button" id="btn-en" onclick="setLanguage('en')">English</button>
+ <button type="button" id="btn-de" onclick="setLanguage('de')">Deutsch</button>
+ <button type="button" id="btn-es" onclick="setLanguage('es')">Español</button>
+ <button type="button" id="btn-ar" onclick="setLanguage('ar')">العربية</button>
+ <button type="button" id="btn-zh" onclick="setLanguage('zh')">中文</button>
+ <button type="button" id="btn-hi" onclick="setLanguage('hi')">हिन्दी</button>
+ </div>
 
-    <div class="logo-word">Assist <span class="ai">AI</span></div>
-    <div class="logo-sub" data-i18n="global_tagline">Smart tools for clearer decisions</div>
-    <a class="btn" href="https://reviewpro-ai.streamlit.app/" target="_blank" onclick="trackReviewProClick('hero')" data-i18n="hero_button">ReviewPro</a>
+ <div class="logo-word">Assist <span class="ai">AI</span></div>
+ <div class="logo-sub" data-i18n="global_tagline">Smart tools for clearer decisions</div>
+ <a class="btn" href="https://reviewpro-ai.streamlit.app/" target="_blank" onclick="trackReviewProClick('hero')" data-i18n="hero_button">ReviewPro</a>
+ <div class="hero-link-wrap">
+ <a class="hero-link" href="#features" data-i18n="features_button">Voir les fonctionnalités</a>
+ </div>
+ </header>
 
-    <button class="btn btn-disabled" type="button" data-i18n="trading_button" aria-disabled="true">
-      Trading Advisor — in progress
-    </button>
-    <div class="hero-link-wrap">
-      <a class="hero-link" href="#features" data-i18n="features_button">Voir les fonctionnalités</a>
-    </div>
-  </header>
+ <section>
+ <h2 class="center" data-i18n="solution_title">Nos outils intelligents</h2>
+ <p class="intro center" data-i18n="solution_text">AssistAI regroupe des outils intelligents pour analyser, comprendre et décider avec plus de clarté. ReviewPro analyse la réputation.</p>
+ <div class="cards">
+ <div class="card"><h3 data-i18n="card_search_title">ReviewPro</h3><p data-i18n="card_search_text">Analyse la réputation, le benchmark local, le score réputation et les recommandations actionnables.</p></div>
+ <div class="card"><h3 data-i18n="card_export_title">Rapports et synthèses</h3><p data-i18n="card_export_text">PDF recommandé pour français, anglais, allemand et espagnol. TXT recommandé pour arabe, chinois et hindi.</p></div>
+ </div>
+ </section>
 
-  <section>
-    <h2 class="center" data-i18n="solution_title">Nos outils intelligents</h2>
-    <p class="intro center" data-i18n="solution_text">AssistAI regroupe des outils intelligents pour analyser, comprendre et décider avec plus de clarté. ReviewPro analyse la réputation. Trading Advisor apportera une aide structurée pour suivre des opportunités de marché.</p>
-    <div class="cards">
-      <div class="card"><h3 data-i18n="card_search_title">ReviewPro</h3><p data-i18n="card_search_text">Analyse la réputation, le benchmark local, le score réputation et les recommandations actionnables.</p></div>
-      <div class="card"><h3 data-i18n="card_ai_title">Trading Advisor</h3><p data-i18n="card_ai_text">Aperçu du prochain outil : suivi d’idées de marché, signaux structurés, synthèse de risques et aide à la décision.</p></div>
-      <div class="card"><h3 data-i18n="card_export_title">Rapports et synthèses</h3><p data-i18n="card_export_text">PDF recommandé pour français, anglais, allemand et espagnol. TXT recommandé pour arabe, chinois et hindi.</p></div>
-    </div>
-  </section>
+ <section id="features">
+ <h2 class="center" data-i18n="difference_title">Au-delà des avis Google</h2>
+ <p class="intro center" data-i18n="difference_text">ReviewPro aide à comprendre, comparer et agir.</p>
+ <div class="cards">
+ <div class="card"><h3 data-i18n="benchmark_title">Benchmark local automatique</h3><p data-i18n="benchmark_text">Compare le résultat sélectionné avec les concurrents locaux dès la sélection.</p></div>
+ <div class="card"><h3 data-i18n="score_title">Score de réputation</h3><p data-i18n="score_text">Génère un score simple sur 100 pour évaluer rapidement la réputation.</p></div>
+ <div class="card"><h3 data-i18n="action_title">Plan d’action 30 jours</h3><p data-i18n="action_text">Propose des actions concrètes pour améliorer la satisfaction client et la réputation.</p></div>
+ </div>
+ </section>
 
-  <section id="features">
-    <h2 class="center" data-i18n="difference_title">Au-delà des avis Google</h2>
-    <p class="intro center" data-i18n="difference_text">ReviewPro aide à comprendre, comparer et agir.</p>
-    <div class="cards">
-      <div class="card"><h3 data-i18n="benchmark_title">Benchmark local automatique</h3><p data-i18n="benchmark_text">Compare le résultat sélectionné avec les concurrents locaux dès la sélection.</p></div>
-      <div class="card"><h3 data-i18n="score_title">Score de réputation</h3><p data-i18n="score_text">Génère un score simple sur 100 pour évaluer rapidement la réputation.</p></div>
-      <div class="card"><h3 data-i18n="action_title">Plan d’action 30 jours</h3><p data-i18n="action_text">Propose des actions concrètes pour améliorer la satisfaction client et la réputation.</p></div>
-    </div>
-  </section>
+ <section>
+ <div class="dark-section">
+ <h2 data-i18n="why_title">Pourquoi l’utiliser ?</h2>
+ <p class="intro" data-i18n="why_text">Lire des avis un par un prend du temps. ReviewPro transforme les données disponibles en rapport professionnel pour aider un propriétaire, manager ou responsable à agir.</p>
+ <br />
+ <span class="badge" data-i18n="badge_benchmark">Benchmark local</span>
+ <span class="badge" data-i18n="badge_score">Score réputation</span>
+ <span class="badge" data-i18n="badge_competitors">Concurrents visibles</span>
+ <span class="badge" data-i18n="badge_export">PDF/TXT</span>
+ </div>
+ </section>
 
-
-  <section>
-    <h2 class="center" data-i18n="roadmap_title">La suite AssistAI</h2>
-    <p class="intro center" data-i18n="roadmap_text">
-      AssistAI est pensé comme une famille d’outils intelligents. ReviewPro est déjà disponible. Trading Advisor est le prochain outil prévu.
-    </p>
-
-    <div class="cards">
-      <div class="card">
-        <h3>01 · ReviewPro</h3>
-        <p data-i18n="roadmap_reviewpro">Disponible maintenant : audit de réputation, benchmark local, score et rapport actionnable.</p>
-      </div>
-
-      <div class="card">
-        <h3>02 · Trading Advisor</h3>
-        <p data-i18n="roadmap_trading">Bientôt : suivi d’opportunités de marché, signaux structurés, résumé des risques et synthèses claires.</p>
-      </div>
-
-      <div class="card">
-        <h3 data-i18n="roadmap_future_title">03 · Prochains outils</h3>
-        <p data-i18n="roadmap_future">La plateforme pourra accueillir d’autres assistants spécialisés selon les besoins.</p>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="dark-section">
-      <h2 data-i18n="why_title">Pourquoi l’utiliser ?</h2>
-      <p class="intro" data-i18n="why_text">Lire des avis un par un prend du temps. ReviewPro transforme les données disponibles en rapport professionnel pour aider un propriétaire, manager ou responsable à agir.</p>
-      <br />
-      <span class="badge" data-i18n="badge_benchmark">Benchmark local</span>
-      <span class="badge" data-i18n="badge_score">Score réputation</span>
-      <span class="badge" data-i18n="badge_competitors">Concurrents visibles</span>
-      <span class="badge" data-i18n="badge_export">PDF/TXT</span>
-    </div>
-  </section>
-
-  <section>
-    <h2 class="center" data-i18n="how_title">Comment ça fonctionne ?</h2>
-    <div class="steps">
-      <div class="step"><div class="step-number">1</div><div><h3 data-i18n="step1_title">Choisir la langue</h3><p data-i18n="step1_text">Français, anglais, allemand, espagnol, arabe, chinois ou hindi.</p></div></div>
-      <div class="step"><div class="step-number">2</div><div><h3 data-i18n="step2_title">Entrer le nom et la ville</h3><p data-i18n="step2_text">L’outil recherche et filtre les résultats pertinents.</p></div></div>
-      <div class="step"><div class="step-number">3</div><div><h3 data-i18n="step3_title">Benchmark automatique</h3><p data-i18n="step3_text">Le benchmark local, le score et les principaux concurrents s’affichent directement.</p></div></div>
-      <div class="step"><div class="step-number">4</div><div><h3 data-i18n="step4_title">Générer le rapport IA</h3><p data-i18n="step4_text">Le rapport est rédigé pour le propriétaire, le manager ou le responsable.</p></div></div>
-      <div class="step"><div class="step-number">5</div><div><h3 data-i18n="step5_title">Exporter</h3><p data-i18n="step5_text">PDF pour les langues latines. TXT recommandé pour arabe, chinois et hindi.</p></div></div>
-    </div>
-  </section>
+ <section>
+ <h2 class="center" data-i18n="how_title">Comment ça fonctionne ?</h2>
+ <div class="steps">
+ <div class="step"><div class="step-number">1</div><div><h3 data-i18n="step1_title">Choisir la langue</h3><p data-i18n="step1_text">Français, anglais, allemand, espagnol, arabe, chinois ou hindi.</p></div></div>
+ <div class="step"><div class="step-number">2</div><div><h3 data-i18n="step2_title">Entrer le nom et la ville</h3><p data-i18n="step2_text">L’outil recherche et filtre les résultats pertinents.</p></div></div>
+ <div class="step"><div class="step-number">3</div><div><h3 data-i18n="step3_title">Benchmark automatique</h3><p data-i18n="step3_text">Le benchmark local, le score et les principaux concurrents s’affichent directement.</p></div></div>
+ <div class="step"><div class="step-number">4</div><div><h3 data-i18n="step4_title">Générer le rapport IA</h3><p data-i18n="step4_text">Le rapport est rédigé pour le propriétaire, le manager ou le responsable.</p></div></div>
+ <div class="step"><div class="step-number">5</div><div><h3 data-i18n="step5_title">Exporter</h3><p data-i18n="step5_text">PDF pour les langues latines. TXT recommandé pour arabe, chinois et hindi.</p></div></div>
+ </div>
+ </section>
 
 
-  <section>
-    <h2 class="center">Why online reputation analysis matters</h2>
-    <p class="intro center">
-      Customer reviews are often one of the first signals people check before choosing a restaurant, hotel, service provider or local place. A rating alone does not tell the full story. ReviewPro helps transform public review signals into a clearer view of strengths, weaknesses, local positioning and practical next steps.
-    </p>
-    <div class="cards">
-      <div class="card"><h3>Understand customer expectations</h3><p>Reviews reveal repeated themes such as service quality, waiting time, communication, cleanliness, price perception and overall experience.</p></div>
-      <div class="card"><h3>Compare locally</h3><p>A score becomes more useful when compared with nearby alternatives in the same activity type and city.</p></div>
-      <div class="card"><h3>Act with clarity</h3><p>The goal is not only to read reviews, but to identify what can be improved first and what actions can create visible progress.</p></div>
-    </div>
-  </section>
+ <section>
+ <h2 class="center">Why online reputation analysis matters</h2>
+ <p class="intro center">
+ Customer reviews are often one of the first signals people check before choosing a restaurant, hotel, service provider or local place. A rating alone does not tell the full story. ReviewPro helps transform public review signals into a clearer view of strengths, weaknesses, local positioning and practical next steps.
+ </p>
+ <div class="cards">
+ <div class="card"><h3>Understand customer expectations</h3><p>Reviews reveal repeated themes such as service quality, waiting time, communication, cleanliness, price perception and overall experience.</p></div>
+ <div class="card"><h3>Compare locally</h3><p>A score becomes more useful when compared with nearby alternatives in the same activity type and city.</p></div>
+ <div class="card"><h3>Act with clarity</h3><p>The goal is not only to read reviews, but to identify what can be improved first and what actions can create visible progress.</p></div>
+ </div>
+ </section>
 
-  <section id="tools">
-    <h2 class="center">Assist AI tools</h2>
-    <p class="intro center">
-      Assist AI is built as a family of focused tools. Each tool addresses a specific need with a simple interface, practical analysis and clear outputs.
-    </p>
-    <div class="cards">
-      <div class="card"><h3>ReviewPro</h3><p>Available now. ReviewPro helps analyze online reputation, local benchmarks, reputation score and improvement priorities.</p></div>
-      <div class="card"><h3>Trading Advisor</h3><p>In progress. Trading Advisor will focus on structured market observations, risk summaries and decision support. It will not replace professional financial advice.</p></div>
-      <div class="card"><h3>Future tools</h3><p>Assist AI may later include other specialized assistants for analysis, productivity and decision support.</p></div>
-    </div>
-  </section>
+ <section id="tools">
+ <h2 class="center">ReviewPro</h2>
+ <p class="intro center">
+ ReviewPro is an Assist AI tool that helps analyze online reputation, local benchmarks, reputation score and improvement priorities.
+ </p>
+ <div class="cards">
+ <div class="card"><h3>ReviewPro</h3><p>Available now. ReviewPro helps analyze online reputation, local benchmarks, reputation score and improvement priorities.</p></div>
+ </div>
+ </section>
 
-  <section>
-    <h2 class="center">Frequently asked questions</h2>
-    <div class="cards">
-      <div class="card"><h3>Does ReviewPro replace Google Reviews?</h3><p>No. Google Reviews shows public reviews and ratings. ReviewPro helps interpret available reputation signals and turn them into a structured audit.</p></div>
-      <div class="card"><h3>Where does the data come from?</h3><p>ReviewPro uses public information and review signals available through Google Places, then organizes the result into a clearer analysis.</p></div>
-      <div class="card"><h3>Is the report professional advice?</h3><p>The report is informational decision support. It is not legal, financial, medical or regulated professional advice.</p></div>
-      <div class="card"><h3>Why PDF and TXT?</h3><p>PDF is convenient for Latin-based languages. TXT is recommended for Arabic, Chinese and Hindi to preserve characters more reliably.</p></div>
-      <div class="card"><h3>Who is the report for?</h3><p>The report is designed for an owner, manager or responsible person who wants a clear view of reputation and practical next steps.</p></div>
-      <div class="card"><h3>Can anyone use the app?</h3><p>The app can be public while the source code remains private. Access and usage rules can evolve as Assist AI grows.</p></div>
-    </div>
-  </section>
+ <section>
+ <h2 class="center">Frequently asked questions</h2>
+ <div class="cards">
+ <div class="card"><h3>Does ReviewPro replace Google Reviews?</h3><p>No. Google Reviews shows public reviews and ratings. ReviewPro helps interpret available reputation signals and turn them into a structured audit.</p></div>
+ <div class="card"><h3>Where does the data come from?</h3><p>ReviewPro uses public information and review signals available through Google Places, then organizes the result into a clearer analysis.</p></div>
+ <div class="card"><h3>Is the report professional advice?</h3><p>The report is informational decision support. It is not legal, financial, medical or regulated professional advice.</p></div>
+ <div class="card"><h3>Why PDF and TXT?</h3><p>PDF is convenient for Latin-based languages. TXT is recommended for Arabic, Chinese and Hindi to preserve characters more reliably.</p></div>
+ <div class="card"><h3>Who is the report for?</h3><p>The report is designed for an owner, manager or responsible person who wants a clear view of reputation and practical next steps.</p></div>
+ <div class="card"><h3>Can anyone use the app?</h3><p>The app can be public while the source code remains private. Access and usage rules can evolve as Assist AI grows.</p></div>
+ </div>
+ </section>
 
-  <section class="highlight">
-    <h2 data-i18n="demo_title">ReviewPro</h2>
-    <p class="intro" data-i18n="demo_text">Accédez à ReviewPro pour analyser une réputation et générer un rapport professionnel.</p>
-    <br />
-    <a class="btn" href="https://reviewpro-ai.streamlit.app/" target="_blank" onclick="trackReviewProClick('bottom')" data-i18n="demo_button">ReviewPro</a>
-  </section>
+ <section class="highlight">
+ <h2 data-i18n="demo_title">ReviewPro</h2>
+ <p class="intro" data-i18n="demo_text">Accédez à ReviewPro pour analyser une réputation et générer un rapport professionnel.</p>
+ <br />
+ <a class="btn" href="https://reviewpro-ai.streamlit.app/" target="_blank" onclick="trackReviewProClick('bottom')" data-i18n="demo_button">ReviewPro</a>
+ </section>
 
-  <footer>
-    <p data-i18n="footer_brand">Assist AI — Smart tools for clearer decisions</p>
-    <p>
-      <a href="mailto:hello@assistia.digital" dir="ltr">hello@assistia.digital</a>
-    </p>
-    <p data-i18n="footer_copyright">© 2026 Assist AI. All rights reserved.</p>
-  </footer>
+ <footer>
+ <p data-i18n="footer_brand">Assist AI — Smart tools for clearer decisions</p>
+ <p>
+ <a href="mailto:hello@assistia.digital" dir="ltr">hello@assistia.digital</a>
+ </p>
+ <p data-i18n="footer_copyright">© 2026 Assist AI. All rights reserved.</p>
+ </footer>
 
-  <script>
-    const translations = {
-      fr: {hero_subtitle: "Des outils intelligents pour analyser, comprendre et décider avec plus de clarté",hero_button: "ReviewPro",features_button: "Voir les fonctionnalités",solution_title: "Nos outils intelligents",solution_text: "Assist AI regroupe des outils intelligents pour analyser, comprendre et décider avec plus de clarté. ReviewPro analyse la réputation. Trading Advisor est en cours de préparation.",card_search_title:"Recherche intelligente",card_search_text: "Analyse la réputation, le benchmark local, le score réputation et les recommandations actionnables.",card_ai_title:"Analyse IA",card_ai_text:"Analyse les informations disponibles, les avis et les signaux de réputation.",card_export_title:"Export adapté",card_export_text:"PDF recommandé pour français, anglais, allemand et espagnol. TXT recommandé pour arabe, chinois et hindi.",difference_title:"Au-delà des avis Google",difference_text:"ReviewPro aide à comprendre, comparer et agir.",benchmark_title:"Benchmark local automatique",benchmark_text:"Compare le résultat sélectionné avec les concurrents locaux dès la sélection.",score_title:"Score de réputation",score_text:"Génère un score simple sur 100 pour évaluer rapidement la réputation.",action_title:"Plan d’action 30 jours",action_text:"Propose des actions concrètes pour améliorer la satisfaction client et la réputation.",why_title:"Pourquoi l’utiliser ?",why_text:"Lire des avis un par un prend du temps. ReviewPro transforme les données disponibles en rapport professionnel pour aider un propriétaire, manager ou responsable à agir.",badge_benchmark:"Benchmark local",badge_score:"Score réputation",badge_competitors:"Concurrents visibles",badge_export:"PDF/TXT",how_title:"Comment ça fonctionne ?",step1_title:"Choisir la langue",step1_text:"Français, anglais, allemand, espagnol, arabe, chinois ou hindi.",step2_title:"Entrer le nom et la ville",step2_text:"L’outil recherche et filtre les résultats pertinents.",step3_title:"Benchmark automatique",step3_text:"Le benchmark local, le score et les principaux concurrents s’affichent directement.",step4_title:"Générer le rapport IA",step4_text:"Le rapport est rédigé pour le propriétaire, le manager ou le responsable.",step5_title:"Exporter",step5_text:"PDF pour les langues latines. TXT recommandé pour arabe, chinois et hindi.",demo_title: "ReviewPro",demo_text:"Accédez à ReviewPro pour analyser une réputation et générer un rapport professionnel.",demo_button: "ReviewPro",        roadmap_title: "La suite AssistAI",
-        footer_copyright: "© 2026 Assist AI. Tous droits réservés.",
-        footer_brand: "Assist AI — Des outils intelligents pour des décisions plus claires",
-        trading_button: "Trading Advisor — en cours",
-        global_tagline: "Des outils intelligents pour des décisions plus claires",
-        roadmap_text: "AssistAI est pensé comme une famille d’outils intelligents. ReviewPro est déjà disponible. Trading Advisor est le prochain outil prévu.",
-        roadmap_reviewpro: "Disponible maintenant : audit de réputation, benchmark local, score et rapport actionnable.",
-        roadmap_trading: "Bientôt : suivi d’opportunités de marché, signaux structurés, résumé des risques et synthèses claires.",
-        roadmap_future_title: "03 · Prochains outils",
-        roadmap_future: "La plateforme pourra accueillir d’autres assistants spécialisés selon les besoins.",
+ <script>
+ const translations = {
+ fr: {hero_subtitle: "Des outils intelligents pour analyser, comprendre et décider avec plus de clarté",hero_button: "ReviewPro",features_button: "Voir les fonctionnalités",solution_title: "Nos outils intelligents",solution_text: "Assist AI regroupe des outils intelligents pour analyser, comprendre et décider avec plus de clarté. ReviewPro analyse la réputation.",card_search_title:"Recherche intelligente",card_search_text: "Analyse la réputation, le benchmark local, le score réputation et les recommandations actionnables.",card_ai_title:"Analyse IA",card_ai_text:"Analyse les informations disponibles, les avis et les signaux de réputation.",card_export_title:"Export adapté",card_export_text:"PDF recommandé pour français, anglais, allemand et espagnol. TXT recommandé pour arabe, chinois et hindi.",difference_title:"Au-delà des avis Google",difference_text:"ReviewPro aide à comprendre, comparer et agir.",benchmark_title:"Benchmark local automatique",benchmark_text:"Compare le résultat sélectionné avec les concurrents locaux dès la sélection.",score_title:"Score de réputation",score_text:"Génère un score simple sur 100 pour évaluer rapidement la réputation.",action_title:"Plan d’action 30 jours",action_text:"Propose des actions concrètes pour améliorer la satisfaction client et la réputation.",why_title:"Pourquoi l’utiliser ?",why_text:"Lire des avis un par un prend du temps. ReviewPro transforme les données disponibles en rapport professionnel pour aider un propriétaire, manager ou responsable à agir.",badge_benchmark:"Benchmark local",badge_score:"Score réputation",badge_competitors:"Concurrents visibles",badge_export:"PDF/TXT",how_title:"Comment ça fonctionne ?",step1_title:"Choisir la langue",step1_text:"Français, anglais, allemand, espagnol, arabe, chinois ou hindi.",step2_title:"Entrer le nom et la ville",step2_text:"L’outil recherche et filtre les résultats pertinents.",step3_title:"Benchmark automatique",step3_text:"Le benchmark local, le score et les principaux concurrents s’affichent directement.",step4_title:"Générer le rapport IA",step4_text:"Le rapport est rédigé pour le propriétaire, le manager ou le responsable.",step5_title:"Exporter",step5_text:"PDF pour les langues latines. TXT recommandé pour arabe, chinois et hindi.",demo_title: "ReviewPro",demo_text:"Accédez à ReviewPro pour analyser une réputation et générer un rapport professionnel.",demo_button: "ReviewPro", roadmap_title: "La suite AssistAI",
+ footer_copyright: "© 2026 Assist AI. Tous droits réservés.",
+ footer_brand: "Assist AI — Des outils intelligents pour des décisions plus claires",
+ global_tagline: "Des outils intelligents pour des décisions plus claires",
 footer:"© 2026 AssistAI — Solutions intelligentes"},
-      en: {hero_subtitle: "Smart tools to analyze, understand and decide with more clarity",hero_button: "ReviewPro",features_button: "View features",solution_title: "Our smart tools",solution_text: "Assist AI brings together smart tools to analyze, understand and decide with more clarity. ReviewPro analyzes reputation. Trading Advisor is in progress.",card_search_title:"Smart search",card_search_text: "Analyzes reputation, local benchmark, reputation score and actionable recommendations.",card_ai_title:"AI analysis",card_ai_text:"Analyzes available information, reviews and reputation signals.",card_export_title:"Adapted export",card_export_text:"PDF is recommended for French, English, German and Spanish. TXT is recommended for Arabic, Chinese and Hindi.",difference_title:"Beyond Google reviews",difference_text:"ReviewPro helps understand, compare and act.",benchmark_title:"Automatic local benchmark",benchmark_text:"Compares the selected result with local competitors as soon as it is selected.",score_title:"Reputation score",score_text:"Generates a simple score out of 100 to quickly evaluate reputation.",action_title:"30-day action plan",action_text:"Suggests concrete actions to improve customer satisfaction and reputation.",why_title:"Why use it?",why_text:"Reading reviews one by one takes time. ReviewPro turns available data into a professional report that helps an owner, manager or decision-maker act.",badge_benchmark:"Local benchmark",badge_score:"Reputation score",badge_competitors:"Visible competitors",badge_export:"PDF/TXT",how_title:"How does it work?",step1_title:"Choose the language",step1_text:"French, English, German, Spanish, Arabic, Chinese or Hindi.",step2_title:"Enter the name and city",step2_text:"The tool searches and filters relevant results.",step3_title:"Automatic benchmark",step3_text:"The local benchmark, score and main competitors are displayed directly.",step4_title:"Generate the AI report",step4_text:"The report is written for the owner, manager or decision-maker.",step5_title:"Export",step5_text:"PDF for Latin languages. TXT recommended for Arabic, Chinese and Hindi.",demo_title: "ReviewPro",demo_text:"Open ReviewPro to analyze reputation and generate a professional report.",demo_button: "ReviewPro",        roadmap_title: "The AssistAI suite",
-        footer_copyright: "© 2026 Assist AI. All rights reserved.",
-        footer_brand: "Assist AI — Smart tools for clearer decisions",
-        trading_button: "Trading Advisor — in progress",
-        global_tagline: "Smart tools for clearer decisions",
-        roadmap_text: "AssistAI is designed as a family of smart tools. ReviewPro is already available. Trading Advisor is the next planned tool.",
-        roadmap_reviewpro: "Available now: reputation audit, local benchmark, score and actionable report.",
-        roadmap_trading: "Coming next: market opportunity tracking, structured signals, risk summaries and clear briefings.",
-        roadmap_future_title: "03 · Future tools",
-        roadmap_future: "The platform can later host other specialized assistants based on needs.",
+ en: {hero_subtitle: "Smart tools to analyze, understand and decide with more clarity",hero_button: "ReviewPro",features_button: "View features",solution_title: "Our smart tools",solution_text: "Assist AI brings together smart tools to analyze, understand and decide with more clarity. ReviewPro analyzes reputation.",card_search_title:"Smart search",card_search_text: "Analyzes reputation, local benchmark, reputation score and actionable recommendations.",card_ai_title:"AI analysis",card_ai_text:"Analyzes available information, reviews and reputation signals.",card_export_title:"Adapted export",card_export_text:"PDF is recommended for French, English, German and Spanish. TXT is recommended for Arabic, Chinese and Hindi.",difference_title:"Beyond Google reviews",difference_text:"ReviewPro helps understand, compare and act.",benchmark_title:"Automatic local benchmark",benchmark_text:"Compares the selected result with local competitors as soon as it is selected.",score_title:"Reputation score",score_text:"Generates a simple score out of 100 to quickly evaluate reputation.",action_title:"30-day action plan",action_text:"Suggests concrete actions to improve customer satisfaction and reputation.",why_title:"Why use it?",why_text:"Reading reviews one by one takes time. ReviewPro turns available data into a professional report that helps an owner, manager or decision-maker act.",badge_benchmark:"Local benchmark",badge_score:"Reputation score",badge_competitors:"Visible competitors",badge_export:"PDF/TXT",how_title:"How does it work?",step1_title:"Choose the language",step1_text:"French, English, German, Spanish, Arabic, Chinese or Hindi.",step2_title:"Enter the name and city",step2_text:"The tool searches and filters relevant results.",step3_title:"Automatic benchmark",step3_text:"The local benchmark, score and main competitors are displayed directly.",step4_title:"Generate the AI report",step4_text:"The report is written for the owner, manager or decision-maker.",step5_title:"Export",step5_text:"PDF for Latin languages. TXT recommended for Arabic, Chinese and Hindi.",demo_title: "ReviewPro",demo_text:"Open ReviewPro to analyze reputation and generate a professional report.",demo_button: "ReviewPro", roadmap_title: "The AssistAI suite",
+ footer_copyright: "© 2026 Assist AI. All rights reserved.",
+ footer_brand: "Assist AI — Smart tools for clearer decisions",
+ global_tagline: "Smart tools for clearer decisions",
 footer:"© 2026 AssistAI — Smart solutions"},
-      de: {hero_subtitle: "Intelligente Tools, um klarer zu analysieren, zu verstehen und zu entscheiden",hero_button: "ReviewPro",features_button: "Funktionen ansehen",solution_title: "Unsere intelligenten Tools",solution_text: "Assist AI bündelt intelligente Tools, um klarer zu analysieren, zu verstehen und zu entscheiden. ReviewPro analysiert Reputation. Trading Advisor ist in Vorbereitung.",card_search_title:"Intelligente Suche",card_search_text: "Analysiert Reputation, lokalen Benchmark, Reputationsscore und umsetzbare Empfehlungen.",card_ai_title:"KI-Analyse",card_ai_text:"Analysiert verfügbare Informationen, Bewertungen und Reputationssignale.",card_export_title:"Passender Export",card_export_text:"PDF wird für Französisch, Englisch, Deutsch und Spanisch empfohlen. TXT wird für Arabisch, Chinesisch und Hindi empfohlen.",difference_title:"Mehr als Google-Bewertungen",difference_text:"ReviewPro hilft zu verstehen, zu vergleichen und zu handeln.",benchmark_title:"Automatischer lokaler Benchmark",benchmark_text:"Vergleicht das ausgewählte Ergebnis direkt mit lokalen Wettbewerbern.",score_title:"Reputationsscore",score_text:"Erzeugt einen einfachen Score von 100, um die Reputation schnell einzuschätzen.",action_title:"30-Tage-Aktionsplan",action_text:"Schlägt konkrete Maßnahmen zur Verbesserung der Kundenzufriedenheit und Reputation vor.",why_title:"Warum nutzen?",why_text:"Bewertungen einzeln zu lesen kostet Zeit. ReviewPro verwandelt verfügbare Daten in einen professionellen Bericht, der Inhabern, Managern oder Verantwortlichen hilft zu handeln.",badge_benchmark:"Lokaler Benchmark",badge_score:"Reputationsscore",badge_competitors:"Sichtbare Wettbewerber",badge_export:"PDF/TXT",how_title:"Wie funktioniert es?",step1_title:"Sprache wählen",step1_text:"Französisch, Englisch, Deutsch, Spanisch, Arabisch, Chinesisch oder Hindi.",step2_title:"Name und Stadt eingeben",step2_text:"Das Tool sucht und filtert relevante Ergebnisse.",step3_title:"Automatischer Benchmark",step3_text:"Lokaler Benchmark, Score und wichtigste Wettbewerber werden direkt angezeigt.",step4_title:"KI-Bericht erstellen",step4_text:"Der Bericht wird für Inhaber, Manager oder Verantwortliche geschrieben.",step5_title:"Export",step5_text:"PDF für lateinische Sprachen. TXT empfohlen für Arabisch, Chinesisch und Hindi.",demo_title: "ReviewPro",demo_text:"Öffnen Sie ReviewPro, um Reputation zu analysieren und einen professionellen Bericht zu erstellen.",demo_button: "ReviewPro",        roadmap_title: "Die AssistAI-Suite",
-        footer_copyright: "© 2026 Assist AI. Alle Rechte vorbehalten.",
-        footer_brand: "Assist AI — Intelligente Tools für klarere Entscheidungen",
-        trading_button: "Trading Advisor — in Arbeit",
-        global_tagline: "Intelligente Tools für klarere Entscheidungen",
-        roadmap_text: "AssistAI ist als Familie intelligenter Tools gedacht. ReviewPro ist bereits verfügbar. Trading Advisor ist das nächste geplante Tool.",
-        roadmap_reviewpro: "Jetzt verfügbar: Reputationsaudit, lokaler Benchmark, Score und umsetzbarer Bericht.",
-        roadmap_trading: "Demnächst: Marktchancen verfolgen, strukturierte Signale, Risikoübersichten und klare Zusammenfassungen.",
-        roadmap_future_title: "03 · Weitere Tools",
-        roadmap_future: "Die Plattform kann später weitere spezialisierte Assistenten aufnehmen.",
+ de: {hero_subtitle: "Intelligente Tools, um klarer zu analysieren, zu verstehen und zu entscheiden",hero_button: "ReviewPro",features_button: "Funktionen ansehen",solution_title: "Unsere intelligenten Tools",solution_text: "Assist AI bündelt intelligente Tools, um klarer zu analysieren, zu verstehen und zu entscheiden. ReviewPro analysiert Reputation.",card_search_title:"Intelligente Suche",card_search_text: "Analysiert Reputation, lokalen Benchmark, Reputationsscore und umsetzbare Empfehlungen.",card_ai_title:"KI-Analyse",card_ai_text:"Analysiert verfügbare Informationen, Bewertungen und Reputationssignale.",card_export_title:"Passender Export",card_export_text:"PDF wird für Französisch, Englisch, Deutsch und Spanisch empfohlen. TXT wird für Arabisch, Chinesisch und Hindi empfohlen.",difference_title:"Mehr als Google-Bewertungen",difference_text:"ReviewPro hilft zu verstehen, zu vergleichen und zu handeln.",benchmark_title:"Automatischer lokaler Benchmark",benchmark_text:"Vergleicht das ausgewählte Ergebnis direkt mit lokalen Wettbewerbern.",score_title:"Reputationsscore",score_text:"Erzeugt einen einfachen Score von 100, um die Reputation schnell einzuschätzen.",action_title:"30-Tage-Aktionsplan",action_text:"Schlägt konkrete Maßnahmen zur Verbesserung der Kundenzufriedenheit und Reputation vor.",why_title:"Warum nutzen?",why_text:"Bewertungen einzeln zu lesen kostet Zeit. ReviewPro verwandelt verfügbare Daten in einen professionellen Bericht, der Inhabern, Managern oder Verantwortlichen hilft zu handeln.",badge_benchmark:"Lokaler Benchmark",badge_score:"Reputationsscore",badge_competitors:"Sichtbare Wettbewerber",badge_export:"PDF/TXT",how_title:"Wie funktioniert es?",step1_title:"Sprache wählen",step1_text:"Französisch, Englisch, Deutsch, Spanisch, Arabisch, Chinesisch oder Hindi.",step2_title:"Name und Stadt eingeben",step2_text:"Das Tool sucht und filtert relevante Ergebnisse.",step3_title:"Automatischer Benchmark",step3_text:"Lokaler Benchmark, Score und wichtigste Wettbewerber werden direkt angezeigt.",step4_title:"KI-Bericht erstellen",step4_text:"Der Bericht wird für Inhaber, Manager oder Verantwortliche geschrieben.",step5_title:"Export",step5_text:"PDF für lateinische Sprachen. TXT empfohlen für Arabisch, Chinesisch und Hindi.",demo_title: "ReviewPro",demo_text:"Öffnen Sie ReviewPro, um Reputation zu analysieren und einen professionellen Bericht zu erstellen.",demo_button: "ReviewPro", roadmap_title: "Die AssistAI-Suite",
+ footer_copyright: "© 2026 Assist AI. Alle Rechte vorbehalten.",
+ footer_brand: "Assist AI — Intelligente Tools für klarere Entscheidungen",
+ global_tagline: "Intelligente Tools für klarere Entscheidungen",
 footer:"© 2026 AssistAI — Intelligente Lösungen"},
-      es: {
-        footer_copyright: "© 2026 Assist AI. Todos los derechos reservados.",
-        footer_brand: "Assist AI — Herramientas inteligentes para decisiones más claras",
-        trading_button: "Trading Advisor — en progreso",
-        global_tagline: "Herramientas inteligentes para decisiones más claras",
-        hero_button: "ReviewPro",
-        features_button: "Ver funciones",
-        solution_title: "Nuestras herramientas inteligentes",
-        solution_text: "Assist AI reúne herramientas inteligentes para analizar, entender y decidir con más claridad. ReviewPro analiza la reputación. Trading Advisor está en preparación.",
-        card_search_title: "ReviewPro",
-        card_search_text: "Analiza reputación, benchmark local, puntuación de reputación y recomendaciones accionables.",
-        card_ai_title: "Trading Advisor",
-        card_ai_text: "Vista previa del próximo instrumento: ideas de mercado, señales estructuradas, síntesis de riesgos y apoyo a la decisión.",
-        card_export_title: "Informes y síntesis",
-        card_export_text: "ReviewPro exporta informes PDF/TXT. Trading Advisor podrá ofrecer síntesis claras para consultar o compartir.",
-        difference_title: "Más allá de las reseñas de Google",
-        difference_text: "ReviewPro ayuda a entender, comparar y actuar.",
-        benchmark_title: "Benchmark local automático",
-        benchmark_text: "Compara el resultado seleccionado con competidores locales desde el momento de la selección.",
-        score_title: "Puntuación de reputación",
-        score_text: "Genera una puntuación simple sobre 100 para evaluar rápidamente la reputación.",
-        action_title: "Plan de acción de 30 días",
-        action_text: "Propone acciones concretas para mejorar la satisfacción del cliente y la reputación.",
-        why_title: "¿Por qué usarlo?",
-        why_text: "Leer reseñas una por una lleva tiempo. ReviewPro transforma los datos disponibles en un informe profesional para ayudar al propietario, gerente o responsable a actuar.",
-        badge_benchmark: "Benchmark local",
-        badge_score: "Puntuación de reputación",
-        badge_competitors: "Competidores visibles",
-        badge_export: "PDF/TXT",
-        how_title: "¿Cómo funciona?",
-        step1_title: "Elegir el idioma",
-        step1_text: "Francés, inglés, alemán, español, árabe, chino o hindi.",
-        step2_title: "Introducir el nombre y la ciudad",
-        step2_text: "La herramienta busca y filtra resultados relevantes.",
-        step3_title: "Benchmark automático",
-        step3_text: "El benchmark local, la puntuación y los principales competidores se muestran directamente.",
-        step4_title: "Generar el informe IA",
-        step4_text: "El informe está redactado para el propietario, gerente o responsable.",
-        step5_title: "Exportar",
-        step5_text: "PDF para lenguas latinas. TXT recomendado para árabe, chino e hindi.",
-        demo_title: "ReviewPro",
-        demo_text: "Accede a ReviewPro para analizar la reputación y generar un informe profesional.",
-        demo_button: "ReviewPro",
-                roadmap_title: "La suite AssistAI",
-        roadmap_text: "AssistAI está pensado como una familia de herramientas inteligentes. ReviewPro ya está disponible. Trading Advisor será la próxima herramienta prevista.",
-        roadmap_reviewpro: "Disponible ahora: auditoría de reputación, benchmark local, puntuación e informe accionable.",
-        roadmap_trading: "Próximamente: seguimiento de oportunidades de mercado, señales estructuradas, resumen de riesgos y síntesis claras.",
-        roadmap_future_title: "03 · Próximas herramientas",
-        roadmap_future: "La plataforma podrá incorporar otros asistentes especializados según las necesidades.",
+ es: {
+ footer_copyright: "© 2026 Assist AI. Todos los derechos reservados.",
+ footer_brand: "Assist AI — Herramientas inteligentes para decisiones más claras",
+ global_tagline: "Herramientas inteligentes para decisiones más claras",
+ hero_button: "ReviewPro",
+ features_button: "Ver funciones",
+ solution_title: "Nuestras herramientas inteligentes",
+ solution_text: "Assist AI reúne herramientas inteligentes para analizar, entender y decidir con más claridad. ReviewPro analiza la reputación.",
+ card_search_title: "ReviewPro",
+ card_search_text: "Analiza reputación, benchmark local, puntuación de reputación y recomendaciones accionables.",
+ card_export_title: "Informes y síntesis",
+ card_export_text: "ReviewPro exporta informes PDF/TXT.",
+ difference_title: "Más allá de las reseñas de Google",
+ difference_text: "ReviewPro ayuda a entender, comparar y actuar.",
+ benchmark_title: "Benchmark local automático",
+ benchmark_text: "Compara el resultado seleccionado con competidores locales desde el momento de la selección.",
+ score_title: "Puntuación de reputación",
+ score_text: "Genera una puntuación simple sobre 100 para evaluar rápidamente la reputación.",
+ action_title: "Plan de acción de 30 días",
+ action_text: "Propone acciones concretas para mejorar la satisfacción del cliente y la reputación.",
+ why_title: "¿Por qué usarlo?",
+ why_text: "Leer reseñas una por una lleva tiempo. ReviewPro transforma los datos disponibles en un informe profesional para ayudar al propietario, gerente o responsable a actuar.",
+ badge_benchmark: "Benchmark local",
+ badge_score: "Puntuación de reputación",
+ badge_competitors: "Competidores visibles",
+ badge_export: "PDF/TXT",
+ how_title: "¿Cómo funciona?",
+ step1_title: "Elegir el idioma",
+ step1_text: "Francés, inglés, alemán, español, árabe, chino o hindi.",
+ step2_title: "Introducir el nombre y la ciudad",
+ step2_text: "La herramienta busca y filtra resultados relevantes.",
+ step3_title: "Benchmark automático",
+ step3_text: "El benchmark local, la puntuación y los principales competidores se muestran directamente.",
+ step4_title: "Generar el informe IA",
+ step4_text: "El informe está redactado para el propietario, gerente o responsable.",
+ step5_title: "Exportar",
+ step5_text: "PDF para lenguas latinas. TXT recomendado para árabe, chino e hindi.",
+ demo_title: "ReviewPro",
+ demo_text: "Accede a ReviewPro para analizar la reputación y generar un informe profesional.",
+ demo_button: "ReviewPro",
 footer: "© 2026 AssistAI — Soluciones inteligentes"
-      },
-      ar: {hero_subtitle: "أدوات ذكية للتحليل والفهم واتخاذ قرارات أوضح",hero_button: "ReviewPro",features_button: "عرض الميزات",solution_title: "أدواتنا الذكية",solution_text: "يجمع Assist AI أدوات ذكية للتحليل والفهم واتخاذ قرارات أوضح. ReviewPro يحلل السمعة. Trading Advisor قيد التحضير.",card_search_title:"بحث ذكي",card_search_text: "يحلل السمعة والمقارنة المحلية ودرجة السمعة والتوصيات القابلة للتنفيذ.",card_ai_title:"تحليل بالذكاء الاصطناعي",card_ai_text:"يحلل المعلومات المتاحة والمراجعات وإشارات السمعة.",card_export_title:"تصدير مناسب",card_export_text:"يوصى بـ PDF للفرنسية والإنجليزية والألمانية. ويوصى بـ TXT للعربية والصينية والهندية.",difference_title:"أكثر من مراجعات Google",difference_text:"يساعد ReviewPro على الفهم والمقارنة واتخاذ القرار.",benchmark_title:"مقارنة محلية تلقائية",benchmark_text:"يقارن النتيجة المختارة بالمنافسين المحليين مباشرة بعد الاختيار.",score_title:"درجة السمعة",score_text:"ينشئ درجة بسيطة من 100 لتقييم السمعة بسرعة.",action_title:"خطة عمل 30 يومًا",action_text:"يقترح إجراءات عملية لتحسين رضا العملاء والسمعة.",why_title:"لماذا نستخدمه؟",why_text:"قراءة المراجعات واحدة تلو الأخرى تستغرق وقتًا. ReviewPro يحول البيانات المتاحة إلى تقرير احترافي يساعد المالك أو المدير أو المسؤول على اتخاذ إجراء.",badge_benchmark:"مقارنة محلية",badge_score:"درجة السمعة",badge_competitors:"منافسون ظاهرون",badge_export:"PDF/TXT",how_title:"كيف يعمل؟",step1_title:"اختيار اللغة",step1_text:"الفرنسية أو الإنجليزية أو الألمانية أو العربية أو الصينية أو الهندية.",step2_title:"إدخال الاسم والمدينة",step2_text:"الأداة تبحث وتعرض النتائج المناسبة.",step3_title:"مقارنة تلقائية",step3_text:"تظهر المقارنة المحلية والدرجة وأهم المنافسين مباشرة.",step4_title:"إنشاء التقرير",step4_text:"التقرير موجه للمالك أو المدير أو المسؤول.",step5_title:"تصدير",step5_text:"PDF للغات اللاتينية. TXT موصى به للعربية والصينية والهندية.",demo_title: "ReviewPro",demo_text:"افتح ReviewPro لتحليل السمعة وإنشاء تقرير احترافي.",demo_button: "ReviewPro",        roadmap_title: "مجموعة AssistAI",
-        footer_copyright: "© 2026 Assist AI. جميع الحقوق محفوظة.",
-        footer_brand: "Assist AI — أدوات ذكية لقرارات أوضح",
-        trading_button: "Trading Advisor — قيد التطوير",
-        global_tagline: "أدوات ذكية لقرارات أوضح",
-        roadmap_text: "تم تصميم AssistAI كعائلة من الأدوات الذكية. ReviewPro متاح الآن، و Trading Advisor هو الأداة التالية المخطط لها.",
-        roadmap_reviewpro: "متاح الآن: تدقيق السمعة، مقارنة محلية، درجة السمعة وتقرير قابل للتنفيذ.",
-        roadmap_trading: "قريباً: متابعة فرص السوق، إشارات منظمة، ملخص للمخاطر وتلخيصات واضحة.",
-        roadmap_future_title: "03 · أدوات قادمة",
-        roadmap_future: "يمكن للمنصة لاحقاً استضافة مساعدين متخصصين آخرين حسب الحاجة.",
+ },
+ ar: {hero_subtitle: "أدوات ذكية للتحليل والفهم واتخاذ قرارات أوضح",hero_button: "ReviewPro",features_button: "عرض الميزات",solution_title: "أدواتنا الذكية",solution_text: "يجمع Assist AI أدوات ذكية للتحليل والفهم واتخاذ قرارات أوضح. ReviewPro يحلل السمعة.",card_search_title:"بحث ذكي",card_search_text: "يحلل السمعة والمقارنة المحلية ودرجة السمعة والتوصيات القابلة للتنفيذ.",card_ai_title:"تحليل بالذكاء الاصطناعي",card_ai_text:"يحلل المعلومات المتاحة والمراجعات وإشارات السمعة.",card_export_title:"تصدير مناسب",card_export_text:"يوصى بـ PDF للفرنسية والإنجليزية والألمانية. ويوصى بـ TXT للعربية والصينية والهندية.",difference_title:"أكثر من مراجعات Google",difference_text:"يساعد ReviewPro على الفهم والمقارنة واتخاذ القرار.",benchmark_title:"مقارنة محلية تلقائية",benchmark_text:"يقارن النتيجة المختارة بالمنافسين المحليين مباشرة بعد الاختيار.",score_title:"درجة السمعة",score_text:"ينشئ درجة بسيطة من 100 لتقييم السمعة بسرعة.",action_title:"خطة عمل 30 يومًا",action_text:"يقترح إجراءات عملية لتحسين رضا العملاء والسمعة.",why_title:"لماذا نستخدمه؟",why_text:"قراءة المراجعات واحدة تلو الأخرى تستغرق وقتًا. ReviewPro يحول البيانات المتاحة إلى تقرير احترافي يساعد المالك أو المدير أو المسؤول على اتخاذ إجراء.",badge_benchmark:"مقارنة محلية",badge_score:"درجة السمعة",badge_competitors:"منافسون ظاهرون",badge_export:"PDF/TXT",how_title:"كيف يعمل؟",step1_title:"اختيار اللغة",step1_text:"الفرنسية أو الإنجليزية أو الألمانية أو العربية أو الصينية أو الهندية.",step2_title:"إدخال الاسم والمدينة",step2_text:"الأداة تبحث وتعرض النتائج المناسبة.",step3_title:"مقارنة تلقائية",step3_text:"تظهر المقارنة المحلية والدرجة وأهم المنافسين مباشرة.",step4_title:"إنشاء التقرير",step4_text:"التقرير موجه للمالك أو المدير أو المسؤول.",step5_title:"تصدير",step5_text:"PDF للغات اللاتينية. TXT موصى به للعربية والصينية والهندية.",demo_title: "ReviewPro",demo_text:"افتح ReviewPro لتحليل السمعة وإنشاء تقرير احترافي.",demo_button: "ReviewPro", roadmap_title: "مجموعة AssistAI",
+ footer_copyright: "© 2026 Assist AI. جميع الحقوق محفوظة.",
+ footer_brand: "Assist AI — أدوات ذكية لقرارات أوضح",
+ global_tagline: "أدوات ذكية لقرارات أوضح",
 footer:"© 2026 AssistAI — حلول ذكية"},
-      zh: {hero_subtitle: "用于分析、理解并更清晰决策的智能工具",hero_button: "ReviewPro",features_button: "查看功能",solution_title: "我们的智能工具",solution_text: "Assist AI 汇集智能工具，帮助更清晰地分析、理解并决策。ReviewPro 分析声誉。Trading Advisor 正在准备中。",card_search_title:"智能搜索",card_search_text: "分析声誉、本地基准、声誉评分和可执行建议。",card_ai_title:"AI 分析",card_ai_text:"分析可用信息、评论和声誉信号。",card_export_title:"适配导出",card_export_text:"法语、英语和德语推荐 PDF。阿拉伯语、中文和印地语推荐 TXT。",difference_title:"超越 Google 评论",difference_text:"ReviewPro 帮助理解、比较并采取行动。",benchmark_title:"自动本地基准",benchmark_text:"选择正确结果后，立即与本地竞争对手比较。",score_title:"声誉评分",score_text:"生成 100 分制评分，快速评估声誉。",action_title:"30 天行动计划",action_text:"提出具体行动来提升客户满意度和声誉。",why_title:"为什么使用？",why_text:"逐条阅读评论很耗时。ReviewPro 将可用数据转化为专业报告，帮助所有者、经理或负责人行动。",badge_benchmark:"本地基准",badge_score:"声誉评分",badge_competitors:"可见竞争对手",badge_export:"PDF/TXT",how_title:"它如何工作？",step1_title:"选择语言",step1_text:"法语、英语、德语、阿拉伯语、中文或印地语。",step2_title:"输入名称和城市",step2_text:"工具搜索并筛选相关结果。",step3_title:"自动基准",step3_text:"本地基准、评分和主要竞争对手会直接显示。",step4_title:"生成报告",step4_text:"报告面向所有者、经理或负责人。",step5_title:"导出",step5_text:"拉丁语言使用 PDF。阿拉伯语、中文和印地语建议使用 TXT。",demo_title: "ReviewPro",demo_text:"打开 ReviewPro，分析声誉并生成专业报告。",demo_button: "ReviewPro",        roadmap_title: "AssistAI 工具套件",
-        footer_copyright: "© 2026 Assist AI. 保留所有权利。",
-        footer_brand: "Assist AI — 让决策更清晰的智能工具",
-        trading_button: "Trading Advisor — 开发中",
-        global_tagline: "让决策更清晰的智能工具",
-        roadmap_text: "AssistAI 被设计为一组智能工具。ReviewPro 已可使用，Trading Advisor 是下一个计划推出的工具。",
-        roadmap_reviewpro: "现已可用：声誉审计、本地基准、评分和可执行报告。",
-        roadmap_trading: "即将推出：市场机会跟踪、结构化信号、风险摘要和清晰简报。",
-        roadmap_future_title: "03 · 未来工具",
-        roadmap_future: "平台之后可以根据需求加入更多专业助手。",
+ zh: {hero_subtitle: "用于分析、理解并更清晰决策的智能工具",hero_button: "ReviewPro",features_button: "查看功能",solution_title: "我们的智能工具",solution_text: "Assist AI 汇集智能工具，帮助更清晰地分析、理解并决策。ReviewPro 分析声誉。",card_search_title:"智能搜索",card_search_text: "分析声誉、本地基准、声誉评分和可执行建议。",card_ai_title:"AI 分析",card_ai_text:"分析可用信息、评论和声誉信号。",card_export_title:"适配导出",card_export_text:"法语、英语和德语推荐 PDF。阿拉伯语、中文和印地语推荐 TXT。",difference_title:"超越 Google 评论",difference_text:"ReviewPro 帮助理解、比较并采取行动。",benchmark_title:"自动本地基准",benchmark_text:"选择正确结果后，立即与本地竞争对手比较。",score_title:"声誉评分",score_text:"生成 100 分制评分，快速评估声誉。",action_title:"30 天行动计划",action_text:"提出具体行动来提升客户满意度和声誉。",why_title:"为什么使用？",why_text:"逐条阅读评论很耗时。ReviewPro 将可用数据转化为专业报告，帮助所有者、经理或负责人行动。",badge_benchmark:"本地基准",badge_score:"声誉评分",badge_competitors:"可见竞争对手",badge_export:"PDF/TXT",how_title:"它如何工作？",step1_title:"选择语言",step1_text:"法语、英语、德语、阿拉伯语、中文或印地语。",step2_title:"输入名称和城市",step2_text:"工具搜索并筛选相关结果。",step3_title:"自动基准",step3_text:"本地基准、评分和主要竞争对手会直接显示。",step4_title:"生成报告",step4_text:"报告面向所有者、经理或负责人。",step5_title:"导出",step5_text:"拉丁语言使用 PDF。阿拉伯语、中文和印地语建议使用 TXT。",demo_title: "ReviewPro",demo_text:"打开 ReviewPro，分析声誉并生成专业报告。",demo_button: "ReviewPro", roadmap_title: "AssistAI 工具套件",
+ footer_copyright: "© 2026 Assist AI. 保留所有权利。",
+ footer_brand: "Assist AI — 让决策更清晰的智能工具",
+ global_tagline: "让决策更清晰的智能工具",
 footer:"© 2026 AssistAI — 智能解决方案"},
-      hi: {hero_subtitle: "विश्लेषण, समझ और बेहतर निर्णय के लिए स्मार्ट टूल्स",hero_button: "ReviewPro",features_button: "विशेषताएँ देखें",solution_title: "हमारे स्मार्ट टूल्स",solution_text: "Assist AI स्मार्ट टूल्स को साथ लाता है ताकि विश्लेषण, समझ और निर्णय अधिक स्पष्ट हों। ReviewPro प्रतिष्ठा का विश्लेषण करता है। Trading Advisor तैयार किया जा रहा है।",card_search_title:"स्मार्ट खोज",card_search_text: "प्रतिष्ठा, स्थानीय तुलना, प्रतिष्ठा स्कोर और कार्रवाई योग्य सुझावों का विश्लेषण करता है।",card_ai_title:"AI विश्लेषण",card_ai_text:"उपलब्ध जानकारी, समीक्षाओं और प्रतिष्ठा संकेतों का विश्लेषण करता है।",card_export_title:"अनुकूल निर्यात",card_export_text:"फ्रेंच, अंग्रेज़ी और जर्मन के लिए PDF अनुशंसित है। अरबी, चीनी और हिंदी के लिए TXT अनुशंसित है।",difference_title:"Google समीक्षाओं से आगे",difference_text:"ReviewPro समझने, तुलना करने और कार्रवाई करने में मदद करता है।",benchmark_title:"स्वचालित स्थानीय तुलना",benchmark_text:"चयन होते ही परिणाम की स्थानीय प्रतिस्पर्धियों से तुलना करता है।",score_title:"प्रतिष्ठा स्कोर",score_text:"प्रतिष्ठा का तेज़ मूल्यांकन करने के लिए 100 में से स्कोर देता है।",action_title:"30 दिन की कार्य योजना",action_text:"ग्राहक संतुष्टि और प्रतिष्ठा सुधारने के लिए ठोस कदम सुझाता है।",why_title:"इसका उपयोग क्यों करें?",why_text:"एक-एक समीक्षा पढ़ने में समय लगता है। ReviewPro उपलब्ध डेटा को पेशेवर रिपोर्ट में बदलता है जो मालिक, मैनेजर या जिम्मेदार व्यक्ति की मदद करता है।",badge_benchmark:"स्थानीय तुलना",badge_score:"प्रतिष्ठा स्कोर",badge_competitors:"दिखने वाले प्रतिस्पर्धी",badge_export:"PDF/TXT",how_title:"यह कैसे काम करता है?",step1_title:"भाषा चुनें",step1_text:"फ्रेंच, अंग्रेज़ी, जर्मन, अरबी, चीनी या हिंदी।",step2_title:"नाम और शहर दर्ज करें",step2_text:"टूल खोजता है और संबंधित परिणामों को फ़िल्टर करता है।",step3_title:"स्वचालित तुलना",step3_text:"स्थानीय तुलना, स्कोर और मुख्य प्रतिस्पर्धी सीधे दिखते हैं।",step4_title:"रिपोर्ट बनाएँ",step4_text:"रिपोर्ट मालिक, मैनेजर या जिम्मेदार व्यक्ति के लिए लिखी जाती है।",step5_title:"निर्यात",step5_text:"लैटिन भाषाओं के लिए PDF। अरबी, चीनी और हिंदी के लिए TXT अनुशंसित है।",demo_title: "ReviewPro",demo_text:"ReviewPro खोलें, प्रतिष्ठा का विश्लेषण करें और पेशेवर रिपोर्ट बनाएँ।",demo_button: "ReviewPro",        roadmap_title: "AssistAI सूट",
-        footer_copyright: "© 2026 Assist AI. सर्वाधिकार सुरक्षित।",
-        footer_brand: "Assist AI — बेहतर निर्णयों के लिए स्मार्ट टूल्स",
-        trading_button: "Trading Advisor — प्रगति में",
-        global_tagline: "बेहतर निर्णयों के लिए स्मार्ट टूल्स",
-        roadmap_text: "AssistAI को स्मार्ट टूल्स के परिवार के रूप में बनाया गया है। ReviewPro उपलब्ध है। Trading Advisor अगला नियोजित टूल है।",
-        roadmap_reviewpro: "अभी उपलब्ध: प्रतिष्ठा ऑडिट, स्थानीय तुलना, स्कोर और कार्रवाई योग्य रिपोर्ट।",
-        roadmap_trading: "जल्द आ रहा है: बाज़ार अवसर ट्रैकिंग, संरचित संकेत, जोखिम सारांश और स्पष्ट ब्रीफिंग।",
-        roadmap_future_title: "03 · भविष्य के टूल",
-        roadmap_future: "प्लेटफ़ॉर्म आगे जरूरत के अनुसार अन्य विशेष सहायकों को शामिल कर सकता है।",
+ hi: {hero_subtitle: "विश्लेषण, समझ और बेहतर निर्णय के लिए स्मार्ट टूल्स",hero_button: "ReviewPro",features_button: "विशेषताएँ देखें",solution_title: "हमारे स्मार्ट टूल्स",solution_text: "Assist AI स्मार्ट टूल्स को साथ लाता है ताकि विश्लेषण, समझ और निर्णय अधिक स्पष्ट हों। ReviewPro प्रतिष्ठा का विश्लेषण करता है।",card_search_title:"स्मार्ट खोज",card_search_text: "प्रतिष्ठा, स्थानीय तुलना, प्रतिष्ठा स्कोर और कार्रवाई योग्य सुझावों का विश्लेषण करता है।",card_ai_title:"AI विश्लेषण",card_ai_text:"उपलब्ध जानकारी, समीक्षाओं और प्रतिष्ठा संकेतों का विश्लेषण करता है।",card_export_title:"अनुकूल निर्यात",card_export_text:"फ्रेंच, अंग्रेज़ी और जर्मन के लिए PDF अनुशंसित है। अरबी, चीनी और हिंदी के लिए TXT अनुशंसित है।",difference_title:"Google समीक्षाओं से आगे",difference_text:"ReviewPro समझने, तुलना करने और कार्रवाई करने में मदद करता है।",benchmark_title:"स्वचालित स्थानीय तुलना",benchmark_text:"चयन होते ही परिणाम की स्थानीय प्रतिस्पर्धियों से तुलना करता है।",score_title:"प्रतिष्ठा स्कोर",score_text:"प्रतिष्ठा का तेज़ मूल्यांकन करने के लिए 100 में से स्कोर देता है।",action_title:"30 दिन की कार्य योजना",action_text:"ग्राहक संतुष्टि और प्रतिष्ठा सुधारने के लिए ठोस कदम सुझाता है।",why_title:"इसका उपयोग क्यों करें?",why_text:"एक-एक समीक्षा पढ़ने में समय लगता है। ReviewPro उपलब्ध डेटा को पेशेवर रिपोर्ट में बदलता है जो मालिक, मैनेजर या जिम्मेदार व्यक्ति की मदद करता है।",badge_benchmark:"स्थानीय तुलना",badge_score:"प्रतिष्ठा स्कोर",badge_competitors:"दिखने वाले प्रतिस्पर्धी",badge_export:"PDF/TXT",how_title:"यह कैसे काम करता है?",step1_title:"भाषा चुनें",step1_text:"फ्रेंच, अंग्रेज़ी, जर्मन, अरबी, चीनी या हिंदी।",step2_title:"नाम और शहर दर्ज करें",step2_text:"टूल खोजता है और संबंधित परिणामों को फ़िल्टर करता है।",step3_title:"स्वचालित तुलना",step3_text:"स्थानीय तुलना, स्कोर और मुख्य प्रतिस्पर्धी सीधे दिखते हैं।",step4_title:"रिपोर्ट बनाएँ",step4_text:"रिपोर्ट मालिक, मैनेजर या जिम्मेदार व्यक्ति के लिए लिखी जाती है।",step5_title:"निर्यात",step5_text:"लैटिन भाषाओं के लिए PDF। अरबी, चीनी और हिंदी के लिए TXT अनुशंसित है।",demo_title: "ReviewPro",demo_text:"ReviewPro खोलें, प्रतिष्ठा का विश्लेषण करें और पेशेवर रिपोर्ट बनाएँ।",demo_button: "ReviewPro", roadmap_title: "AssistAI सूट",
+ footer_copyright: "© 2026 Assist AI. सर्वाधिकार सुरक्षित।",
+ footer_brand: "Assist AI — बेहतर निर्णयों के लिए स्मार्ट टूल्स",
+ global_tagline: "बेहतर निर्णयों के लिए स्मार्ट टूल्स",
 footer:"© 2026 AssistAI — स्मार्ट समाधान"}
-    };
-    function setLanguage(lang) {
-      const selected = translations[lang] || translations.fr;
-      document.documentElement.lang = lang;
-      document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
-      document.querySelectorAll("[data-i18n]").forEach(function(element) {
-        const key = element.getAttribute("data-i18n");
-        if (selected[key]) element.textContent = selected[key];
-      });
-      ["fr","en","de","ar","zh","hi"].forEach(function(code) {
-        const btn = document.getElementById("btn-" + code);
-        if (btn) btn.classList.remove("active");
-      });
-      const activeBtn = document.getElementById("btn-" + lang);
-      if (activeBtn) activeBtn.classList.add("active");
-      localStorage.setItem("assistia_language", lang);
-    }
-    function trackReviewProClick(position) {
-      if (typeof gtag === "function") {
-        gtag("event", "click_reviewpro_button", { event_category:"CTA", event_label: position + " - ReviewPro" });
-      }
-    }
-    function detectBrowserLanguage() {
-      const browserLang = (navigator.language || navigator.userLanguage || "fr").toLowerCase();
+ };
+ function setLanguage(lang) {
+ const selected = translations[lang] || translations.fr;
+ document.documentElement.lang = lang;
+ document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
+ document.querySelectorAll("[data-i18n]").forEach(function(element) {
+ const key = element.getAttribute("data-i18n");
+ if (selected[key]) element.textContent = selected[key];
+ });
+ ["fr","en","de","ar","zh","hi"].forEach(function(code) {
+ const btn = document.getElementById("btn-" + code);
+ if (btn) btn.classList.remove("active");
+ });
+ const activeBtn = document.getElementById("btn-" + lang);
+ if (activeBtn) activeBtn.classList.add("active");
+ localStorage.setItem("assistia_language", lang);
+ }
+ function trackReviewProClick(position) {
+ if (typeof gtag === "function") {
+ gtag("event", "click_reviewpro_button", { event_category:"CTA", event_label: position + " - ReviewPro" });
+ }
+ }
+ function detectBrowserLanguage() {
+ const browserLang = (navigator.language || navigator.userLanguage || "fr").toLowerCase();
 
-      if (browserLang.startsWith("fr")) return "fr";
-      if (browserLang.startsWith("en")) return "en";
-      if (browserLang.startsWith("de")) return "de";
-      if (browserLang.startsWith("es")) return "es";
-      if (browserLang.startsWith("ar")) return "ar";
-      if (browserLang.startsWith("zh")) return "zh";
-      if (browserLang.startsWith("hi")) return "hi";
+ if (browserLang.startsWith("fr")) return "fr";
+ if (browserLang.startsWith("en")) return "en";
+ if (browserLang.startsWith("de")) return "de";
+ if (browserLang.startsWith("es")) return "es";
+ if (browserLang.startsWith("ar")) return "ar";
+ if (browserLang.startsWith("zh")) return "zh";
+ if (browserLang.startsWith("hi")) return "hi";
 
-      return "fr";
-    }
+ return "fr";
+ }
 
-    document.addEventListener("DOMContentLoaded", function() {
-      const saved = localStorage.getItem("assistia_language");
-      const initialLanguage = saved || detectBrowserLanguage();
-      setLanguage(initialLanguage);
-    });
-  </script>
+ document.addEventListener("DOMContentLoaded", function() {
+ const saved = localStorage.getItem("assistia_language");
+ const initialLanguage = saved || detectBrowserLanguage();
+ setLanguage(initialLanguage);
+ });
+ </script>
 </body>
 </html>
