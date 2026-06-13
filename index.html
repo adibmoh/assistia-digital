@@ -9,7 +9,6 @@
   <meta name="robots" content="index,follow">
   <link rel="stylesheet" href="assets/styles.css">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8966992932095198" crossorigin="anonymous"></script>
-
 </head>
 <body>
 
@@ -33,7 +32,7 @@
 <section class="dark hero">
   <div class="container">
     <div class="langs" aria-label="Language selector">
-      <button class="lang active" data-lang="fr">Français</button>
+      <button class="lang" data-lang="fr">Français</button>
       <button class="lang" data-lang="en">English</button>
       <button class="lang" data-lang="de">Deutsch</button>
       <button class="lang" data-lang="es">Español</button>
@@ -47,54 +46,107 @@
     <a class="secondary-link" data-i18n="features" href="#features">See the features</a>
   </div>
 </section>
+
 <section class="section" id="features">
   <div class="container">
     <h2 data-i18n="home_intro_title">Understand local reputation before making decisions</h2>
     <p class="lead" data-i18n="home_intro_text">Assist AI turns Google reviews, ratings and local comparisons into clear insights for owners, managers and decision-makers who want to improve their service.</p>
+
     <div class="grid">
-      <article class="card"><span class="pill">ReviewPro</span><h3>Reputation audit</h3><p>ReviewPro helps users search for a business, read available Google rating signals, compare the selected location with nearby competitors and generate a structured management report.</p></article>
-      <article class="card"><span class="pill">Benchmark</span><h3>Local context</h3><p>A rating only becomes useful when it is compared with the local market. A 4.4 rating can be strong in one city and average in another depending on competitor quality and review volume.</p></article>
-      <article class="card"><span class="pill">Action plan</span><h3>Practical next steps</h3><p>The report is designed for owners and managers. It highlights strengths, weaknesses, issues to monitor and a practical thirty-day improvement plan.</p></article>
+      <article class="card">
+        <span class="pill" data-i18n="card1_pill">ReviewPro</span>
+        <h3 data-i18n="card1_title">Reputation audit</h3>
+        <p data-i18n="card1_text">ReviewPro helps users search for a business, read available Google rating signals, compare the selected location with nearby competitors and generate a structured management report.</p>
+      </article>
+
+      <article class="card">
+        <span class="pill" data-i18n="card2_pill">Benchmark</span>
+        <h3 data-i18n="card2_title">Local context</h3>
+        <p data-i18n="card2_text">A rating only becomes useful when it is compared with the local market. A 4.4 rating can be strong in one city and average in another depending on competitor quality and review volume.</p>
+      </article>
+
+      <article class="card">
+        <span class="pill" data-i18n="card3_pill">Action plan</span>
+        <h3 data-i18n="card3_title">Practical next steps</h3>
+        <p data-i18n="card3_text">The report is designed for owners and managers. It highlights strengths, weaknesses, issues to monitor and a practical thirty-day improvement plan.</p>
+      </article>
     </div>
   </div>
 </section>
+
 <section class="section dark">
   <div class="container">
-    <h2>How Assist AI helps users</h2>
-    <p class="lead">Assist AI is designed to give users both a practical tool and clear educational material. The website explains how reputation analysis works, how to interpret Google reviews, how local benchmarks should be used, and where automated analysis has limits.</p>
+    <h2 data-i18n="assist_title">How Assist AI helps users</h2>
+    <p class="lead" data-i18n="assist_text">Assist AI is designed to give users both a practical tool and clear educational material. The website explains how reputation analysis works, how to interpret Google reviews, how local benchmarks should be used, and where automated analysis has limits.</p>
+
     <div class="grid two">
-      <div class="card dark-card"><h3>Educational content</h3><p>The guides are written for small and local teams that need to understand online reputation without becoming data specialists. They explain common mistakes, useful metrics and responsible interpretation.</p></div>
-      <div class="card dark-card"><h3>Responsible tool use</h3><p>ReviewPro can support better decisions, but it should not replace human judgement. The website clearly explains that limited public review data can be incomplete and should be combined with internal customer feedback.</p></div>
+      <div class="card dark-card">
+        <h3 data-i18n="assist_card1_title">Educational content</h3>
+        <p data-i18n="assist_card1_text">The guides are written for local teams that need to understand online reputation without becoming data specialists. They explain common mistakes, useful metrics and responsible interpretation.</p>
+      </div>
+
+      <div class="card dark-card">
+        <h3 data-i18n="assist_card2_title">Responsible tool use</h3>
+        <p data-i18n="assist_card2_text">ReviewPro can support better decisions, but it should not replace human judgement. The website clearly explains that limited public review data can be incomplete and should be combined with internal customer feedback.</p>
+      </div>
     </div>
   </div>
 </section>
+
 <section class="section">
   <div class="container">
-    <h2>What ReviewPro analyzes</h2>
-    <p class="lead">The application uses available public information from Google Places and converts it into a management-friendly report. The goal is not to produce a perfect truth; it is to make reputation signals easier to understand.</p>
+    <h2 data-i18n="analysis_title">What ReviewPro analyzes</h2>
+    <p class="lead" data-i18n="analysis_text">The application uses available public information from Google Places and converts it into a management-friendly report. The goal is not to produce a perfect truth; it is to make reputation signals easier to understand.</p>
+
     <ul class="checklist">
-      <li>Google rating and number of reviews for the selected result.</li>
-      <li>Nearby competitors found through the same activity type and city.</li>
-      <li>Average local rating and average local review count for comparison.</li>
-      <li>A reputation score that combines rating, review volume and benchmark position.</li>
-      <li>A report structure with summary, strengths, weaknesses, risks and action priorities.</li>
+      <li data-i18n="analysis_li1">Google rating and number of reviews for the selected result.</li>
+      <li data-i18n="analysis_li2">Nearby competitors found through the same activity type and city.</li>
+      <li data-i18n="analysis_li3">Average local rating and average local review count for comparison.</li>
+      <li data-i18n="analysis_li4">A reputation score that combines rating, review volume and benchmark position.</li>
+      <li data-i18n="analysis_li5">A report structure with summary, strengths, weaknesses, risks and action priorities.</li>
     </ul>
+
     <div class="button-row">
       <a class="btn btn-primary" data-i18n="launch" href="https://reviewpro-ai.streamlit.app/" target="_blank" rel="noopener">Launch ReviewPro</a>
-      <a class="btn btn-secondary" href="guides/index.html">Read the guides</a>
+      <a class="btn btn-secondary" data-i18n="read_guides" href="guides/index.html">Read the guides</a>
     </div>
   </div>
 </section>
+
 <section class="section" style="background:#eff6ff">
   <div class="container">
-    <h2>Start with these resources</h2>
+    <h2 data-i18n="resources_title">Start with these resources</h2>
+
     <div class="grid">
-      <article class="card"><h3><a href="guides/what-is-a-reputation-audit.html">What is a reputation audit?</a></h3><p>Learn the basic idea behind reputation audits and why ratings, comments and response patterns should be read together.</p></article>
-      <article class="card"><h3><a href="guides/how-to-analyze-google-reviews.html">How to analyze Google reviews</a></h3><p>Understand recurring themes, customer expectations and how to avoid overreacting to a single positive or negative comment.</p></article>
-      <article class="card"><h3><a href="guides/local-business-benchmark.html">Local benchmark guide</a></h3><p>See why a competitor comparison gives better context than looking at one rating in isolation.</p></article>
-      <article class="card"><h3><a href="guides/reputation-score-explained.html">Reputation score explained</a></h3><p>ReviewPro's score is a practical summary, not a universal truth. This guide explains how to read it responsibly.</p></article>
-      <article class="card"><h3><a href="examples/reviewpro-report-example.html">Example report</a></h3><p>Read a sample report structure for a local restaurant and see how insights can become a 30-day action plan.</p></article>
-      <article class="card"><h3><a href="faq.html">Frequently asked questions</a></h3><p>Answers about data sources, privacy, limitations, PDF exports and how the application should be used.</p></article>
+      <article class="card">
+        <h3><a data-i18n="res1_title" href="guides/what-is-a-reputation-audit.html">What is a reputation audit?</a></h3>
+        <p data-i18n="res1_text">Learn the basic idea behind reputation audits and why ratings, comments and response patterns should be read together.</p>
+      </article>
+
+      <article class="card">
+        <h3><a data-i18n="res2_title" href="guides/how-to-analyze-google-reviews.html">How to analyze Google reviews</a></h3>
+        <p data-i18n="res2_text">Understand recurring themes, customer expectations and how to avoid overreacting to a single positive or negative comment.</p>
+      </article>
+
+      <article class="card">
+        <h3><a data-i18n="res3_title" href="guides/local-business-benchmark.html">Local benchmark guide</a></h3>
+        <p data-i18n="res3_text">See why a competitor comparison gives better context than looking at one rating in isolation.</p>
+      </article>
+
+      <article class="card">
+        <h3><a data-i18n="res4_title" href="guides/reputation-score-explained.html">Reputation score explained</a></h3>
+        <p data-i18n="res4_text">ReviewPro's score is a practical summary, not a universal truth. This guide explains how to read it responsibly.</p>
+      </article>
+
+      <article class="card">
+        <h3><a data-i18n="res5_title" href="examples/reviewpro-report-example.html">Example report</a></h3>
+        <p data-i18n="res5_text">Read a sample report structure for a local restaurant and see how insights can become a 30-day action plan.</p>
+      </article>
+
+      <article class="card">
+        <h3><a data-i18n="res6_title" href="faq.html">Frequently asked questions</a></h3>
+        <p data-i18n="res6_text">Answers about data sources, privacy, limitations, PDF exports and how the application should be used.</p>
+      </article>
     </div>
   </div>
 </section>
@@ -104,9 +156,9 @@
 <footer class="footer">
   <div class="container">
     <strong>Assist AI</strong><br>
-    Smart tools for clearer decisions<br>
+    <span data-i18n="footer_tagline">Smart tools for clearer decisions</span><br>
     <a href="mailto:hello@assistia.digital">hello@assistia.digital</a><br>
-    <span class="small">© 2026 Assist AI. All rights reserved.</span>
+    <span class="small" data-i18n="footer_rights">© 2026 Assist AI. All rights reserved.</span>
   </div>
 </footer>
 
