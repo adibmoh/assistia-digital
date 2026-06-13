@@ -42,21 +42,53 @@ const translations = {
     launch: 'ReviewPro खोलें'
   }
 };
-function applyLang(lang){
-  const data = translations[lang] || translations.fr;
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const key = el.getAttribute('data-i18n');
-    if(data[key]) el.innerHTML = data[key];
-  });
-  document.querySelectorAll('[data-lang]').forEach(btn=>{
-    btn.classList.toggle('active', btn.getAttribute('data-lang')===lang);
-  });
-  localStorage.setItem('assistai_lang', lang);
+
+const supportedLanguages = ['fr', 'en', 'de', 'es', 'ar', 'zh', 'hi'];
+
+function detectVisitorLanguage() {
+  const browserLanguages = navigator.languages && navigator.languages.length
+    ? navigator.languages
+    : [navigator.language || navigator.userLanguage || 'en'];
+
+  for (const lang of browserLanguages) {
+    const shortLang = String(lang).toLowerCase().split('-')[0];
+
+    if (supportedLanguages.includes(shortLang)) {
+      return shortLang;
+    }
+  }
+
+  return 'en';
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  const stored = localStorage.getItem('assistai_lang') || 'fr';
-  applyLang(stored);
-  document.querySelectorAll('[data-lang]').forEach(btn=>btn.addEventListener('click',()=>applyLang(btn.getAttribute('data-lang'))));
+
+function applyLang(lang) {
+  const selectedLang = supportedLanguages.includes(lang) ? lang : 'en';
+  const data = translations[selectedLang] || translations.en;
+
+  document.documentElement.lang = selectedLang;
+  document.documentElement.dir = selectedLang === 'ar' ? 'rtl' : 'ltr';
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (data[key]) {
+      el.innerHTML = data[key];
+    }
+  });
+
+  document.querySelectorAll('[data-lang]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === selectedLang);
+  });
+
+  localStorage.setItem('assistai_lang', selectedLang);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const savedLanguage = localStorage.getItem('assistai_lang');
+  const visitorLanguage = savedLanguage || detectVisitorLanguage();
+
+  applyLang(visitorLanguage);
+
+  document.querySelectorAll('[data-lang]').forEach(btn => {
+    btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
+  });
 });
