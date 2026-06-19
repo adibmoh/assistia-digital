@@ -36,6 +36,9 @@ const state = {
   userTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "local"
 };
 
+const CACHE_KEY = "assistai_worldcup_at_a_glance_cache_v1";
+const CACHE_MAX_AGE_MS = 60 * 60 * 1000;
+
 const $ = (id) => document.getElementById(id);
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -58,7 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
 
-  loadData();
+  const hadCachedData = loadCachedData();
+  loadData({ background: hadCachedData });
   setupAutoRefresh();
 });
 
@@ -98,6 +102,70 @@ function formatRefreshDuration(ms) {
   return `${(ms / 1000).toFixed(1)} s`;
 }
 
+function loadCachedData() {
+  const cached = readCache();
+  if (!cached || !cached.raw) return false;
+
+  try {
+    applyPayloadToState(cached.raw);
+    const savedAt = cached.savedAt ? new Date(cached.savedAt) : null;
+    const age = savedAt ? Date.now() - savedAt.getTime() : Number.POSITIVE_INFINITY;
+
+    if ($("lastUpdated")) {
+      $("lastUpdated").textContent = savedAt
+        ? `${formatDateTime(savedAt)} · cached`
+        : "Cached data";
+    }
+
+    setStatus(age <= CACHE_MAX_AGE_MS ? "Showing cached data. Refreshing in background…" : "Showing older cached data. Refreshing in background…");
+    setLoadingState("is-fresh", "Showing cached data while refreshing…", "Cache");
+    render();
+    return true;
+  } catch (error) {
+    console.warn("Could not read cached World Cup data:", error);
+    return false;
+  }
+}
+
+function readCache() {
+  try {
+    return JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function saveCache() {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      savedAt: new Date().toISOString(),
+      raw: state.raw
+    }));
+  } catch (error) {
+    console.warn("Could not save World Cup cache:", error);
+  }
+}
+
+function applyPayloadToState(raw) {
+  state.raw = raw || {};
+  state.teams = extractArray(state.raw.teams);
+  state.stadiums = extractArray(state.raw.stadiums);
+  buildLookups();
+
+  state.matches = extractArray(state.raw.games).map(normalizeMatch);
+  state.groups = extractArray(state.raw.groups);
+  state.standingsByGroup = buildAllStandings();
+  state.qualificationByTeam = buildQualificationMap();
+}
+
+function formatDateTime(date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: state.userTimeZone === "local" ? undefined : state.userTimeZone
+  }).format(date);
+}
+
 function setupAutoRefresh() {
   if (state.autoTimer) clearInterval(state.autoTimer);
   if ($("autoRefresh").checked) state.autoTimer = setInterval(loadData, 5 * 60 * 1000);
@@ -109,10 +177,12 @@ function switchTab(tabId) {
   document.querySelectorAll(".panel").forEach((panel) => panel.classList.toggle("active", panel.id === tabId));
 }
 
-async function loadData() {
+async function loadData(options = {}) {
   const refreshStartedAt = performance.now();
-  setStatus("Loading…");
-  setLoadingState("is-loading", "Loading live World Cup data…", "");
+  const isBackground = Boolean(options.background);
+
+  setStatus(isBackground ? "Refreshing latest data in background…" : "Loading…");
+  if (!isBackground) setLoadingState("is-loading", "Loading live World Cup data…", "");
   $("refreshBtn").disabled = true;
 
   try {
@@ -123,21 +193,13 @@ async function loadData() {
       fetchJson(ENDPOINTS.stadiums)
     ]);
 
-    state.raw = {
+    applyPayloadToState({
       games: valueOrError(games),
       groups: valueOrError(groups),
       teams: valueOrError(teams),
       stadiums: valueOrError(stadiums)
-    };
-
-    state.teams = extractArray(state.raw.teams);
-    state.stadiums = extractArray(state.raw.stadiums);
-    buildLookups();
-
-    state.matches = extractArray(state.raw.games).map(normalizeMatch);
-    state.groups = extractArray(state.raw.groups);
-    state.standingsByGroup = buildAllStandings();
-    state.qualificationByTeam = buildQualificationMap();
+    });
+    saveCache();
 
     state.playerOfMatchExternal = [];
     state.playerOfMatchSourceStatus = "loading";
@@ -766,13 +828,13 @@ function renderMatches() {
     }
 
     html.push(...group.rows.map((m) => `
-      <tr>
-        <td>${formatDate(m.date, m.rawDate)}</td>
-        <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
-        <td>${escapeHtml(m.home)} vs ${escapeHtml(m.away)}</td>
-        <td class="score">${formatScore(m)}</td>
-        <td><span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span></td>
-        <td>${escapeHtml(m.venue)}</td>
+      <tr class="match-row">
+        <td data-label="Time">${formatDate(m.date, m.rawDate)}</td>
+        <td data-label="Group">${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+        <td data-label="Match">${escapeHtml(m.home)} vs ${escapeHtml(m.away)}</td>
+        <td data-label="Score" class="score">${formatScore(m)}</td>
+        <td data-label="Status"><span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span></td>
+        <td data-label="Venue">${escapeHtml(m.venue)}</td>
       </tr>
     `));
   }
