@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WorldCup at a Glance | Assist AI</title>
+  <meta name="description" content="WorldCup at a Glance by Assist AI: a compact live dashboard for World Cup 2026 schedule, results, standings, and statistics." />
+  <link rel="canonical" href="https://assistia.digital/worldcup-at-a-glance/" />
+  <meta name="robots" content="index,follow" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="assist-bar">
+    <a href="../index.html" class="assist-brand">Assist <span>AI</span></a>
+    <nav aria-label="Assist AI links">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../contact.html">Contact</a>
+    </nav>
+  </div>
+
+  <header class="hero">
+    <div class="hero-text">
+      <p class="eyebrow">Assist AI tool</p>
+      <h1>WorldCup at a Glance</h1>
+      <p class="subtitle">A compact live dashboard for World Cup 2026 schedule, results, standings, and statistics — refreshed on launch and every 5 minutes.</p>
+    </div>
+    <div class="actions">
+      <button id="refreshBtn">Refresh</button>
+      <label class="toggle">
+        <input id="autoRefresh" type="checkbox" checked />
+        Auto 5 min
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <section class="status-card">
+      <div><strong>Status</strong><p id="statusText">Starting…</p></div>
+      <div><strong>Last updated</strong><p id="lastUpdated">—</p></div>
+      <div><strong>Displayed time zone</strong><p id="userTimezone">—</p></div>
+    </section>
+
+    <section id="loadingPanel" class="loading-panel is-loading">
+      <div class="loading-row">
+        <span id="loadingText">Loading live World Cup data…</span>
+        <span id="loadingHint">Please wait</span>
+      </div>
+      <div class="loading-bar"><span></span></div>
+    </section>
+
+    <section class="toolbar">
+      <input id="searchInput" type="search" placeholder="Search team, group, stadium…" />
+      <div class="status-buttons" id="statusButtons">
+        <button class="status-filter active" data-filter="all">All</button>
+        <button class="status-filter" data-filter="live">Live</button>
+        <button class="status-filter" data-filter="upcoming">Upcoming</button>
+        <button class="status-filter" data-filter="finished">Finished</button>
+      </div>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="matches">Schedule & Results</button>
+      <button class="tab" data-tab="groups">Standings</button>
+      <button class="tab" data-tab="stats">Stats</button>
+    </nav>
+
+    <section id="matches" class="panel active">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Local date/time</th>
+              <th>Group</th>
+              <th>Match</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Venue</th>
+            </tr>
+          </thead>
+          <tbody id="matchesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="groups" class="panel">
+      <div class="qualification-legend standings-legend">
+        <span><i class="dot q-auto"></i> Top 2 qualify</span>
+        <span><i class="dot q-third"></i> 8 best third-place teams qualify</span>
+        <span><i class="dot q-out"></i> Not currently qualified</span>
+        <span class="legend-note">Provisional based on loaded results</span>
+      </div>
+      <div id="groupsBody" class="groups-grid"></div>
+    </section>
+
+    <section id="stats" class="panel">
+      <div class="stats-grid">
+        <article class="wide"><h2>Top scorers</h2><ol id="topScorers" class="stat-list"></ol></article>
+        <article class="wide"><h2>MVP award</h2><ol id="mostPlayerOfMatch" class="stat-list"></ol></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Match times are converted to the time zone of the device opening this application.</p>
+    <p class="tool-note">WorldCup at a Glance is an Assist AI tool. Data availability depends on the live data source.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
