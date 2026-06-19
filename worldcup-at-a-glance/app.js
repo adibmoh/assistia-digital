@@ -1244,3 +1244,222 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
   return escapeHtml(value).replaceAll("`", "&#096;");
 }
+
+
+/* =========================================================
+   Mobile + live stats patch v2
+   - More tolerant live goal scorer extraction
+   - Mobile-friendly standings with no horizontal table scroll
+   ========================================================= */
+
+function renderGroups() {
+  const container = $("groupsBody");
+  const groups = [...state.standingsByGroup.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+  if (!groups.length) {
+    container.innerHTML = `<div class="group-card">No standings available.</div>`;
+    return;
+  }
+
+  container.innerHTML = groups.map(([groupName, teams]) => `
+    <article class="group-card">
+      <h2>Group ${escapeHtml(groupName)}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Team</th><th>Pts</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${teams.map((team) => {
+            const q = qualificationFor(groupName, team.name);
+            return `
+              <tr class="${q.rowClass}">
+                <td data-label="#">${team.rank}</td>
+                <td data-label="Team">${escapeHtml(team.name)}</td>
+                <td data-label="Pts">${team.points}</td>
+                <td data-label="P">${team.played}</td>
+                <td data-label="W">${team.won}</td>
+                <td data-label="D">${team.drawn}</td>
+                <td data-label="L">${team.lost}</td>
+                <td data-label="GF">${team.gf}</td>
+                <td data-label="GA">${team.ga}</td>
+                <td data-label="GD">${team.diff > 0 ? "+" : ""}${team.diff}</td>
+                <td data-label="Status" class="${q.textClass}">${q.shortLabel || q.label}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </article>
+  `).join("");
+}
+
+function buildTopScorers() {
+  const counts = new Map();
+
+  for (const match of state.matches) {
+    const scorers = extractGoalScorers(match.original);
+
+    for (const scorer of scorers) {
+      const name = cleanPlayerName(scorer);
+      if (!name || isNoiseName(name)) continue;
+      counts.set(name, (counts.get(name) || 0) + 1);
+    }
+  }
+
+  return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+
+function extractGoalScorers(match) {
+  const events = [];
+  const seenObjectNames = new Set();
+
+  function addName(rawName, context = {}) {
+    const cleaned = cleanPlayerName(rawName);
+    if (!cleaned || isNoiseName(cleaned)) return;
+
+    // If the same object exposes the same player through multiple keys, count it once.
+    const objectKey = context.objectId ? `${context.objectId}|||${cleaned.toLowerCase()}` : "";
+    if (objectKey) {
+      if (seenObjectNames.has(objectKey)) return;
+      seenObjectNames.add(objectKey);
+    }
+
+    events.push(cleaned);
+  }
+
+  function namesFromString(text) {
+    const raw = String(text || "").trim();
+    if (!raw || raw === "[]" || raw === "{}") return [];
+
+    try {
+      const parsed = JSON.parse(raw);
+      const nested = [];
+      walk(parsed, "parsed", false, nested);
+      if (nested.length) return nested;
+    } catch (_) {}
+
+    const results = [];
+
+    // JSON-like: {"player_name":"Name"}
+    const jsonLike = /["'](?:player|player_name|playerName|scorer|scorer_name|scorerName|goal_scorer|goalScorer|name|full_name|fullName)["']\s*:\s*["']([^"']+)["']/gi;
+    let m;
+    while ((m = jsonLike.exec(raw)) !== null) results.push(m[1]);
+
+    if (results.length) return results;
+
+    // Common scorer text: "Player 12'", "Player (12)", "Player 12', Other 70'"
+    const goalPattern = /([A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ.'’ -]{2,48})\s*(?:\(?\d{1,3}(?:\+\d{1,2})?'?\)?|\(pen\)|pen\.?|og\.?)/gi;
+    while ((m = goalPattern.exec(raw)) !== null) results.push(m[1]);
+
+    if (results.length) return results;
+
+    // Last fallback for scorer-only arrays/strings.
+    return raw
+      .split(/[,;|،\n]+/)
+      .map(cleanPlayerName)
+      .filter((name) => name && !isNoiseName(name));
+  }
+
+  function objectNameCandidates(obj) {
+    const keys = [
+      "player", "player_name", "playerName", "player_full_name", "playerFullName",
+      "scorer", "scorer_name", "scorerName", "goal_scorer", "goalScorer",
+      "footballer", "athlete", "name", "full_name", "fullName", "display_name", "displayName"
+    ];
+
+    const names = [];
+    for (const key of keys) {
+      const value = obj?.[key];
+      if (value === undefined || value === null || value === "") continue;
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          const label = labelOf(item);
+          if (label) names.push(label);
+        }
+      } else {
+        const label = labelOf(value);
+        if (label) names.push(label);
+      }
+    }
+
+    return names;
+  }
+
+  let objectCounter = 0;
+
+  function walk(value, path = "", goalContext = false, stringSink = null) {
+    if (value === null || value === undefined || value === "") return;
+
+    if (typeof value === "string") {
+      const keyLooksScorer = /(?:scorer|goal[_-]?scorer|goalScorer|goals?|home[_-]?goals?|away[_-]?goals?)/i.test(path) && !/(?:score|scoreline|result)/i.test(path);
+      if (goalContext || keyLooksScorer) {
+        const names = namesFromString(value);
+        if (stringSink) stringSink.push(...names);
+        else names.forEach((name) => addName(name));
+      }
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) walk(item, path, goalContext, stringSink);
+      return;
+    }
+
+    if (typeof value !== "object") return;
+
+    objectCounter += 1;
+    const objectId = `o${objectCounter}`;
+    const typeText = String(pick(value, [
+      "type", "event_type", "eventType", "kind", "incidentType", "incident_type",
+      "action", "event", "eventName", "event_name", "category"
+    ]) || "").toLowerCase();
+
+    const pathText = String(path || "").toLowerCase();
+    const isBadEvent = /yellow|red|card|booking|substitution|substitute|var|offside|foul|corner/.test(typeText);
+    const isGoalEvent = !isBadEvent && (
+      /goal|own.?goal|penalty|scorer/.test(typeText) ||
+      /goal|scorer/.test(pathText)
+    );
+
+    if (isGoalEvent) {
+      for (const name of objectNameCandidates(value)) addName(name, { objectId });
+    }
+
+    for (const [key, child] of Object.entries(value)) {
+      const childPath = path ? `${path}.${key}` : key;
+      const keyLooksRelevant = /goal|scorer|event|incident|timeline|commentary|live|detail|stat/i.test(key);
+      walk(child, childPath, goalContext || isGoalEvent || keyLooksRelevant, stringSink);
+    }
+  }
+
+  walk(match, "match", false);
+
+  return events;
+}
+
+function isNoiseName(name) {
+  const s = String(name || "").trim();
+  const lower = s.toLowerCase();
+
+  if (!s || s.length < 2) return true;
+  if (/^\d+$/.test(lower)) return true;
+
+  const noise = new Set([
+    "-", "null", "undefined", "none", "n/a", "unknown", "to be determined",
+    "goal", "goals", "own goal", "penalty", "pen", "scorer", "player", "team",
+    "home", "away", "home team", "away team", "finished", "live", "upcoming",
+    "up", "video", "videos", "match", "centre", "center", "highlights"
+  ]);
+
+  if (noise.has(lower)) return true;
+  if (/\b(?:yellow card|red card|substitution|assist|var|foul|corner|offside)\b/i.test(s)) return true;
+  if (!/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(s)) return true;
+
+  // Avoid country/team-only names when they slip through as events.
+  if (NON_PLAYER_WORDS && NON_PLAYER_WORDS.has(lower)) return true;
+
+  return false;
+}

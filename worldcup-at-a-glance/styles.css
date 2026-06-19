@@ -955,3 +955,321 @@ body[data-tab="stats"] .toolbar {
     font-size: .68rem;
   }
 }
+
+
+/* =========================================================
+   Mobile usability patch v2
+   - No horizontal page scroll
+   - Smaller header/actions on mobile
+   - Standings become compact cards on mobile
+   ========================================================= */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.assist-bar,
+.hero,
+main,
+footer,
+.table-wrap,
+.group-card,
+.wide {
+  max-width: 100%;
+}
+
+@media (max-width: 720px) {
+  .assist-bar {
+    gap: 6px;
+    padding: 7px 8px;
+  }
+
+  .assist-brand {
+    font-size: .88rem;
+  }
+
+  .assist-bar nav {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
+
+  .assist-bar nav a {
+    font-size: .66rem;
+    text-align: center;
+    padding: 4px 2px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 7px;
+    background: rgba(255,255,255,.035);
+  }
+
+  .hero {
+    padding: 7px 8px;
+  }
+
+  h1 {
+    font-size: 1.15rem;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 6px;
+  }
+
+  #refreshBtn,
+  .toggle {
+    width: 100%;
+    min-height: 30px;
+    justify-content: center;
+    font-size: .72rem;
+  }
+
+  main {
+    padding: 5px 6px 12px;
+  }
+
+  .status-card {
+    display: none;
+  }
+
+  .loading-panel {
+    font-size: .70rem;
+  }
+
+  .toolbar {
+    gap: 5px;
+  }
+
+  input[type="search"] {
+    min-height: 32px;
+    font-size: .74rem;
+  }
+
+  .status-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: hidden;
+    gap: 4px;
+  }
+
+  .status-filter {
+    min-width: 0;
+    padding: 6px 2px;
+    font-size: .66rem;
+  }
+
+  .tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: hidden;
+    gap: 4px;
+    margin-bottom: 5px;
+  }
+
+  .tab {
+    min-width: 0;
+    min-height: 31px;
+    padding: 5px 2px;
+    font-size: .66rem;
+    line-height: 1.1;
+  }
+
+  #matches tbody tr.match-row {
+    padding: 7px;
+    margin-bottom: 6px;
+  }
+
+  #matches tbody tr.match-row td {
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 6px;
+    padding: 2px 0;
+    font-size: .73rem;
+    overflow-wrap: anywhere;
+  }
+
+  #matches tbody tr.match-row td::before {
+    font-size: .56rem;
+  }
+
+  #matches tbody tr.match-row td[data-label="Venue"] {
+    display: none;
+  }
+
+  #matches tbody tr.match-row td[data-label="Match"],
+  #matches tbody tr.match-row td.score {
+    font-size: .80rem;
+  }
+
+  .badge {
+    font-size: .56rem;
+    padding: 2px 5px;
+  }
+
+  .qualification-legend {
+    gap: 5px;
+    font-size: .62rem;
+    margin-bottom: 5px;
+  }
+
+  .legend-note {
+    display: none;
+  }
+
+  .groups-grid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .group-card {
+    overflow: visible;
+    padding: 7px;
+  }
+
+  .group-card h2 {
+    font-size: .80rem;
+    margin-bottom: 5px;
+  }
+
+  .group-card table,
+  .group-card thead,
+  .group-card tbody,
+  .group-card tr,
+  .group-card td {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+  }
+
+  .group-card thead {
+    display: none;
+  }
+
+  .group-card tbody tr {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) 36px 42px 38px;
+    gap: 4px;
+    align-items: center;
+    padding: 5px 6px;
+    margin-bottom: 4px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,.025);
+  }
+
+  .group-card td {
+    border: none;
+    padding: 0;
+    font-size: .68rem;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  .group-card td[data-label="#"] {
+    opacity: .8;
+    text-align: center;
+  }
+
+  .group-card td[data-label="Team"] {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: .72rem;
+    color: var(--text);
+  }
+
+  .group-card td[data-label="Pts"] {
+    font-weight: 650;
+    color: var(--accent-2);
+    text-align: right;
+  }
+
+  .group-card td[data-label="Pts"]::after {
+    content: " pts";
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .group-card td[data-label="GD"] {
+    text-align: right;
+    color: var(--muted);
+  }
+
+  .group-card td[data-label="GD"]::before {
+    content: "GD ";
+    color: var(--muted);
+    opacity: .8;
+  }
+
+  .group-card td[data-label="Status"] {
+    text-align: right;
+    font-weight: 650;
+  }
+
+  .group-card td[data-label="P"],
+  .group-card td[data-label="W"],
+  .group-card td[data-label="D"],
+  .group-card td[data-label="L"],
+  .group-card td[data-label="GF"],
+  .group-card td[data-label="GA"] {
+    display: none;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .wide {
+    padding: 8px;
+  }
+
+  .wide h2 {
+    font-size: .82rem;
+  }
+
+  .stat-list li {
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    gap: 5px;
+    padding: 4px 5px;
+  }
+
+  .stat-name {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .stat-value {
+    font-size: .68rem;
+  }
+
+  footer {
+    padding: 7px 8px 12px;
+  }
+
+  footer p {
+    margin: 4px 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .assist-bar nav {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .status-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .group-card tbody tr {
+    grid-template-columns: 20px minmax(0, 1fr) 34px 38px;
+  }
+
+  .group-card td[data-label="GD"] {
+    display: none;
+  }
+}
