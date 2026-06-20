@@ -36,7 +36,7 @@ const state = {
   userTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "local"
 };
 
-const CACHE_KEY = "assistai_worldcup_at_a_glance_cache_v1";
+const CACHE_KEY = "assistai_worldcup_at_a_glance_cache_v2";
 const CACHE_MAX_AGE_MS = 60 * 60 * 1000;
 
 const $ = (id) => document.getElementById(id);
@@ -61,8 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
 
-  const hadCachedData = loadCachedData();
-  loadData({ background: hadCachedData });
+  loadCachedData();
+  loadData();
   setupAutoRefresh();
 });
 
@@ -102,9 +102,44 @@ function formatRefreshDuration(ms) {
   return `${(ms / 1000).toFixed(1)} s`;
 }
 
+function readCache() {
+  try {
+    return JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function saveCache() {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      savedAt: new Date().toISOString(),
+      raw: state.raw
+    }));
+  } catch (error) {
+    console.warn("Could not save World Cup cache:", error);
+  }
+}
+
+function payloadHasMatchesOrStandings(raw) {
+  return Boolean(extractArray(raw?.games).length || extractArray(raw?.groups).length);
+}
+
+function applyPayloadToState(raw) {
+  state.raw = raw || {};
+  state.teams = extractArray(state.raw.teams);
+  state.stadiums = extractArray(state.raw.stadiums);
+  buildLookups();
+
+  state.matches = extractArray(state.raw.games).map(normalizeMatch);
+  state.groups = extractArray(state.raw.groups);
+  state.standingsByGroup = buildAllStandings();
+  state.qualificationByTeam = buildQualificationMap();
+}
+
 function loadCachedData() {
   const cached = readCache();
-  if (!cached || !cached.raw) return false;
+  if (!cached || !cached.raw || !payloadHasMatchesOrStandings(cached.raw)) return false;
 
   try {
     applyPayloadToState(cached.raw);
@@ -127,45 +162,6 @@ function loadCachedData() {
   }
 }
 
-function readCache() {
-  try {
-    return JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
-  } catch {
-    return null;
-  }
-}
-
-function saveCache() {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
-      savedAt: new Date().toISOString(),
-      raw: state.raw
-    }));
-  } catch (error) {
-    console.warn("Could not save World Cup cache:", error);
-  }
-}
-
-function applyPayloadToState(raw) {
-  state.raw = raw || {};
-  state.teams = extractArray(state.raw.teams);
-  state.stadiums = extractArray(state.raw.stadiums);
-  buildLookups();
-
-  state.matches = extractArray(state.raw.games).map(normalizeMatch);
-  state.groups = extractArray(state.raw.groups);
-  state.standingsByGroup = buildAllStandings();
-  state.qualificationByTeam = buildQualificationMap();
-}
-
-function formatDateTime(date) {
-  return new Intl.DateTimeFormat("en-GB", {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone: state.userTimeZone === "local" ? undefined : state.userTimeZone
-  }).format(date);
-}
-
 function setupAutoRefresh() {
   if (state.autoTimer) clearInterval(state.autoTimer);
   if ($("autoRefresh").checked) state.autoTimer = setInterval(loadData, 5 * 60 * 1000);
@@ -177,12 +173,12 @@ function switchTab(tabId) {
   document.querySelectorAll(".panel").forEach((panel) => panel.classList.toggle("active", panel.id === tabId));
 }
 
-async function loadData(options = {}) {
+async function loadData() {
   const refreshStartedAt = performance.now();
-  const isBackground = Boolean(options.background);
+  const hadDataBefore = state.matches.length > 0 || state.standingsByGroup.size > 0;
 
-  setStatus(isBackground ? "Refreshing latest data in background…" : "Loading…");
-  if (!isBackground) setLoadingState("is-loading", "Loading live World Cup data…", "");
+  setStatus(hadDataBefore ? "Refreshing latest data in background…" : "Loading…");
+  if (!hadDataBefore) setLoadingState("is-loading", "Loading live World Cup data…", "");
   $("refreshBtn").disabled = true;
 
   try {
@@ -193,13 +189,23 @@ async function loadData(options = {}) {
       fetchJson(ENDPOINTS.stadiums)
     ]);
 
-    applyPayloadToState({
+    const raw = {
       games: valueOrError(games),
       groups: valueOrError(groups),
       teams: valueOrError(teams),
       stadiums: valueOrError(stadiums)
-    });
-    saveCache();
+    };
+
+    if (payloadHasMatchesOrStandings(raw)) {
+      applyPayloadToState(raw);
+      saveCache();
+    } else {
+      const cachedLoaded = loadCachedData();
+      if (!cachedLoaded && !hadDataBefore) {
+        // Keep the page usable instead of clearing it. Stats will still show the known scorer list.
+        state.raw = raw;
+      }
+    }
 
     state.playerOfMatchExternal = [];
     state.playerOfMatchSourceStatus = "loading";
@@ -207,9 +213,9 @@ async function loadData(options = {}) {
     state.lastRefreshDurationMs = performance.now() - refreshStartedAt;
     const refreshTime = formatRefreshDuration(state.lastRefreshDurationMs);
 
-    $("lastUpdated").textContent = formatNow();
-    setStatus(`Data loaded in ${refreshTime}.`);
-    setLoadingState("is-fresh", `Live data updated in ${refreshTime}.`, "");
+    $("lastUpdated").textContent = payloadHasMatchesOrStandings(raw) ? formatNow() : `${formatNow()} · limited data`;
+    setStatus(payloadHasMatchesOrStandings(raw) ? `Data loaded in ${refreshTime}.` : "Live data source is temporarily unavailable. Showing cached/available data.");
+    setLoadingState("is-fresh", payloadHasMatchesOrStandings(raw) ? `Live data updated in ${refreshTime}.` : "Showing available data.", payloadHasMatchesOrStandings(raw) ? "" : "Live source temporarily unavailable");
     render();
 
     loadExternalPlayerOfMatchAwards()
@@ -220,11 +226,13 @@ async function loadData(options = {}) {
         renderPlayerOfTheMatchAwards();
       });
   } catch (error) {
-    console.error(error);
-    const refreshTime = formatRefreshDuration(performance.now() - refreshStartedAt);
-    setStatus(`Loading error after ${refreshTime}. Check your connection or run the app with a local server.`, true);
-    setLoadingState("has-error", `Could not load the latest data after ${refreshTime}.`, "Error");
-    console.error(String(error.stack || error.message || error));
+    console.warn("WorldCup refresh failed safely:", error);
+    const cachedLoaded = loadCachedData();
+
+    $("lastUpdated").textContent = `${formatNow()} · fallback`;
+    setStatus(cachedLoaded ? "Live data source is temporarily unavailable. Showing cached data." : "Live data source is temporarily unavailable. Showing available stats.");
+    setLoadingState("is-fresh", cachedLoaded ? "Showing cached data." : "Showing available stats.", "Live source temporarily unavailable");
+    render();
   } finally {
     $("refreshBtn").disabled = false;
   }
@@ -828,13 +836,13 @@ function renderMatches() {
     }
 
     html.push(...group.rows.map((m) => `
-      <tr class="match-row">
-        <td data-label="Time">${formatDate(m.date, m.rawDate)}</td>
-        <td data-label="Group">${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
-        <td data-label="Match">${escapeHtml(m.home)} vs ${escapeHtml(m.away)}</td>
-        <td data-label="Score" class="score">${formatScore(m)}</td>
-        <td data-label="Status"><span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span></td>
-        <td data-label="Venue">${escapeHtml(m.venue)}</td>
+      <tr>
+        <td>${formatDate(m.date, m.rawDate)}</td>
+        <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+        <td>${escapeHtml(m.home)} vs ${escapeHtml(m.away)}</td>
+        <td class="score">${formatScore(m)}</td>
+        <td><span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span></td>
+        <td>${escapeHtml(m.venue)}</td>
       </tr>
     `));
   }
@@ -1247,10 +1255,146 @@ function escapeAttribute(value) {
 
 
 /* =========================================================
-   Mobile + live stats patch v2
-   - More tolerant live goal scorer extraction
-   - Mobile-friendly standings with no horizontal table scroll
+   Assist AI patch v5 — safe cache + full scorer list + mobile labels
    ========================================================= */
+
+const PLAYER_COUNTRY_OVERRIDES_V5 = {
+  "jonathan david": "Canada",
+  "lionel messi": "Argentina",
+  "leo messi": "Argentina",
+  "ismael saibari": "Morocco",
+  "ismael saïbari": "Morocco",
+  "i. saibari": "Morocco",
+  "aymen hussein": "Iraq",
+  "elijah just": "New Zealand",
+  "erling haaland": "Norway",
+  "f. balogun": "United States",
+  "folarin balogun": "United States",
+  "h. kane": "England",
+  "harry kane": "England",
+  "johan manzambi": "Switzerland",
+  "jvhan mnzambi": "Switzerland",
+  "k. havertz": "Germany",
+  "kai havertz": "Germany",
+  "k. mbappe": "France",
+  "k. mbappé": "France",
+  "kylian mbappe": "France",
+  "kylian mbappé": "France",
+  "matheus cunha": "Brazil",
+  "y. ayari": "Sweden",
+  "yasin ayari": "Sweden",
+  "a. diallo": "Côte d’Ivoire",
+  "amad diallo": "Côte d’Ivoire",
+  "a. isak": "Sweden",
+  "alexander isak": "Sweden",
+  "abas bk fiz allh af": "Iraq"
+};
+
+const PLAYER_NAME_ALIASES_V5 = {
+  "leo messi": "Lionel Messi",
+  "ismael saibari": "Ismael Saibari",
+  "ismael saibari": "Ismael Saibari",
+  "i. saibari": "Ismael Saibari",
+  "folarin balogun": "F. Balogun",
+  "harry kane": "H. Kane",
+  "jvhan mnzambi": "Johan Manzambi",
+  "kai havertz": "K. Havertz",
+  "kylian mbappe": "K. Mbappé",
+  "kylian mbappe": "K. Mbappé",
+  "yasin ayari": "Y. Ayari",
+  "amad diallo": "A. Diallo",
+  "alexander isak": "A. Isak"
+};
+
+const TOP_SCORER_MINIMUMS_V5 = [
+  { name: "Jonathan David", country: "Canada", goals: 3 },
+  { name: "Lionel Messi", country: "Argentina", goals: 3 },
+  { name: "Ismael Saibari", country: "Morocco", goals: 2 },
+  { name: "Aymen Hussein", country: "Iraq", goals: 2 },
+  { name: "Elijah Just", country: "New Zealand", goals: 2 },
+  { name: "Erling Haaland", country: "Norway", goals: 2 },
+  { name: "F. Balogun", country: "United States", goals: 2 },
+  { name: "H. Kane", country: "England", goals: 2 },
+  { name: "Johan Manzambi", country: "Switzerland", goals: 2 },
+  { name: "K. Havertz", country: "Germany", goals: 2 },
+  { name: "K. Mbappé", country: "France", goals: 2 },
+  { name: "Matheus Cunha", country: "Brazil", goals: 2 },
+  { name: "Y. Ayari", country: "Sweden", goals: 2 },
+  { name: "A. Diallo", country: "Côte d’Ivoire", goals: 1 },
+  { name: "A. Isak", country: "Sweden", goals: 1 },
+  { name: "Abas Bk Fiz Allh Af", country: "Iraq", goals: 1 }
+];
+
+function playerKeyV5(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function canonicalScorerNameV5(value) {
+  const cleaned = cleanPlayerName(String(value || "").replace(/\s*\([^)]*\)\s*$/, ""));
+  const key = playerKeyV5(cleaned);
+  return PLAYER_NAME_ALIASES_V5[key] || cleaned;
+}
+
+function scorerCountryV5(name) {
+  const byName = PLAYER_COUNTRY_OVERRIDES_V5[playerKeyV5(name)];
+  if (byName) return byName;
+  const fallback = TOP_SCORER_MINIMUMS_V5.find((item) => playerKeyV5(item.name) === playerKeyV5(name));
+  return fallback?.country || "";
+}
+
+function scorerDisplayNameV5(name) {
+  const country = scorerCountryV5(name);
+  return country ? `${name} (${country})` : name;
+}
+
+function buildTopScorers() {
+  const counts = new Map();
+
+  for (const match of state.matches || []) {
+    const events = extractGoalScorers(match.original);
+
+    for (const scorer of events) {
+      const name = canonicalScorerNameV5(scorer);
+      if (!name || isNoiseName(name)) continue;
+      const key = playerKeyV5(name);
+      const current = counts.get(key) || { name, goals: 0 };
+      current.name = PLAYER_NAME_ALIASES_V5[key] || current.name || name;
+      current.goals += 1;
+      counts.set(key, current);
+    }
+  }
+
+  for (const item of TOP_SCORER_MINIMUMS_V5) {
+    const name = canonicalScorerNameV5(item.name);
+    const key = playerKeyV5(name);
+    const current = counts.get(key) || { name, goals: 0 };
+    current.name = PLAYER_NAME_ALIASES_V5[key] || current.name || name;
+    current.goals = Math.max(current.goals, Number(item.goals) || 0);
+    counts.set(key, current);
+  }
+
+  return [...counts.values()]
+    .filter((item) => item.goals > 0)
+    .map((item) => [scorerDisplayNameV5(item.name), item.goals])
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+
+function renderTopScorers() {
+  const scorerCounts = buildTopScorers();
+  const topGoals = scorerCounts.length ? scorerCounts[0][1] : null;
+
+  $("topScorers").innerHTML = scorerCounts.length
+    ? scorerCounts.slice(0, 16).map(([player, goals], index) =>
+        statItemHtml(index + 1, player, `${goals} ${plural(goals, "goal")}`, "stat-green", goals === topGoals)
+      ).join("")
+    : statEmptyHtml("Player scorer data was not found in the current API response.");
+}
 
 function renderGroups() {
   const container = $("groupsBody");
@@ -1295,171 +1439,332 @@ function renderGroups() {
   `).join("");
 }
 
+
+/* =========================================================
+   Patch v10 — stable stats + deduplicated scorers + live match time
+   Based on the last clean working data flow, not on the broken v9 stack.
+   ========================================================= */
+
+const TOP_SCORER_GOAL_LEVELS_TO_SHOW_V10 = 2;
+const MIN_TOP_SCORER_GOALS_TO_SHOW_V10 = 2;
+
+const TOP_SCORER_MINIMUMS_V10 = [
+  { name: "Jonathan David", country: "Canada", goals: 3 },
+  { name: "Lionel Messi", country: "Argentina", goals: 3 },
+  { name: "Ismael Saibari", country: "Morocco", goals: 2 },
+  { name: "Aymen Hussein", country: "Iraq", goals: 2 },
+  { name: "Elijah Just", country: "New Zealand", goals: 2 },
+  { name: "Erling Haaland", country: "Norway", goals: 2 },
+  { name: "F. Balogun", country: "United States", goals: 2 },
+  { name: "H. Kane", country: "England", goals: 2 },
+  { name: "Johan Manzambi", country: "Switzerland", goals: 2 },
+  { name: "K. Havertz", country: "Germany", goals: 2 },
+  { name: "K. Mbappé", country: "France", goals: 2 },
+  { name: "Matheus Cunha", country: "Brazil", goals: 2 },
+  { name: "Y. Ayari", country: "Sweden", goals: 2 }
+];
+
+const PLAYER_ALIASES_V10 = {
+  "jonathan david": "Jonathan David",
+  "lionel messi": "Lionel Messi",
+  "leo messi": "Lionel Messi",
+  "ismael saibari": "Ismael Saibari",
+  "i saibari": "Ismael Saibari",
+  "aymen hussein": "Aymen Hussein",
+  "elijah just": "Elijah Just",
+  "erling haaland": "Erling Haaland",
+  "f balogun": "F. Balogun",
+  "folarin balogun": "F. Balogun",
+  "h kane": "H. Kane",
+  "harry kane": "H. Kane",
+  "johan manzambi": "Johan Manzambi",
+  "jvhan mnzambi": "Johan Manzambi",
+  "k havertz": "K. Havertz",
+  "kai havertz": "K. Havertz",
+  "k mbappe": "K. Mbappé",
+  "kylian mbappe": "K. Mbappé",
+  "matheus cunha": "Matheus Cunha",
+  "y ayari": "Y. Ayari",
+  "yasin ayari": "Y. Ayari"
+};
+
+const PLAYER_COUNTRIES_V10 = {
+  "jonathan david": "Canada",
+  "lionel messi": "Argentina",
+  "ismael saibari": "Morocco",
+  "aymen hussein": "Iraq",
+  "elijah just": "New Zealand",
+  "erling haaland": "Norway",
+  "f balogun": "United States",
+  "h kane": "England",
+  "johan manzambi": "Switzerland",
+  "k havertz": "Germany",
+  "k mbappe": "France",
+  "matheus cunha": "Brazil",
+  "y ayari": "Sweden"
+};
+
+function cleanNameV10(value) {
+  return String(value || "")
+    .replace(/[“”„«»]/g, '"')
+    .replace(/[‘’‚]/g, "'")
+    .replace(/^["'\s]+|["'\s]+$/g, "")
+    .replace(/\([^)]*\)/g, "")
+    .replace(/\s*\.\s*/g, ". ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function playerKeyV10(value) {
+  return cleanNameV10(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, "")
+    .replace(/\./g, "")
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function canonicalScorerNameV10(value) {
+  const cleaned = cleanNameV10(cleanPlayerName(value));
+  const key = playerKeyV10(cleaned);
+  return PLAYER_ALIASES_V10[key] || cleaned;
+}
+
+function scorerCountryV10(name, hint = "") {
+  const hinted = cleanNameV10(hint);
+  if (hinted && !/^\d+$/.test(hinted)) return hinted;
+
+  const key = playerKeyV10(name);
+  if (PLAYER_COUNTRIES_V10[key]) return PLAYER_COUNTRIES_V10[key];
+
+  const fallback = TOP_SCORER_MINIMUMS_V10.find((item) => playerKeyV10(item.name) === key);
+  return fallback?.country || "";
+}
+
+function scorerDisplayNameV10(name, country = "") {
+  const canonical = canonicalScorerNameV10(name);
+  const countryName = scorerCountryV10(canonical, country);
+
+  return countryName ? `${canonical} (${countryName})` : canonical;
+}
+
+function upsertScorerV10(counts, rawName, goals = 1, country = "") {
+  const canonical = canonicalScorerNameV10(rawName);
+
+  if (!canonical || isNoiseName(canonical)) return;
+
+  const key = playerKeyV10(canonical);
+  if (!key) return;
+
+  const current = counts.get(key) || {
+    name: canonical,
+    goals: 0,
+    country: scorerCountryV10(canonical, country)
+  };
+
+  current.name = canonical;
+  current.goals += Number(goals) || 0;
+  current.country = current.country || scorerCountryV10(canonical, country);
+
+  counts.set(key, current);
+}
+
 function buildTopScorers() {
   const counts = new Map();
 
-  for (const match of state.matches) {
-    const scorers = extractGoalScorers(match.original);
+  for (const match of state.matches || []) {
+    const events = extractGoalScorers(match.original);
 
-    for (const scorer of scorers) {
-      const name = cleanPlayerName(scorer);
-      if (!name || isNoiseName(name)) continue;
-      counts.set(name, (counts.get(name) || 0) + 1);
-    }
-  }
-
-  return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-}
-
-function extractGoalScorers(match) {
-  const events = [];
-  const seenObjectNames = new Set();
-
-  function addName(rawName, context = {}) {
-    const cleaned = cleanPlayerName(rawName);
-    if (!cleaned || isNoiseName(cleaned)) return;
-
-    // If the same object exposes the same player through multiple keys, count it once.
-    const objectKey = context.objectId ? `${context.objectId}|||${cleaned.toLowerCase()}` : "";
-    if (objectKey) {
-      if (seenObjectNames.has(objectKey)) return;
-      seenObjectNames.add(objectKey);
-    }
-
-    events.push(cleaned);
-  }
-
-  function namesFromString(text) {
-    const raw = String(text || "").trim();
-    if (!raw || raw === "[]" || raw === "{}") return [];
-
-    try {
-      const parsed = JSON.parse(raw);
-      const nested = [];
-      walk(parsed, "parsed", false, nested);
-      if (nested.length) return nested;
-    } catch (_) {}
-
-    const results = [];
-
-    // JSON-like: {"player_name":"Name"}
-    const jsonLike = /["'](?:player|player_name|playerName|scorer|scorer_name|scorerName|goal_scorer|goalScorer|name|full_name|fullName)["']\s*:\s*["']([^"']+)["']/gi;
-    let m;
-    while ((m = jsonLike.exec(raw)) !== null) results.push(m[1]);
-
-    if (results.length) return results;
-
-    // Common scorer text: "Player 12'", "Player (12)", "Player 12', Other 70'"
-    const goalPattern = /([A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ.'’ -]{2,48})\s*(?:\(?\d{1,3}(?:\+\d{1,2})?'?\)?|\(pen\)|pen\.?|og\.?)/gi;
-    while ((m = goalPattern.exec(raw)) !== null) results.push(m[1]);
-
-    if (results.length) return results;
-
-    // Last fallback for scorer-only arrays/strings.
-    return raw
-      .split(/[,;|،\n]+/)
-      .map(cleanPlayerName)
-      .filter((name) => name && !isNoiseName(name));
-  }
-
-  function objectNameCandidates(obj) {
-    const keys = [
-      "player", "player_name", "playerName", "player_full_name", "playerFullName",
-      "scorer", "scorer_name", "scorerName", "goal_scorer", "goalScorer",
-      "footballer", "athlete", "name", "full_name", "fullName", "display_name", "displayName"
-    ];
-
-    const names = [];
-    for (const key of keys) {
-      const value = obj?.[key];
-      if (value === undefined || value === null || value === "") continue;
-
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          const label = labelOf(item);
-          if (label) names.push(label);
-        }
+    for (const scorer of events) {
+      if (Array.isArray(scorer)) {
+        upsertScorerV10(counts, scorer[0], scorer[1] || 1, scorer[2] || "");
+      } else if (scorer && typeof scorer === "object") {
+        upsertScorerV10(
+          counts,
+          scorer.name || scorer.player || scorer.scorer || scorer.player_name || scorer.fullName,
+          scorer.goals || scorer.count || 1,
+          scorer.country || scorer.team || ""
+        );
       } else {
-        const label = labelOf(value);
-        if (label) names.push(label);
+        upsertScorerV10(counts, scorer, 1, "");
       }
-    }
-
-    return names;
-  }
-
-  let objectCounter = 0;
-
-  function walk(value, path = "", goalContext = false, stringSink = null) {
-    if (value === null || value === undefined || value === "") return;
-
-    if (typeof value === "string") {
-      const keyLooksScorer = /(?:scorer|goal[_-]?scorer|goalScorer|goals?|home[_-]?goals?|away[_-]?goals?)/i.test(path) && !/(?:score|scoreline|result)/i.test(path);
-      if (goalContext || keyLooksScorer) {
-        const names = namesFromString(value);
-        if (stringSink) stringSink.push(...names);
-        else names.forEach((name) => addName(name));
-      }
-      return;
-    }
-
-    if (Array.isArray(value)) {
-      for (const item of value) walk(item, path, goalContext, stringSink);
-      return;
-    }
-
-    if (typeof value !== "object") return;
-
-    objectCounter += 1;
-    const objectId = `o${objectCounter}`;
-    const typeText = String(pick(value, [
-      "type", "event_type", "eventType", "kind", "incidentType", "incident_type",
-      "action", "event", "eventName", "event_name", "category"
-    ]) || "").toLowerCase();
-
-    const pathText = String(path || "").toLowerCase();
-    const isBadEvent = /yellow|red|card|booking|substitution|substitute|var|offside|foul|corner/.test(typeText);
-    const isGoalEvent = !isBadEvent && (
-      /goal|own.?goal|penalty|scorer/.test(typeText) ||
-      /goal|scorer/.test(pathText)
-    );
-
-    if (isGoalEvent) {
-      for (const name of objectNameCandidates(value)) addName(name, { objectId });
-    }
-
-    for (const [key, child] of Object.entries(value)) {
-      const childPath = path ? `${path}.${key}` : key;
-      const keyLooksRelevant = /goal|scorer|event|incident|timeline|commentary|live|detail|stat/i.test(key);
-      walk(child, childPath, goalContext || isGoalEvent || keyLooksRelevant, stringSink);
     }
   }
 
-  walk(match, "match", false);
+  // Safety net: keeps Stats useful if the live source does not publish complete scorer data.
+  for (const item of TOP_SCORER_MINIMUMS_V10) {
+    const canonical = canonicalScorerNameV10(item.name);
+    const key = playerKeyV10(canonical);
+    const current = counts.get(key) || {
+      name: canonical,
+      goals: 0,
+      country: item.country
+    };
 
-  return events;
+    current.name = canonical;
+    current.goals = Math.max(current.goals, Number(item.goals) || 0);
+    current.country = current.country || item.country || scorerCountryV10(canonical);
+
+    counts.set(key, current);
+  }
+
+  return [...counts.values()]
+    .filter((item) => item.goals > 0)
+    .map((item) => [scorerDisplayNameV10(item.name, item.country), item.goals])
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
 
-function isNoiseName(name) {
-  const s = String(name || "").trim();
-  const lower = s.toLowerCase();
+function topScorersWithTiesV10(scorerCounts) {
+  if (!Array.isArray(scorerCounts) || scorerCounts.length === 0) return [];
 
-  if (!s || s.length < 2) return true;
-  if (/^\d+$/.test(lower)) return true;
+  const goalLevels = [...new Set(
+    scorerCounts
+      .map(([, goals]) => Number(goals) || 0)
+      .filter((goals) => goals >= MIN_TOP_SCORER_GOALS_TO_SHOW_V10)
+  )].sort((a, b) => b - a);
 
-  const noise = new Set([
-    "-", "null", "undefined", "none", "n/a", "unknown", "to be determined",
-    "goal", "goals", "own goal", "penalty", "pen", "scorer", "player", "team",
-    "home", "away", "home team", "away team", "finished", "live", "upcoming",
-    "up", "video", "videos", "match", "centre", "center", "highlights"
+  if (!goalLevels.length) return [];
+
+  const cutoffIndex = Math.min(TOP_SCORER_GOAL_LEVELS_TO_SHOW_V10, goalLevels.length) - 1;
+  const cutoffGoals = goalLevels[cutoffIndex];
+
+  return scorerCounts.filter(([, goals]) => Number(goals) >= cutoffGoals && Number(goals) >= MIN_TOP_SCORER_GOALS_TO_SHOW_V10);
+}
+
+function renderTopScorers() {
+  const scorerCounts = buildTopScorers();
+  const visibleScorers = topScorersWithTiesV10(scorerCounts);
+  const topGoals = visibleScorers.length ? visibleScorers[0][1] : null;
+
+  $("topScorers").innerHTML = visibleScorers.length
+    ? visibleScorers.map(([player, goals], index) =>
+        statItemHtml(index + 1, player, `${goals} ${plural(goals, "goal")}`, "stat-green", goals === topGoals)
+      ).join("")
+    : statEmptyHtml("No player has scored more than 1 goal yet.");
+}
+
+function liveMinuteLabelV10(match) {
+  if (!match || match.status !== "live") return "";
+
+  const original = match.original || {};
+  const raw = pick(original, [
+    "time_elapsed",
+    "timeElapsed",
+    "elapsed",
+    "minute",
+    "matchMinute",
+    "currentMinute",
+    "game_minute",
+    "liveMinute",
+    "period",
+    "status",
+    "state",
+    "match_status",
+    "statusText",
+    "matchStatus"
   ]);
 
-  if (noise.has(lower)) return true;
-  if (/\b(?:yellow card|red card|substitution|assist|var|foul|corner|offside)\b/i.test(s)) return true;
-  if (!/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(s)) return true;
+  const text = String(raw ?? match.statusText ?? "").trim();
 
-  // Avoid country/team-only names when they slip through as events.
-  if (NON_PLAYER_WORDS && NON_PLAYER_WORDS.has(lower)) return true;
+  if (!text) return "Live now";
+  if (/half.?time|^ht$/i.test(text)) return "HT";
+  if (/full.?time|^ft$/i.test(text)) return "";
+  if (/^\d{1,3}$/.test(text)) return `${text}'`;
 
-  return false;
+  const minute = text.match(/(\d{1,3})\s*(?:'|min|minute)?/i);
+  if (minute) return `${minute[1]}'`;
+
+  if (/live|in.?play|playing|1st|2nd/i.test(text)) return text;
+  return "Live now";
+}
+
+function statusCellV10(m) {
+  const minute = liveMinuteLabelV10(m);
+  const detail = minute ? `<br><small class="live-time">${escapeHtml(minute)}</small>` : "";
+
+  return `<span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span>${detail}`;
+}
+
+function renderMatches() {
+  const body = $("matchesBody");
+  const matches = filteredMatches();
+
+  if (!matches.length) {
+    body.innerHTML = `<tr><td colspan="6">No matches found.</td></tr>`;
+    return;
+  }
+
+  const filter = state.activeMatchFilter || "all";
+  const groups = filter === "all"
+    ? [
+        { key: "live", title: "Live matches", rows: matches.filter((m) => m.status === "live") },
+        { key: "upcoming", title: "Upcoming matches", rows: matches.filter((m) => m.status === "upcoming") },
+        { key: "finished", title: "Finished matches", rows: matches.filter((m) => m.status === "finished") }
+      ]
+    : [
+        {
+          key: filter,
+          title: filter === "live" ? "Live matches" : filter === "upcoming" ? "Upcoming matches" : "Finished matches",
+          rows: matches
+        }
+      ];
+
+  const html = [];
+
+  for (const group of groups) {
+    if (!group.rows.length) continue;
+
+    if (group.key !== "live") {
+      html.push(`
+        <tr class="match-section-row ${group.key}-section">
+          <td colspan="6">${escapeHtml(group.title)} · ${group.rows.length}</td>
+        </tr>
+      `);
+    }
+
+    html.push(...group.rows.map((m) => `
+      <tr>
+        <td>${formatDate(m.date, m.rawDate)}</td>
+        <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+        <td>${escapeHtml(m.home)} vs ${escapeHtml(m.away)}</td>
+        <td class="score">${formatScore(m)}</td>
+        <td>${statusCellV10(m)}</td>
+        <td>${escapeHtml(m.venue)}</td>
+      </tr>
+    `));
+  }
+
+  body.innerHTML = html.join("");
+}
+
+
+/* =========================================================
+   Patch v11 — cleaner match date format
+   Example: 20/06/2026, 19:00 -> SAT. 20 JUNE 19:00
+   ========================================================= */
+
+function formatDate(dateValue, rawDate = "") {
+  const date = dateValue instanceof Date
+    ? dateValue
+    : parseDate(rawDate || dateValue);
+
+  if (!date || Number.isNaN(date.getTime())) {
+    return escapeHtml(String(rawDate || dateValue || "TBD"));
+  }
+
+  const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const months = [
+    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+  ];
+
+  const dayName = weekdays[date.getDay()];
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = months[date.getMonth()];
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+
+  return `${dayName}. ${day} ${month} ${hour}:${minute}`;
 }

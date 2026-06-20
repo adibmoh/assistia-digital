@@ -1273,3 +1273,24 @@ footer,
     display: none;
   }
 }
+
+
+/* Patch v5: final no-horizontal-scroll guard */
+html, body { max-width:100%; overflow-x:hidden; }
+* { box-sizing:border-box; }
+@media (max-width: 720px) {
+  body, .assist-bar, .hero, main, footer, .panel, .table-wrap, .group-card, .wide, .stats-grid, .groups-grid { max-width:100% !important; overflow-x:hidden !important; }
+  .group-card table { min-width:0 !important; width:100% !important; }
+  #matches table { min-width:0 !important; width:100% !important; }
+}
+
+
+/* v10: live minute label */
+.live-time {
+  display: inline-block;
+  margin-top: 4px;
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
