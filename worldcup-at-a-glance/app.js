@@ -2547,3 +2547,161 @@ function displayTeamWithCountryV30(name, original = {}, side = "") {
 }
 
 console.info("AssistAI WorldCup app v30 loaded: country codes added to schedule/results.");
+
+
+/* =========================================================
+   v31 — real upcoming first + team country names + visible install
+   ========================================================= */
+
+function isTbdTeamV31(name) {
+  return /^(?:tbd|to be determined|to be confirmed|unknown|-)$/i.test(String(name || "").trim());
+}
+
+function rawSeedLabelV31(original, side) {
+  const keys = side === "home"
+    ? ["home_seed", "homeSeed", "home_label", "homeLabel", "home_name", "homeName", "home_team", "homeTeam", "home"]
+    : ["away_seed", "awaySeed", "away_label", "awayLabel", "away_name", "awayName", "away_team", "awayTeam", "away"];
+
+  for (const key of keys) {
+    const value = original && original[key];
+    if (value && String(value).trim() && !/^tbd$/i.test(String(value).trim())) {
+      return String(value).trim();
+    }
+  }
+
+  return "";
+}
+
+function displayTeamWithCountryV30(name, original = {}, side = "") {
+  const seed = rawSeedLabelV31(original, side);
+  const team = normalizeTeamLabelV30(seed || name);
+
+  if (!team || isTbdTeamV31(team)) {
+    return `<span class="team-name">TBD</span>`;
+  }
+
+  // Keep labels like "2nd Group A" readable, no fake country code.
+  if (/group\s+[a-l]/i.test(team) || /\b(?:winner|runner-up|third|3rd|2nd|1st)\b/i.test(team)) {
+    return `<span class="team-name">${escapeHtml(team)}</span>`;
+  }
+
+  const code = teamCodeFromOriginalV30(original, side) || TEAM_CODES_V30[team] || "";
+
+  if (!code || team.toUpperCase() === code.toUpperCase()) {
+    return `<span class="team-name">${escapeHtml(team)}</span>`;
+  }
+
+  return `<span class="team-name">${escapeHtml(team)}</span> <span class="team-code">(${escapeHtml(code)})</span>`;
+}
+
+function hasRealTeamV31(match) {
+  return !isTbdTeamV31(match.home) || !isTbdTeamV31(match.away);
+}
+
+function sortedMatchesForDisplayV31(matches, filter) {
+  const list = [...matches];
+
+  if (filter === "finished") {
+    return list.sort((a, b) => {
+      const ad = a.date instanceof Date ? a.date.getTime() : 0;
+      const bd = b.date instanceof Date ? b.date.getTime() : 0;
+      return bd - ad;
+    });
+  }
+
+  if (filter === "upcoming") {
+    return list.sort((a, b) => {
+      const aTbd = hasRealTeamV31(a) ? 0 : 1;
+      const bTbd = hasRealTeamV31(b) ? 0 : 1;
+      if (aTbd !== bTbd) return aTbd - bTbd;
+
+      const ad = a.date instanceof Date ? a.date.getTime() : 0;
+      const bd = b.date instanceof Date ? b.date.getTime() : 0;
+      return ad - bd;
+    });
+  }
+
+  return list;
+}
+
+function renderMatches() {
+  const body = $("matchesBody");
+  const matches = filteredMatches();
+
+  if (!matches.length) {
+    body.innerHTML = `<tr><td colspan="6">No matches found.</td></tr>`;
+    return;
+  }
+
+  const filter = state.activeMatchFilter || "all";
+  const groups = filter === "all"
+    ? [
+        { key: "live", title: "Live matches", rows: sortedMatchesForDisplayV31(matches.filter((m) => m.status === "live"), "live") },
+        { key: "upcoming", title: "Upcoming matches", rows: sortedMatchesForDisplayV31(matches.filter((m) => m.status === "upcoming"), "upcoming") },
+        { key: "finished", title: "Finished matches", rows: sortedMatchesForDisplayV31(matches.filter((m) => m.status === "finished"), "finished") }
+      ]
+    : [
+        {
+          key: filter,
+          title: filter === "live" ? "Live matches" : filter === "upcoming" ? "Upcoming matches" : "Finished matches",
+          rows: sortedMatchesForDisplayV31(matches, filter)
+        }
+      ];
+
+  const html = [];
+
+  for (const group of groups) {
+    if (!group.rows.length) continue;
+
+    if (group.key !== "live") {
+      html.push(`
+        <tr class="match-section-row ${group.key}-section">
+          <td colspan="6">${escapeHtml(group.title)} · ${group.rows.length}</td>
+        </tr>
+      `);
+    }
+
+    html.push(...group.rows.map((m) => `
+      <tr>
+        <td>${formatDate(m.date, m.rawDate)}</td>
+        <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+        <td class="teams-cell">${displayTeamWithCountryV30(m.home, m.original, "home")} <span class="vs-label">vs</span> ${displayTeamWithCountryV30(m.away, m.original, "away")}</td>
+        <td class="score">${formatScore(m)}</td>
+        <td>${typeof statusCell === "function" ? statusCell(m) : `<span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span>`}</td>
+        <td>${escapeHtml(m.venue)}</td>
+      </tr>
+    `));
+  }
+
+  body.innerHTML = html.join("");
+}
+
+let deferredInstallPromptV31 = null;
+
+function setupInstallButtonV31() {
+  const btn = document.getElementById("installAppBtn");
+  if (!btn) return;
+
+  btn.style.display = "inline-flex";
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPromptV31 = event;
+    btn.textContent = "Install app";
+  });
+
+  btn.addEventListener("click", async () => {
+    if (deferredInstallPromptV31) {
+      deferredInstallPromptV31.prompt();
+      await deferredInstallPromptV31.userChoice;
+      deferredInstallPromptV31 = null;
+      return;
+    }
+
+    alert("Install on iPhone: tap Share, then Add to Home Screen.\n\nInstall on Android: browser menu, then Add to Home screen or Install app.");
+  });
+}
+
+document.addEventListener("DOMContentLoaded", setupInstallButtonV31);
+
+console.info("AssistAI WorldCup app v31 loaded: real upcoming teams first, install button visible.");

@@ -1,16 +1,14 @@
-WorldCup PWA v30 — Schedule & Results team codes
+WorldCup PWA v31 — schedule names + install button
 
-Fix:
-- Schedule & Results now shows team codes/country codes:
-  Mexico (MEX) vs South Africa (RSA)
-  United States (USA) vs TBD (TBD)
-- Keeps iPhone compact standings.
-- Keeps visible Install app button.
-- Service worker cache bumped to v30.
+Fixes:
+- Install app button is forced visible next to Refresh.
+- Schedule & Results shows real upcoming matches first.
+- Knockout TBD games are pushed after real team games.
+- Team names show country codes where known.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/
 
 After deployment:
 - Desktop: Ctrl + F5.
-- iPhone: clear site data if old PWA cache remains.
+- iPhone private browsing may cache less, but still reload the page.

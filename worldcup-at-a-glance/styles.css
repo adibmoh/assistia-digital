@@ -1555,3 +1555,66 @@ main > img[src*="logo"] {
     font-size: .76em;
   }
 }
+
+
+/* =========================================================
+   v31 — visible install button + schedule country names
+   ========================================================= */
+
+.action-row {
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+#installAppBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  padding: 10px 16px !important;
+  min-height: 42px !important;
+  background: linear-gradient(135deg, #22c55e, #38bdf8) !important;
+  color: #06111f !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+}
+
+.teams-cell .team-code,
+.team-code {
+  color: var(--muted) !important;
+  font-size: .86em !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+.teams-cell .team-name {
+  font-weight: 700 !important;
+}
+
+.vs-label {
+  color: var(--muted) !important;
+  font-size: .86em !important;
+  margin: 0 3px !important;
+}
+
+@media (max-width: 820px) {
+  .action-row {
+    width: 100% !important;
+  }
+
+  #refreshBtn,
+  #installAppBtn {
+    flex: 1 1 160px !important;
+  }
+
+  .teams-cell {
+    line-height: 1.35 !important;
+  }
+
+  .teams-cell .team-code {
+    font-size: .78em !important;
+  }
+}
