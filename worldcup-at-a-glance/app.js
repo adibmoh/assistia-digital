@@ -1768,3 +1768,44 @@ function formatDate(dateValue, rawDate = "") {
 
   return `${dayName}. ${day} ${month} ${hour}:${minute}`;
 }
+
+
+/* =========================================================
+   Patch v12 — force stats refresh after every data refresh
+   Fixes cases where Schedule/Standings update but Stats keeps old DOM.
+   ========================================================= */
+
+function refreshStatsPanelsV12() {
+  try {
+    if (typeof renderTopScorers === "function") renderTopScorers();
+    if (typeof renderPlayerOfTheMatchAwards === "function") renderPlayerOfTheMatchAwards();
+  } catch (error) {
+    console.warn("Stats refresh failed:", error);
+  }
+}
+
+function render() {
+  renderSummary();
+  renderFilters();
+  renderMatches();
+  renderStandings();
+  renderStats();
+  refreshStatsPanelsV12();
+}
+
+/* Re-run stats after manual or automatic data refresh finishes, even if the
+   active tab is not Stats. This keeps the cached DOM and live DOM aligned. */
+const originalLoadDataV12 = loadData;
+loadData = async function patchedLoadDataV12(options = {}) {
+  const result = await originalLoadDataV12(options);
+  refreshStatsPanelsV12();
+  return result;
+};
+
+/* Prevent stale scorer cache from browser storage after deployment. */
+try {
+  localStorage.removeItem("assistai_worldcup_at_a_glance_cache_v1");
+  localStorage.removeItem("assistai_worldcup_at_a_glance_cache_v2");
+} catch (error) {
+  console.warn("Could not clear old WorldCup cache:", error);
+}
