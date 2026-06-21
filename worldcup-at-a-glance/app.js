@@ -769,9 +769,9 @@ function renderMatches() {
       <tr>
         <td>${formatDate(m.date, m.rawDate)}</td>
         <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
-        <td>${escapeHtml(m.home)} vs ${escapeHtml(m.away)}</td>
+        <td class="teams-cell">${displayTeamWithCountryV30(m.home, m.original, "home")} <span class="vs-label">vs</span> ${displayTeamWithCountryV30(m.away, m.original, "away")}</td>
         <td class="score">${formatScore(m)}</td>
-        <td><span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span></td>
+        <td>${typeof statusCell === "function" ? statusCell(m) : `<span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span>`}</td>
         <td>${escapeHtml(m.venue)}</td>
       </tr>
     `));
@@ -2442,3 +2442,108 @@ if ("serviceWorker" in navigator) {
 }
 
 console.info("AssistAI WorldCup app v29 loaded: compact mobile standings + install button.");
+
+
+/* =========================================================
+   v30 — show countries/codes in Schedule & Results
+   ========================================================= */
+
+const TEAM_CODES_V30 = {
+  "Mexico": "MEX",
+  "South Africa": "RSA",
+  "South Korea": "KOR",
+  "Czechia": "CZE",
+  "Czech Republic": "CZE",
+  "Canada": "CAN",
+  "Bosnia and Herzegovina": "BIH",
+  "Qatar": "QAT",
+  "Switzerland": "SUI",
+  "Brazil": "BRA",
+  "Morocco": "MAR",
+  "Haiti": "HAI",
+  "Scotland": "SCO",
+  "United States": "USA",
+  "USA": "USA",
+  "Paraguay": "PAR",
+  "Australia": "AUS",
+  "Turkey": "TUR",
+  "Germany": "GER",
+  "Curacao": "CUW",
+  "Curaçao": "CUW",
+  "Ivory Coast": "CIV",
+  "Ecuador": "ECU",
+  "Netherlands": "NED",
+  "Japan": "JPN",
+  "Sweden": "SWE",
+  "Tunisia": "TUN",
+  "Belgium": "BEL",
+  "Egypt": "EGY",
+  "Iran": "IRN",
+  "New Zealand": "NZL",
+  "Spain": "ESP",
+  "Cape Verde": "CPV",
+  "Saudi Arabia": "KSA",
+  "Uruguay": "URU",
+  "France": "FRA",
+  "Senegal": "SEN",
+  "Iraq": "IRQ",
+  "Norway": "NOR",
+  "Argentina": "ARG",
+  "Algeria": "ALG",
+  "Austria": "AUT",
+  "Jordan": "JOR",
+  "Portugal": "POR",
+  "DR Congo": "COD",
+  "Uzbekistan": "UZB",
+  "Colombia": "COL",
+  "England": "ENG",
+  "Croatia": "CRO",
+  "Ghana": "GHA",
+  "Panama": "PAN",
+  "To be determined": "TBD",
+  "TBD": "TBD"
+};
+
+const TEAM_ALIASES_V30 = {
+  "United States": "United States",
+  "USA": "United States",
+  "Czech Republic": "Czechia",
+  "Curacao": "Curaçao",
+  "To be determined": "TBD"
+};
+
+function normalizeTeamLabelV30(name) {
+  const clean = String(name || "").trim();
+  return TEAM_ALIASES_V30[clean] || clean || "TBD";
+}
+
+function teamCodeFromOriginalV30(original, side) {
+  const keys = side === "home"
+    ? ["home_code", "homeCode", "home_team_code", "homeTeamCode", "home_abbr", "homeAbbr", "home_short", "homeShort"]
+    : ["away_code", "awayCode", "away_team_code", "awayTeamCode", "away_abbr", "awayAbbr", "away_short", "awayShort"];
+
+  for (const key of keys) {
+    const value = original && original[key];
+    if (value && String(value).trim().length <= 4) return String(value).trim().toUpperCase();
+  }
+
+  return "";
+}
+
+function displayTeamWithCountryV30(name, original = {}, side = "") {
+  const team = normalizeTeamLabelV30(name);
+
+  if (!team || /^tbd$/i.test(team) || /to be determined/i.test(team)) {
+    return `<span class="team-name">TBD</span> <span class="team-code">(TBD)</span>`;
+  }
+
+  const code = teamCodeFromOriginalV30(original, side) || TEAM_CODES_V30[team] || "";
+
+  if (!code || team.toUpperCase() === code.toUpperCase()) {
+    return `<span class="team-name">${escapeHtml(team)}</span>`;
+  }
+
+  return `<span class="team-name">${escapeHtml(team)}</span> <span class="team-code">(${escapeHtml(code)})</span>`;
+}
+
+console.info("AssistAI WorldCup app v30 loaded: country codes added to schedule/results.");
