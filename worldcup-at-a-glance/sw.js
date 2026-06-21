@@ -1,4 +1,4 @@
-const CACHE_NAME = "assistia-worldcup-pwa-v28";
+const CACHE_NAME = "assistia-worldcup-pwa-v29";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -12,9 +12,7 @@ const APP_SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
   self.skipWaiting();
 });
 
@@ -31,7 +29,6 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // Keep live/dynamic data fresh.
   if (
     url.hostname.includes("worldcup26.ir") ||
     url.hostname.includes("r.jina.ai") ||
@@ -43,27 +40,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Network-first for HTML navigation, cache-first for app shell files.
   if (request.mode === "navigate") {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
-    );
+    event.respondWith(fetch(request).catch(() => caches.match("./index.html")));
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      return cached || fetch(request).then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-        return response;
-      });
-    })
-  );
+  event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
 });

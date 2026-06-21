@@ -2368,41 +2368,77 @@ function renderPlayerOfTheMatchAwards() {
 console.info("AssistAI WorldCup app v23 loaded: bad top-scorer sentence rows removed; logo header ready.");
 
 
-console.info("AssistAI WorldCup app v25 loaded: fixed logo sizing and mobile standings alignment.");
-
-
-console.info("AssistAI WorldCup app v26 loaded: mobile standings card layout fixed.");
-
-
 /* =========================================================
-   v27 — desktop logo safety guard
-   Hides any accidental oversized logo image outside the header bar.
+   v29 — PWA install button + compact mobile standings
    ========================================================= */
 
-function fixOversizedLogoV27() {
+let deferredInstallPromptV29 = null;
+
+function setupInstallButtonV29() {
+  const btn = document.getElementById("installAppBtn");
+  if (!btn) return;
+
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+  if (isStandalone) {
+    btn.style.display = "none";
+    return;
+  }
+
+  btn.style.display = "inline-flex";
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPromptV29 = event;
+    btn.textContent = "Install app";
+    btn.style.display = "inline-flex";
+  });
+
+  btn.addEventListener("click", async () => {
+    if (deferredInstallPromptV29) {
+      deferredInstallPromptV29.prompt();
+      await deferredInstallPromptV29.userChoice;
+      deferredInstallPromptV29 = null;
+      return;
+    }
+
+    alert(
+      "Install on iPhone: tap Share, then Add to Home Screen.\n\n" +
+      "Install on Android: tap the browser menu, then Add to Home screen or Install app."
+    );
+  });
+}
+
+function fixOversizedLogoV29() {
   document.querySelectorAll('img[src*="assistia-logo"], img[src*="logo"]').forEach((img) => {
-    const insideHeader = img.closest(".assist-bar");
-    if (insideHeader) {
-      img.classList.add("assist-logo");
+    if (img.closest(".assist-bar")) {
       img.style.width = "34px";
       img.style.height = "34px";
       img.style.maxWidth = "34px";
       img.style.maxHeight = "34px";
       img.style.objectFit = "cover";
       img.style.display = "block";
-      return;
+    } else {
+      img.style.display = "none";
     }
-
-    // Any logo accidentally inserted outside the header becomes hidden.
-    img.classList.add("logo-banner-accidental");
-    img.style.display = "none";
   });
 }
 
-document.addEventListener("DOMContentLoaded", fixOversizedLogoV27);
-window.addEventListener("load", fixOversizedLogoV27);
+document.addEventListener("DOMContentLoaded", () => {
+  setupInstallButtonV29();
+  fixOversizedLogoV29();
+});
 
-console.info("AssistAI WorldCup app v27 loaded: desktop oversized logo hidden.");
+window.addEventListener("load", fixOversizedLogoV29);
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch((error) => {
+      console.warn("Service worker registration failed:", error);
+    });
+  });
+}
 
-console.info("AssistAI WorldCup app v28 loaded: compact mobile standings rows.");
+console.info("AssistAI WorldCup app v29 loaded: compact mobile standings + install button.");
