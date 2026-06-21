@@ -817,28 +817,35 @@ function renderGroups() {
   container.innerHTML = groups.map(([groupName, teams]) => `
     <article class="group-card">
       <h2>Group ${escapeHtml(groupName)}</h2>
-      <table>
+      <table class="standings-table">
         <thead>
           <tr>
             <th>#</th><th>Team</th><th>Pts</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Status</th>
           </tr>
         </thead>
         <tbody>
-          ${teams.map((team) => `
-            <tr class="${qualificationFor(groupName, team.name).rowClass}">
-              <td>${team.rank}</td>
-              <td>${escapeHtml(team.name)}</td>
-              <td>${team.points}</td>
-              <td>${team.played}</td>
-              <td>${team.won}</td>
-              <td>${team.drawn}</td>
-              <td>${team.lost}</td>
-              <td>${team.gf}</td>
-              <td>${team.ga}</td>
-              <td>${team.diff}</td>
-              <td class="${qualificationFor(groupName, team.name).textClass}">${qualificationFor(groupName, team.name).label}</td>
-            </tr>
-          `).join("")}
+          ${teams.map((team) => {
+            const q = qualificationFor(groupName, team.name);
+
+            return `
+              <tr class="${q.rowClass}">
+                <td data-label="#">${team.rank}</td>
+                <td data-label="Team">${escapeHtml(team.name)}</td>
+                <td data-label="Pts">${team.points}</td>
+                <td data-label="P">${team.played}</td>
+                <td data-label="W">${team.won}</td>
+                <td data-label="D">${team.drawn}</td>
+                <td data-label="L">${team.lost}</td>
+                <td data-label="GF">${team.gf}</td>
+                <td data-label="GA">${team.ga}</td>
+                <td data-label="GD">${team.diff}</td>
+                <td data-label="Status" class="${q.textClass}">
+                  <span class="status-full">${escapeHtml(q.label)}</span>
+                  <span class="status-short" title="${escapeHtml(q.label)}">${escapeHtml(q.shortLabel)}</span>
+                </td>
+              </tr>
+            `;
+          }).join("")}
         </tbody>
       </table>
     </article>
@@ -2337,3 +2344,6 @@ function renderPlayerOfTheMatchAwards() {
 }
 
 console.info("AssistAI WorldCup app v23 loaded: bad top-scorer sentence rows removed; logo header ready.");
+
+
+console.info("AssistAI WorldCup app v25 loaded: fixed logo sizing and mobile standings alignment.");
