@@ -1741,16 +1741,27 @@ function renderMatches() {
 
 
 /* =========================================================
-   Patch v11 — cleaner match date format
-   Example: 20/06/2026, 19:00 -> SAT. 20 JUNE 19:00
+   Patch v13 — stable stats refresh + safe date format
+   Based on v10 clean working app. Avoids the broken v12 render override.
    ========================================================= */
 
-function formatDate(dateValue, rawDate = "") {
-  const date = dateValue instanceof Date
-    ? dateValue
-    : parseDate(rawDate || dateValue);
+const TOP_SCORER_GOAL_LEVELS_TO_SHOW_V13 = 2;
+const MIN_TOP_SCORER_GOALS_TO_SHOW_V13 = 2;
 
-  if (!date || Number.isNaN(date.getTime())) {
+function safeDateFromValueV13(dateValue, rawDate = "") {
+  if (dateValue instanceof Date && !Number.isNaN(dateValue.getTime())) return dateValue;
+
+  const raw = rawDate || dateValue;
+  if (!raw) return null;
+
+  const d = new Date(String(raw));
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatDate(dateValue, rawDate = "") {
+  const date = safeDateFromValueV13(dateValue, rawDate);
+
+  if (!date) {
     return escapeHtml(String(rawDate || dateValue || "TBD"));
   }
 
@@ -1769,43 +1780,65 @@ function formatDate(dateValue, rawDate = "") {
   return `${dayName}. ${day} ${month} ${hour}:${minute}`;
 }
 
+function topScorersWithTiesV13(scorerCounts) {
+  if (!Array.isArray(scorerCounts) || scorerCounts.length === 0) return [];
 
-/* =========================================================
-   Patch v12 — force stats refresh after every data refresh
-   Fixes cases where Schedule/Standings update but Stats keeps old DOM.
-   ========================================================= */
+  const goalLevels = [...new Set(
+    scorerCounts
+      .map(([, goals]) => Number(goals) || 0)
+      .filter((goals) => goals >= MIN_TOP_SCORER_GOALS_TO_SHOW_V13)
+  )].sort((a, b) => b - a);
 
-function refreshStatsPanelsV12() {
-  try {
-    if (typeof renderTopScorers === "function") renderTopScorers();
-    if (typeof renderPlayerOfTheMatchAwards === "function") renderPlayerOfTheMatchAwards();
-  } catch (error) {
-    console.warn("Stats refresh failed:", error);
-  }
+  if (!goalLevels.length) return [];
+
+  const cutoffIndex = Math.min(TOP_SCORER_GOAL_LEVELS_TO_SHOW_V13, goalLevels.length) - 1;
+  const cutoffGoals = goalLevels[cutoffIndex];
+
+  return scorerCounts.filter(([, goals]) => {
+    const totalGoals = Number(goals) || 0;
+    return totalGoals >= MIN_TOP_SCORER_GOALS_TO_SHOW_V13 && totalGoals >= cutoffGoals;
+  });
 }
 
+function renderTopScorers() {
+  const scorerCounts = buildTopScorers();
+  const visibleScorers = topScorersWithTiesV13(scorerCounts);
+  const topGoals = visibleScorers.length ? visibleScorers[0][1] : null;
+
+  $("topScorers").innerHTML = visibleScorers.length
+    ? visibleScorers.map(([player, goals], index) =>
+        statItemHtml(index + 1, player, `${goals} ${plural(goals, "goal")}`, "stat-green", goals === topGoals)
+      ).join("")
+    : statEmptyHtml("No player has scored more than 1 goal yet.");
+}
+
+/* Correct render function for this app's real function names. */
 function render() {
-  renderSummary();
-  renderFilters();
+  renderCards();
   renderMatches();
-  renderStandings();
+  renderGroups();
   renderStats();
-  refreshStatsPanelsV12();
 }
 
-/* Re-run stats after manual or automatic data refresh finishes, even if the
-   active tab is not Stats. This keeps the cached DOM and live DOM aligned. */
-const originalLoadDataV12 = loadData;
-loadData = async function patchedLoadDataV12(options = {}) {
-  const result = await originalLoadDataV12(options);
-  refreshStatsPanelsV12();
+/* Force stats to redraw after live data and after external MVP source finishes. */
+const originalLoadDataV13 = loadData;
+loadData = async function patchedLoadDataV13(options = {}) {
+  const result = await originalLoadDataV13(options);
+  try {
+    renderStats();
+  } catch (error) {
+    console.warn("Stats redraw failed after refresh:", error);
+  }
   return result;
 };
 
-/* Prevent stale scorer cache from browser storage after deployment. */
-try {
-  localStorage.removeItem("assistai_worldcup_at_a_glance_cache_v1");
-  localStorage.removeItem("assistai_worldcup_at_a_glance_cache_v2");
-} catch (error) {
-  console.warn("Could not clear old WorldCup cache:", error);
-}
+const originalLoadExternalPlayerOfMatchAwardsV13 = loadExternalPlayerOfMatchAwards;
+loadExternalPlayerOfMatchAwards = async function patchedLoadExternalPlayerOfMatchAwardsV13(...args) {
+  const result = await originalLoadExternalPlayerOfMatchAwardsV13(...args);
+  try {
+    renderPlayerOfTheMatchAwards();
+  } catch (error) {
+    console.warn("MVP redraw failed after refresh:", error);
+  }
+  return result;
+};
