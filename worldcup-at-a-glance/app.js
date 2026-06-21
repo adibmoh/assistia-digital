@@ -817,7 +817,8 @@ function renderGroups() {
   container.innerHTML = groups.map(([groupName, teams]) => `
     <article class="group-card">
       <h2>Group ${escapeHtml(groupName)}</h2>
-      <table class="standings-table">
+
+      <table class="standings-table standings-desktop-table">
         <thead>
           <tr>
             <th>#</th><th>Team</th><th>Pts</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Status</th>
@@ -829,25 +830,48 @@ function renderGroups() {
 
             return `
               <tr class="${q.rowClass}">
-                <td data-label="#">${team.rank}</td>
-                <td data-label="Team">${escapeHtml(team.name)}</td>
-                <td data-label="Pts">${team.points}</td>
-                <td data-label="P">${team.played}</td>
-                <td data-label="W">${team.won}</td>
-                <td data-label="D">${team.drawn}</td>
-                <td data-label="L">${team.lost}</td>
-                <td data-label="GF">${team.gf}</td>
-                <td data-label="GA">${team.ga}</td>
-                <td data-label="GD">${team.diff}</td>
-                <td data-label="Status" class="${q.textClass}">
-                  <span class="status-full">${escapeHtml(q.label)}</span>
-                  <span class="status-short" title="${escapeHtml(q.label)}">${escapeHtml(q.shortLabel)}</span>
-                </td>
+                <td>${team.rank}</td>
+                <td>${escapeHtml(team.name)}</td>
+                <td>${team.points}</td>
+                <td>${team.played}</td>
+                <td>${team.won}</td>
+                <td>${team.drawn}</td>
+                <td>${team.lost}</td>
+                <td>${team.gf}</td>
+                <td>${team.ga}</td>
+                <td>${team.diff}</td>
+                <td class="${q.textClass}">${escapeHtml(q.label)}</td>
               </tr>
             `;
           }).join("")}
         </tbody>
       </table>
+
+      <div class="standings-mobile-cards" aria-label="Group ${escapeHtml(groupName)} mobile standings">
+        ${teams.map((team) => {
+          const q = qualificationFor(groupName, team.name);
+
+          return `
+            <section class="standing-mobile-card ${q.rowClass}">
+              <div class="standing-mobile-top">
+                <span class="standing-rank">${team.rank}</span>
+                <span class="standing-team">${escapeHtml(team.name)}</span>
+                <span class="standing-status ${q.textClass}">${escapeHtml(q.shortLabel || q.label)}</span>
+              </div>
+              <div class="standing-mobile-stats">
+                <span><b>${team.points}</b><small>Pts</small></span>
+                <span><b>${team.played}</b><small>P</small></span>
+                <span><b>${team.won}</b><small>W</small></span>
+                <span><b>${team.drawn}</b><small>D</small></span>
+                <span><b>${team.lost}</b><small>L</small></span>
+                <span><b>${team.gf}</b><small>GF</small></span>
+                <span><b>${team.ga}</b><small>GA</small></span>
+                <span><b>${team.diff}</b><small>GD</small></span>
+              </div>
+            </section>
+          `;
+        }).join("")}
+      </div>
     </article>
   `).join("");
 }
@@ -2347,3 +2371,37 @@ console.info("AssistAI WorldCup app v23 loaded: bad top-scorer sentence rows rem
 
 
 console.info("AssistAI WorldCup app v25 loaded: fixed logo sizing and mobile standings alignment.");
+
+
+console.info("AssistAI WorldCup app v26 loaded: mobile standings card layout fixed.");
+
+
+/* =========================================================
+   v27 — desktop logo safety guard
+   Hides any accidental oversized logo image outside the header bar.
+   ========================================================= */
+
+function fixOversizedLogoV27() {
+  document.querySelectorAll('img[src*="assistia-logo"], img[src*="logo"]').forEach((img) => {
+    const insideHeader = img.closest(".assist-bar");
+    if (insideHeader) {
+      img.classList.add("assist-logo");
+      img.style.width = "34px";
+      img.style.height = "34px";
+      img.style.maxWidth = "34px";
+      img.style.maxHeight = "34px";
+      img.style.objectFit = "cover";
+      img.style.display = "block";
+      return;
+    }
+
+    // Any logo accidentally inserted outside the header becomes hidden.
+    img.classList.add("logo-banner-accidental");
+    img.style.display = "none";
+  });
+}
+
+document.addEventListener("DOMContentLoaded", fixOversizedLogoV27);
+window.addEventListener("load", fixOversizedLogoV27);
+
+console.info("AssistAI WorldCup app v27 loaded: desktop oversized logo hidden.");

@@ -1,16 +1,16 @@
-WorldCup PWA v25 fix
+WorldCup PWA v27 — desktop logo fix
 
-Fixes:
-- Header logo cannot render huge anymore.
-- Standings rows align correctly on mobile.
-- Standings mobile row now uses: # | Team | Pts | GD | Status.
-- P/W/D/L/GF/GA are hidden on mobile to avoid wrapping.
-- Service worker cache bumped to v25.
+Fix:
+- Prevents AssistAI logo from appearing as a huge desktop banner.
+- Logo remains only as a small top-left header icon.
+- Service worker cache bumped to v27.
 
-Replace/add all files in:
+Replace all files in:
 assistia-digital/worldcup-at-a-glance/
 
-After deploy:
-1. Open the page.
-2. Hard refresh desktop: Ctrl + F5.
-3. On mobile, if the old view remains: browser menu → site settings/storage → clear, then reopen.
+Important after deployment:
+1. Desktop: Ctrl + F5.
+2. If huge logo still appears, unregister old service worker:
+   Chrome/Edge DevTools -> Application -> Service Workers -> Unregister
+   then reload.
+3. Mobile: clear site storage if old PWA cache remains.
