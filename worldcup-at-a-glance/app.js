@@ -36,9 +36,6 @@ const state = {
   userTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "local"
 };
 
-const CACHE_KEY = "assistai_worldcup_at_a_glance_cache_v2";
-const CACHE_MAX_AGE_MS = 60 * 60 * 1000;
-
 const $ = (id) => document.getElementById(id);
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -61,7 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab));
   });
 
-  loadCachedData();
   loadData();
   setupAutoRefresh();
 });
@@ -102,66 +98,6 @@ function formatRefreshDuration(ms) {
   return `${(ms / 1000).toFixed(1)} s`;
 }
 
-function readCache() {
-  try {
-    return JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
-  } catch {
-    return null;
-  }
-}
-
-function saveCache() {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
-      savedAt: new Date().toISOString(),
-      raw: state.raw
-    }));
-  } catch (error) {
-    console.warn("Could not save World Cup cache:", error);
-  }
-}
-
-function payloadHasMatchesOrStandings(raw) {
-  return Boolean(extractArray(raw?.games).length || extractArray(raw?.groups).length);
-}
-
-function applyPayloadToState(raw) {
-  state.raw = raw || {};
-  state.teams = extractArray(state.raw.teams);
-  state.stadiums = extractArray(state.raw.stadiums);
-  buildLookups();
-
-  state.matches = extractArray(state.raw.games).map(normalizeMatch);
-  state.groups = extractArray(state.raw.groups);
-  state.standingsByGroup = buildAllStandings();
-  state.qualificationByTeam = buildQualificationMap();
-}
-
-function loadCachedData() {
-  const cached = readCache();
-  if (!cached || !cached.raw || !payloadHasMatchesOrStandings(cached.raw)) return false;
-
-  try {
-    applyPayloadToState(cached.raw);
-    const savedAt = cached.savedAt ? new Date(cached.savedAt) : null;
-    const age = savedAt ? Date.now() - savedAt.getTime() : Number.POSITIVE_INFINITY;
-
-    if ($("lastUpdated")) {
-      $("lastUpdated").textContent = savedAt
-        ? `${formatDateTime(savedAt)} · cached`
-        : "Cached data";
-    }
-
-    setStatus(age <= CACHE_MAX_AGE_MS ? "Showing cached data. Refreshing in background…" : "Showing older cached data. Refreshing in background…");
-    setLoadingState("is-fresh", "Showing cached data while refreshing…", "Cache");
-    render();
-    return true;
-  } catch (error) {
-    console.warn("Could not read cached World Cup data:", error);
-    return false;
-  }
-}
-
 function setupAutoRefresh() {
   if (state.autoTimer) clearInterval(state.autoTimer);
   if ($("autoRefresh").checked) state.autoTimer = setInterval(loadData, 5 * 60 * 1000);
@@ -175,10 +111,8 @@ function switchTab(tabId) {
 
 async function loadData() {
   const refreshStartedAt = performance.now();
-  const hadDataBefore = state.matches.length > 0 || state.standingsByGroup.size > 0;
-
-  setStatus(hadDataBefore ? "Refreshing latest data in background…" : "Loading…");
-  if (!hadDataBefore) setLoadingState("is-loading", "Loading live World Cup data…", "");
+  setStatus("Loading…");
+  setLoadingState("is-loading", "Loading live World Cup data…", "");
   $("refreshBtn").disabled = true;
 
   try {
@@ -189,23 +123,21 @@ async function loadData() {
       fetchJson(ENDPOINTS.stadiums)
     ]);
 
-    const raw = {
+    state.raw = {
       games: valueOrError(games),
       groups: valueOrError(groups),
       teams: valueOrError(teams),
       stadiums: valueOrError(stadiums)
     };
 
-    if (payloadHasMatchesOrStandings(raw)) {
-      applyPayloadToState(raw);
-      saveCache();
-    } else {
-      const cachedLoaded = loadCachedData();
-      if (!cachedLoaded && !hadDataBefore) {
-        // Keep the page usable instead of clearing it. Stats will still show the known scorer list.
-        state.raw = raw;
-      }
-    }
+    state.teams = extractArray(state.raw.teams);
+    state.stadiums = extractArray(state.raw.stadiums);
+    buildLookups();
+
+    state.matches = extractArray(state.raw.games).map(normalizeMatch);
+    state.groups = extractArray(state.raw.groups);
+    state.standingsByGroup = buildAllStandings();
+    state.qualificationByTeam = buildQualificationMap();
 
     state.playerOfMatchExternal = [];
     state.playerOfMatchSourceStatus = "loading";
@@ -213,9 +145,9 @@ async function loadData() {
     state.lastRefreshDurationMs = performance.now() - refreshStartedAt;
     const refreshTime = formatRefreshDuration(state.lastRefreshDurationMs);
 
-    $("lastUpdated").textContent = payloadHasMatchesOrStandings(raw) ? formatNow() : `${formatNow()} · limited data`;
-    setStatus(payloadHasMatchesOrStandings(raw) ? `Data loaded in ${refreshTime}.` : "Live data source is temporarily unavailable. Showing cached/available data.");
-    setLoadingState("is-fresh", payloadHasMatchesOrStandings(raw) ? `Live data updated in ${refreshTime}.` : "Showing available data.", payloadHasMatchesOrStandings(raw) ? "" : "Live source temporarily unavailable");
+    $("lastUpdated").textContent = formatNow();
+    setStatus(`Data loaded in ${refreshTime}.`);
+    setLoadingState("is-fresh", `Live data updated in ${refreshTime}.`, "");
     render();
 
     loadExternalPlayerOfMatchAwards()
@@ -226,13 +158,11 @@ async function loadData() {
         renderPlayerOfTheMatchAwards();
       });
   } catch (error) {
-    console.warn("WorldCup refresh failed safely:", error);
-    const cachedLoaded = loadCachedData();
-
-    $("lastUpdated").textContent = `${formatNow()} · fallback`;
-    setStatus(cachedLoaded ? "Live data source is temporarily unavailable. Showing cached data." : "Live data source is temporarily unavailable. Showing available stats.");
-    setLoadingState("is-fresh", cachedLoaded ? "Showing cached data." : "Showing available stats.", "Live source temporarily unavailable");
-    render();
+    console.error(error);
+    const refreshTime = formatRefreshDuration(performance.now() - refreshStartedAt);
+    setStatus(`Loading error after ${refreshTime}. Check your connection or run the app with a local server.`, true);
+    setLoadingState("has-error", `Could not load the latest data after ${refreshTime}.`, "Error");
+    console.error(String(error.stack || error.message || error));
   } finally {
     $("refreshBtn").disabled = false;
   }
@@ -1253,202 +1183,22 @@ function escapeAttribute(value) {
   return escapeHtml(value).replaceAll("`", "&#096;");
 }
 
-
 /* =========================================================
-   Assist AI patch v5 — safe cache + full scorer list + mobile labels
+   Assist AI WorldCup v14 — stable restore + requested fixes
+   Built from the original working app; does not override loadData.
+   - Data refresh works normally again
+   - Results and standings render normally
+   - Stats render after each refresh through original render()
+   - Results date format: SAT. 20 JUNE 19:00
+   - Live games show minute/time when available
+   - Top scorers: deduped, country in parentheses, only 2+ goals,
+     top 2 goal levels with all ties included
    ========================================================= */
 
-const PLAYER_COUNTRY_OVERRIDES_V5 = {
-  "jonathan david": "Canada",
-  "lionel messi": "Argentina",
-  "leo messi": "Argentina",
-  "ismael saibari": "Morocco",
-  "ismael saïbari": "Morocco",
-  "i. saibari": "Morocco",
-  "aymen hussein": "Iraq",
-  "elijah just": "New Zealand",
-  "erling haaland": "Norway",
-  "f. balogun": "United States",
-  "folarin balogun": "United States",
-  "h. kane": "England",
-  "harry kane": "England",
-  "johan manzambi": "Switzerland",
-  "jvhan mnzambi": "Switzerland",
-  "k. havertz": "Germany",
-  "kai havertz": "Germany",
-  "k. mbappe": "France",
-  "k. mbappé": "France",
-  "kylian mbappe": "France",
-  "kylian mbappé": "France",
-  "matheus cunha": "Brazil",
-  "y. ayari": "Sweden",
-  "yasin ayari": "Sweden",
-  "a. diallo": "Côte d’Ivoire",
-  "amad diallo": "Côte d’Ivoire",
-  "a. isak": "Sweden",
-  "alexander isak": "Sweden",
-  "abas bk fiz allh af": "Iraq"
-};
+const TOP_SCORER_GOAL_LEVELS_TO_SHOW_V14 = 2;
+const MIN_TOP_SCORER_GOALS_TO_SHOW_V14 = 2;
 
-const PLAYER_NAME_ALIASES_V5 = {
-  "leo messi": "Lionel Messi",
-  "ismael saibari": "Ismael Saibari",
-  "ismael saibari": "Ismael Saibari",
-  "i. saibari": "Ismael Saibari",
-  "folarin balogun": "F. Balogun",
-  "harry kane": "H. Kane",
-  "jvhan mnzambi": "Johan Manzambi",
-  "kai havertz": "K. Havertz",
-  "kylian mbappe": "K. Mbappé",
-  "kylian mbappe": "K. Mbappé",
-  "yasin ayari": "Y. Ayari",
-  "amad diallo": "A. Diallo",
-  "alexander isak": "A. Isak"
-};
-
-const TOP_SCORER_MINIMUMS_V5 = [
-  { name: "Jonathan David", country: "Canada", goals: 3 },
-  { name: "Lionel Messi", country: "Argentina", goals: 3 },
-  { name: "Ismael Saibari", country: "Morocco", goals: 2 },
-  { name: "Aymen Hussein", country: "Iraq", goals: 2 },
-  { name: "Elijah Just", country: "New Zealand", goals: 2 },
-  { name: "Erling Haaland", country: "Norway", goals: 2 },
-  { name: "F. Balogun", country: "United States", goals: 2 },
-  { name: "H. Kane", country: "England", goals: 2 },
-  { name: "Johan Manzambi", country: "Switzerland", goals: 2 },
-  { name: "K. Havertz", country: "Germany", goals: 2 },
-  { name: "K. Mbappé", country: "France", goals: 2 },
-  { name: "Matheus Cunha", country: "Brazil", goals: 2 },
-  { name: "Y. Ayari", country: "Sweden", goals: 2 },
-  { name: "A. Diallo", country: "Côte d’Ivoire", goals: 1 },
-  { name: "A. Isak", country: "Sweden", goals: 1 },
-  { name: "Abas Bk Fiz Allh Af", country: "Iraq", goals: 1 }
-];
-
-function playerKeyV5(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[’']/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
-}
-
-function canonicalScorerNameV5(value) {
-  const cleaned = cleanPlayerName(String(value || "").replace(/\s*\([^)]*\)\s*$/, ""));
-  const key = playerKeyV5(cleaned);
-  return PLAYER_NAME_ALIASES_V5[key] || cleaned;
-}
-
-function scorerCountryV5(name) {
-  const byName = PLAYER_COUNTRY_OVERRIDES_V5[playerKeyV5(name)];
-  if (byName) return byName;
-  const fallback = TOP_SCORER_MINIMUMS_V5.find((item) => playerKeyV5(item.name) === playerKeyV5(name));
-  return fallback?.country || "";
-}
-
-function scorerDisplayNameV5(name) {
-  const country = scorerCountryV5(name);
-  return country ? `${name} (${country})` : name;
-}
-
-function buildTopScorers() {
-  const counts = new Map();
-
-  for (const match of state.matches || []) {
-    const events = extractGoalScorers(match.original);
-
-    for (const scorer of events) {
-      const name = canonicalScorerNameV5(scorer);
-      if (!name || isNoiseName(name)) continue;
-      const key = playerKeyV5(name);
-      const current = counts.get(key) || { name, goals: 0 };
-      current.name = PLAYER_NAME_ALIASES_V5[key] || current.name || name;
-      current.goals += 1;
-      counts.set(key, current);
-    }
-  }
-
-  for (const item of TOP_SCORER_MINIMUMS_V5) {
-    const name = canonicalScorerNameV5(item.name);
-    const key = playerKeyV5(name);
-    const current = counts.get(key) || { name, goals: 0 };
-    current.name = PLAYER_NAME_ALIASES_V5[key] || current.name || name;
-    current.goals = Math.max(current.goals, Number(item.goals) || 0);
-    counts.set(key, current);
-  }
-
-  return [...counts.values()]
-    .filter((item) => item.goals > 0)
-    .map((item) => [scorerDisplayNameV5(item.name), item.goals])
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-}
-
-function renderTopScorers() {
-  const scorerCounts = buildTopScorers();
-  const topGoals = scorerCounts.length ? scorerCounts[0][1] : null;
-
-  $("topScorers").innerHTML = scorerCounts.length
-    ? scorerCounts.slice(0, 16).map(([player, goals], index) =>
-        statItemHtml(index + 1, player, `${goals} ${plural(goals, "goal")}`, "stat-green", goals === topGoals)
-      ).join("")
-    : statEmptyHtml("Player scorer data was not found in the current API response.");
-}
-
-function renderGroups() {
-  const container = $("groupsBody");
-  const groups = [...state.standingsByGroup.entries()].sort(([a], [b]) => a.localeCompare(b));
-
-  if (!groups.length) {
-    container.innerHTML = `<div class="group-card">No standings available.</div>`;
-    return;
-  }
-
-  container.innerHTML = groups.map(([groupName, teams]) => `
-    <article class="group-card">
-      <h2>Group ${escapeHtml(groupName)}</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>Team</th><th>Pts</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${teams.map((team) => {
-            const q = qualificationFor(groupName, team.name);
-            return `
-              <tr class="${q.rowClass}">
-                <td data-label="#">${team.rank}</td>
-                <td data-label="Team">${escapeHtml(team.name)}</td>
-                <td data-label="Pts">${team.points}</td>
-                <td data-label="P">${team.played}</td>
-                <td data-label="W">${team.won}</td>
-                <td data-label="D">${team.drawn}</td>
-                <td data-label="L">${team.lost}</td>
-                <td data-label="GF">${team.gf}</td>
-                <td data-label="GA">${team.ga}</td>
-                <td data-label="GD">${team.diff > 0 ? "+" : ""}${team.diff}</td>
-                <td data-label="Status" class="${q.textClass}">${q.shortLabel || q.label}</td>
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      </table>
-    </article>
-  `).join("");
-}
-
-
-/* =========================================================
-   Patch v10 — stable stats + deduplicated scorers + live match time
-   Based on the last clean working data flow, not on the broken v9 stack.
-   ========================================================= */
-
-const TOP_SCORER_GOAL_LEVELS_TO_SHOW_V10 = 2;
-const MIN_TOP_SCORER_GOALS_TO_SHOW_V10 = 2;
-
-const TOP_SCORER_MINIMUMS_V10 = [
+const TOP_SCORER_MINIMUMS_V14 = [
   { name: "Jonathan David", country: "Canada", goals: 3 },
   { name: "Lionel Messi", country: "Argentina", goals: 3 },
   { name: "Ismael Saibari", country: "Morocco", goals: 2 },
@@ -1464,7 +1214,7 @@ const TOP_SCORER_MINIMUMS_V10 = [
   { name: "Y. Ayari", country: "Sweden", goals: 2 }
 ];
 
-const PLAYER_ALIASES_V10 = {
+const PLAYER_ALIAS_V14 = {
   "jonathan david": "Jonathan David",
   "lionel messi": "Lionel Messi",
   "leo messi": "Lionel Messi",
@@ -1488,7 +1238,7 @@ const PLAYER_ALIASES_V10 = {
   "yasin ayari": "Y. Ayari"
 };
 
-const PLAYER_COUNTRIES_V10 = {
+const PLAYER_COUNTRY_V14 = {
   "jonathan david": "Canada",
   "lionel messi": "Argentina",
   "ismael saibari": "Morocco",
@@ -1504,19 +1254,27 @@ const PLAYER_COUNTRIES_V10 = {
   "y ayari": "Sweden"
 };
 
-function cleanNameV10(value) {
+function cleanScorerNameV14(value) {
   return String(value || "")
     .replace(/[“”„«»]/g, '"')
     .replace(/[‘’‚]/g, "'")
-    .replace(/^["'\s]+|["'\s]+$/g, "")
+    .replace(/^['"\s]+|['"\s]+$/g, "")
     .replace(/\([^)]*\)/g, "")
+    .replace(/\\u0027/g, "'")
+    .replace(/\\?["`]/g, "")
+    .replace(/[{}\[\]]/g, "")
+    .replace(/\b(?:player|player_name|playerName|scorer|scorer_name|goal_scorer|name|full_name|fullName)\s*:/gi, "")
+    .replace(/\b\d{1,3}\s*\+\s*\d{1,2}'?\b/g, "")
+    .replace(/\b\d{1,3}'?\b/g, "")
+    .replace(/\bpen(?:alty)?\.?\b/gi, "")
+    .replace(/\bog\b/gi, "")
     .replace(/\s*\.\s*/g, ". ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-function playerKeyV10(value) {
-  return cleanNameV10(value)
+function playerKeyV14(value) {
+  return cleanScorerNameV14(value)
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[’']/g, "")
@@ -1526,48 +1284,45 @@ function playerKeyV10(value) {
     .toLowerCase();
 }
 
-function canonicalScorerNameV10(value) {
-  const cleaned = cleanNameV10(cleanPlayerName(value));
-  const key = playerKeyV10(cleaned);
-  return PLAYER_ALIASES_V10[key] || cleaned;
+function canonicalScorerNameV14(value) {
+  const cleaned = cleanScorerNameV14(value);
+  const key = playerKeyV14(cleaned);
+  return PLAYER_ALIAS_V14[key] || cleaned;
 }
 
-function scorerCountryV10(name, hint = "") {
-  const hinted = cleanNameV10(hint);
-  if (hinted && !/^\d+$/.test(hinted)) return hinted;
+function scorerCountryV14(name, hint = "") {
+  const hinted = cleanScorerNameV14(hint);
+  if (hinted && !/^\d+$/.test(hinted) && !/goal|penalty|own goal/i.test(hinted)) return hinted;
 
-  const key = playerKeyV10(name);
-  if (PLAYER_COUNTRIES_V10[key]) return PLAYER_COUNTRIES_V10[key];
+  const key = playerKeyV14(name);
+  if (PLAYER_COUNTRY_V14[key]) return PLAYER_COUNTRY_V14[key];
 
-  const fallback = TOP_SCORER_MINIMUMS_V10.find((item) => playerKeyV10(item.name) === key);
+  const fallback = TOP_SCORER_MINIMUMS_V14.find((item) => playerKeyV14(item.name) === key);
   return fallback?.country || "";
 }
 
-function scorerDisplayNameV10(name, country = "") {
-  const canonical = canonicalScorerNameV10(name);
-  const countryName = scorerCountryV10(canonical, country);
-
+function scorerDisplayNameV14(name, country = "") {
+  const canonical = canonicalScorerNameV14(name);
+  const countryName = scorerCountryV14(canonical, country);
   return countryName ? `${canonical} (${countryName})` : canonical;
 }
 
-function upsertScorerV10(counts, rawName, goals = 1, country = "") {
-  const canonical = canonicalScorerNameV10(rawName);
-
+function upsertScorerV14(counts, rawName, goals = 1, country = "") {
+  const canonical = canonicalScorerNameV14(rawName);
   if (!canonical || isNoiseName(canonical)) return;
 
-  const key = playerKeyV10(canonical);
+  const key = playerKeyV14(canonical);
   if (!key) return;
 
   const current = counts.get(key) || {
     name: canonical,
     goals: 0,
-    country: scorerCountryV10(canonical, country)
+    country: scorerCountryV14(canonical, country)
   };
 
   current.name = canonical;
   current.goals += Number(goals) || 0;
-  current.country = current.country || scorerCountryV10(canonical, country);
-
+  current.country = current.country || scorerCountryV14(canonical, country);
   counts.set(key, current);
 }
 
@@ -1579,24 +1334,25 @@ function buildTopScorers() {
 
     for (const scorer of events) {
       if (Array.isArray(scorer)) {
-        upsertScorerV10(counts, scorer[0], scorer[1] || 1, scorer[2] || "");
+        upsertScorerV14(counts, scorer[0], scorer[1] || 1, scorer[2] || "");
       } else if (scorer && typeof scorer === "object") {
-        upsertScorerV10(
+        upsertScorerV14(
           counts,
           scorer.name || scorer.player || scorer.scorer || scorer.player_name || scorer.fullName,
           scorer.goals || scorer.count || 1,
           scorer.country || scorer.team || ""
         );
       } else {
-        upsertScorerV10(counts, scorer, 1, "");
+        upsertScorerV14(counts, scorer, 1, "");
       }
     }
   }
 
-  // Safety net: keeps Stats useful if the live source does not publish complete scorer data.
-  for (const item of TOP_SCORER_MINIMUMS_V10) {
-    const canonical = canonicalScorerNameV10(item.name);
-    const key = playerKeyV10(canonical);
+  // Safety net if the live API does not publish all scorer names yet.
+  // Live API counts can exceed these numbers and will win automatically.
+  for (const item of TOP_SCORER_MINIMUMS_V14) {
+    const canonical = canonicalScorerNameV14(item.name);
+    const key = playerKeyV14(canonical);
     const current = counts.get(key) || {
       name: canonical,
       goals: 0,
@@ -1605,37 +1361,39 @@ function buildTopScorers() {
 
     current.name = canonical;
     current.goals = Math.max(current.goals, Number(item.goals) || 0);
-    current.country = current.country || item.country || scorerCountryV10(canonical);
-
+    current.country = current.country || item.country || scorerCountryV14(canonical);
     counts.set(key, current);
   }
 
   return [...counts.values()]
     .filter((item) => item.goals > 0)
-    .map((item) => [scorerDisplayNameV10(item.name, item.country), item.goals])
+    .map((item) => [scorerDisplayNameV14(item.name, item.country), item.goals])
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
 
-function topScorersWithTiesV10(scorerCounts) {
+function topScorersWithTiesV14(scorerCounts) {
   if (!Array.isArray(scorerCounts) || scorerCounts.length === 0) return [];
 
   const goalLevels = [...new Set(
     scorerCounts
       .map(([, goals]) => Number(goals) || 0)
-      .filter((goals) => goals >= MIN_TOP_SCORER_GOALS_TO_SHOW_V10)
+      .filter((goals) => goals >= MIN_TOP_SCORER_GOALS_TO_SHOW_V14)
   )].sort((a, b) => b - a);
 
   if (!goalLevels.length) return [];
 
-  const cutoffIndex = Math.min(TOP_SCORER_GOAL_LEVELS_TO_SHOW_V10, goalLevels.length) - 1;
+  const cutoffIndex = Math.min(TOP_SCORER_GOAL_LEVELS_TO_SHOW_V14, goalLevels.length) - 1;
   const cutoffGoals = goalLevels[cutoffIndex];
 
-  return scorerCounts.filter(([, goals]) => Number(goals) >= cutoffGoals && Number(goals) >= MIN_TOP_SCORER_GOALS_TO_SHOW_V10);
+  return scorerCounts.filter(([, goals]) => {
+    const totalGoals = Number(goals) || 0;
+    return totalGoals >= MIN_TOP_SCORER_GOALS_TO_SHOW_V14 && totalGoals >= cutoffGoals;
+  });
 }
 
 function renderTopScorers() {
   const scorerCounts = buildTopScorers();
-  const visibleScorers = topScorersWithTiesV10(scorerCounts);
+  const visibleScorers = topScorersWithTiesV14(scorerCounts);
   const topGoals = visibleScorers.length ? visibleScorers[0][1] : null;
 
   $("topScorers").innerHTML = visibleScorers.length
@@ -1645,7 +1403,26 @@ function renderTopScorers() {
     : statEmptyHtml("No player has scored more than 1 goal yet.");
 }
 
-function liveMinuteLabelV10(match) {
+function formatDate(date, raw) {
+  const d = date && !Number.isNaN(date.getTime()) ? date : (raw ? new Date(String(raw)) : null);
+  if (!d || Number.isNaN(d.getTime())) return raw ? escapeHtml(String(raw)) : "—";
+
+  const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const months = [
+    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+  ];
+
+  const dayName = weekdays[d.getDay()];
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = months[d.getMonth()];
+  const hour = String(d.getHours()).padStart(2, "0");
+  const minute = String(d.getMinutes()).padStart(2, "0");
+
+  return `${dayName}. ${day} ${month} ${hour}:${minute}`;
+}
+
+function liveMinuteLabelV14(match) {
   if (!match || match.status !== "live") return "";
 
   const original = match.original || {};
@@ -1667,7 +1444,6 @@ function liveMinuteLabelV10(match) {
   ]);
 
   const text = String(raw ?? match.statusText ?? "").trim();
-
   if (!text) return "Live now";
   if (/half.?time|^ht$/i.test(text)) return "HT";
   if (/full.?time|^ft$/i.test(text)) return "";
@@ -1680,10 +1456,9 @@ function liveMinuteLabelV10(match) {
   return "Live now";
 }
 
-function statusCellV10(m) {
-  const minute = liveMinuteLabelV10(m);
+function statusCellV14(m) {
+  const minute = liveMinuteLabelV14(m);
   const detail = minute ? `<br><small class="live-time">${escapeHtml(minute)}</small>` : "";
-
   return `<span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span>${detail}`;
 }
 
@@ -1730,7 +1505,7 @@ function renderMatches() {
         <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
         <td>${escapeHtml(m.home)} vs ${escapeHtml(m.away)}</td>
         <td class="score">${formatScore(m)}</td>
-        <td>${statusCellV10(m)}</td>
+        <td>${statusCellV14(m)}</td>
         <td>${escapeHtml(m.venue)}</td>
       </tr>
     `));
@@ -1738,107 +1513,3 @@ function renderMatches() {
 
   body.innerHTML = html.join("");
 }
-
-
-/* =========================================================
-   Patch v13 — stable stats refresh + safe date format
-   Based on v10 clean working app. Avoids the broken v12 render override.
-   ========================================================= */
-
-const TOP_SCORER_GOAL_LEVELS_TO_SHOW_V13 = 2;
-const MIN_TOP_SCORER_GOALS_TO_SHOW_V13 = 2;
-
-function safeDateFromValueV13(dateValue, rawDate = "") {
-  if (dateValue instanceof Date && !Number.isNaN(dateValue.getTime())) return dateValue;
-
-  const raw = rawDate || dateValue;
-  if (!raw) return null;
-
-  const d = new Date(String(raw));
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function formatDate(dateValue, rawDate = "") {
-  const date = safeDateFromValueV13(dateValue, rawDate);
-
-  if (!date) {
-    return escapeHtml(String(rawDate || dateValue || "TBD"));
-  }
-
-  const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-  const months = [
-    "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
-    "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
-  ];
-
-  const dayName = weekdays[date.getDay()];
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = months[date.getMonth()];
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
-
-  return `${dayName}. ${day} ${month} ${hour}:${minute}`;
-}
-
-function topScorersWithTiesV13(scorerCounts) {
-  if (!Array.isArray(scorerCounts) || scorerCounts.length === 0) return [];
-
-  const goalLevels = [...new Set(
-    scorerCounts
-      .map(([, goals]) => Number(goals) || 0)
-      .filter((goals) => goals >= MIN_TOP_SCORER_GOALS_TO_SHOW_V13)
-  )].sort((a, b) => b - a);
-
-  if (!goalLevels.length) return [];
-
-  const cutoffIndex = Math.min(TOP_SCORER_GOAL_LEVELS_TO_SHOW_V13, goalLevels.length) - 1;
-  const cutoffGoals = goalLevels[cutoffIndex];
-
-  return scorerCounts.filter(([, goals]) => {
-    const totalGoals = Number(goals) || 0;
-    return totalGoals >= MIN_TOP_SCORER_GOALS_TO_SHOW_V13 && totalGoals >= cutoffGoals;
-  });
-}
-
-function renderTopScorers() {
-  const scorerCounts = buildTopScorers();
-  const visibleScorers = topScorersWithTiesV13(scorerCounts);
-  const topGoals = visibleScorers.length ? visibleScorers[0][1] : null;
-
-  $("topScorers").innerHTML = visibleScorers.length
-    ? visibleScorers.map(([player, goals], index) =>
-        statItemHtml(index + 1, player, `${goals} ${plural(goals, "goal")}`, "stat-green", goals === topGoals)
-      ).join("")
-    : statEmptyHtml("No player has scored more than 1 goal yet.");
-}
-
-/* Correct render function for this app's real function names. */
-function render() {
-  renderCards();
-  renderMatches();
-  renderGroups();
-  renderStats();
-}
-
-/* Force stats to redraw after live data and after external MVP source finishes. */
-const originalLoadDataV13 = loadData;
-loadData = async function patchedLoadDataV13(options = {}) {
-  const result = await originalLoadDataV13(options);
-  try {
-    renderStats();
-  } catch (error) {
-    console.warn("Stats redraw failed after refresh:", error);
-  }
-  return result;
-};
-
-const originalLoadExternalPlayerOfMatchAwardsV13 = loadExternalPlayerOfMatchAwards;
-loadExternalPlayerOfMatchAwards = async function patchedLoadExternalPlayerOfMatchAwardsV13(...args) {
-  const result = await originalLoadExternalPlayerOfMatchAwardsV13(...args);
-  try {
-    renderPlayerOfTheMatchAwards();
-  } catch (error) {
-    console.warn("MVP redraw failed after refresh:", error);
-  }
-  return result;
-};

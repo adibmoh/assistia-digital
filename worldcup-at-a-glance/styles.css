@@ -1284,8 +1284,7 @@ html, body { max-width:100%; overflow-x:hidden; }
   #matches table { min-width:0 !important; width:100% !important; }
 }
 
-
-/* v10: live minute label */
+/* v14: live minute label */
 .live-time {
   display: inline-block;
   margin-top: 4px;
