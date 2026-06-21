@@ -2,48 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-
-    <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZPVL9VQMR"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-SZPVL9VQMR');
-  </script>
-  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WorldCup at a Glance | Assist AI</title>
-  <meta name="description" content="WorldCup at a Glance by Assist AI: a compact live dashboard for World Cup 2026 schedule, results, standings, and statistics." />
+  <title>WorldCup at a Glance</title>
+  <meta name="description" content="A compact live dashboard for World Cup 2026 schedule, results, standings, and statistics." />
   <link rel="canonical" href="https://assistia.digital/worldcup-at-a-glance/" />
-  <meta name="robots" content="index,follow" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="assist-bar">
-    <a href="../index.html" class="assist-brand">Assist <span>AI</span></a>
-    <nav aria-label="Assist AI links">
-      <a href="../index.html">Home</a>
+  <header class="assist-bar" aria-label="Site navigation">
+    <a href="../" class="assist-brand">Assist AI</a>
+    <nav>
+      <a href="../">Home</a>
       <a href="../about.html">About</a>
       <a href="../privacy.html">Privacy</a>
       <a href="../terms.html">Terms</a>
       <a href="../contact.html">Contact</a>
     </nav>
-  </div>
+  </header>
 
   <header class="hero">
     <div class="hero-text">
-      <p class="eyebrow">Assist AI tool</p>
       <h1>WorldCup at a Glance</h1>
-      <p class="subtitle">A compact live dashboard for World Cup 2026 schedule, results, standings, and statistics — refreshed on launch and every 5 minutes.</p>
+      <p class="subtitle">A compact live dashboard for World Cup 2026 schedule, results, standings, and statistics.</p>
     </div>
     <div class="actions">
       <button id="refreshBtn">Refresh</button>
-      <label class="toggle">
-        <input id="autoRefresh" type="checkbox" checked />
-        Auto 5 min
-      </label>
+      <input id="autoRefresh" type="checkbox" hidden aria-hidden="true" />
     </div>
   </header>
 
@@ -116,7 +100,7 @@
 
   <footer>
     <p>Match times are converted to the time zone of the device opening this application.</p>
-    <p class="tool-note">WorldCup at a Glance is an Assist AI tool. Data availability depends on the live data source.</p>
+    <p>Data availability depends on live data sources.</p>
   </footer>
 
   <script src="app.js"></script>
