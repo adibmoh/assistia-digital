@@ -1298,3 +1298,40 @@ html, body { max-width:100%; overflow-x:hidden; }
 /* v22: small live-time and mobile guard */
 .live-time { display:inline-block; margin-top:4px; color:#38bdf8; font-weight:700; font-size:.8rem; white-space:nowrap; }
 html, body { max-width: 100%; overflow-x: hidden; }
+
+
+/* v23 logo header */
+.assist-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255,255,255,.04);
+}
+
+.assist-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  display: block;
+}
+
+.assist-logo-link:hover {
+  opacity: .92;
+  transform: translateY(-1px);
+}
+
+@media(max-width:700px){
+  .assist-logo-link {
+    width: 34px;
+    height: 34px;
+  }
+  .assist-logo {
+    width: 34px;
+    height: 34px;
+  }
+}

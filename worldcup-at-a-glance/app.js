@@ -2153,3 +2153,187 @@ async function loadData() {
 }
 
 console.info("AssistAI WorldCup app v22 loaded: finished newest first, dynamic stats with non-empty fallback.");
+
+
+/* =========================================================
+   v23 — clean dynamic top scorer rows + logo header
+   Fixes bad parsed sentence rows such as:
+   "h Japan and followed up with his team's last..."
+   ========================================================= */
+
+function isLikelyScorerNameV23(name) {
+  const cleaned = canonicalPlayerNameV22(name);
+  const key = normalizeNameKeyV22(cleaned);
+  const words = key.split(/\s+/).filter(Boolean);
+
+  if (!cleaned || cleaned.length < 3 || cleaned.length > 48) return false;
+  if (words.length < 2 || words.length > 4) return false;
+
+  // These words mean the parser captured a sentence fragment, not a player.
+  if (/\b(?:and|with|followed|team|teams|his|her|their|last|first|second|third|after|against|as|they|scored|scores|goals|assists|national|tally|latest|incredible|came|bench|game|match|world|cup|source|image|news)\b/i.test(key)) {
+    return false;
+  }
+
+  if (!/^[A-ZÀ-ÖØ-Þ]/.test(cleaned)) return false;
+  return true;
+}
+
+function isCredibleTopScorerSetV23(rows) {
+  if (!Array.isArray(rows) || rows.length < 3) return false;
+  if (rows.some((row) => !isLikelyScorerNameV23(row.name))) return false;
+
+  const keys = new Set(rows.map((row) => normalizeNameKeyV22(row.name)));
+  const hasCurrentLeaders =
+    keys.has("deniz undav") &&
+    keys.has("lionel messi") &&
+    keys.has("jonathan david");
+
+  const topGoals = Math.max(...rows.map((row) => Number(row.goals || 0)));
+
+  return hasCurrentLeaders && topGoals >= 3;
+}
+
+function rankTopScorersV22(rows) {
+  const merged = new Map();
+
+  for (const row of rows || []) {
+    const name = canonicalPlayerNameV22(row.name);
+    const country = normalizeCountryV22(row.country);
+    const goals = Number(row.goals || 0);
+    let assists = Number(row.assists || 0);
+
+    if (!name || !country || goals < TOP_SCORER_MIN_GOALS_V22) continue;
+    if (!isLikelyScorerNameV23(name)) continue;
+
+    const key = `${normalizeNameKeyV22(name)}|||${normalizeNameKeyV22(country)}`;
+    assists = Math.max(assists, TOP_SCORER_ASSIST_HINTS_V22[key] || 0);
+
+    const current = merged.get(key) || {
+      name,
+      country,
+      goals: 0,
+      assists: 0,
+      sourceRank: row.sourceRank || 999,
+      sourceOrder: row.sourceOrder || 9999
+    };
+
+    current.goals = Math.max(current.goals, goals);
+    current.assists = Math.max(current.assists, assists);
+    current.sourceRank = Math.min(current.sourceRank || 999, row.sourceRank || 999);
+    current.sourceOrder = Math.min(current.sourceOrder || 9999, row.sourceOrder || 9999);
+
+    merged.set(key, current);
+  }
+
+  const sorted = [...merged.values()].sort((a, b) =>
+    Number(b.goals) - Number(a.goals) ||
+    Number(b.assists) - Number(a.assists) ||
+    Number(a.sourceRank) - Number(b.sourceRank) ||
+    Number(a.sourceOrder) - Number(b.sourceOrder) ||
+    a.name.localeCompare(b.name)
+  );
+
+  let previousGoals = null;
+  let previousAssists = null;
+  let previousRank = 0;
+
+  return sorted.map((player, index) => {
+    const tiedWithPrevious =
+      Number(player.goals) === Number(previousGoals) &&
+      Number(player.assists || 0) === Number(previousAssists || 0);
+
+    const rank = tiedWithPrevious ? previousRank : index + 1;
+
+    previousGoals = Number(player.goals);
+    previousAssists = Number(player.assists || 0);
+    previousRank = rank;
+
+    const tied = sorted.some((item, i) =>
+      i !== index &&
+      Number(item.goals) === Number(player.goals) &&
+      Number(item.assists || 0) === Number(player.assists || 0)
+    );
+
+    return { ...player, rank: tied ? `T-${rank}` : String(rank) };
+  });
+}
+
+async function loadDynamicTopScorersV22() {
+  const errors = [];
+
+  for (const source of TOP_SCORER_SOURCES_V22) {
+    for (const url of source.urls) {
+      try {
+        const text = await fetchTextNoStoreV22(url);
+        const rows = parseTopScorersFromTextV22(text);
+
+        if (isCredibleTopScorerSetV23(rows)) {
+          state.dynamicTopScorers = rows;
+          state.dynamicTopScorersStatus = "loaded";
+          state.dynamicTopScorersSourceName = source.name;
+          state.dynamicTopScorersUpdatedAt = new Date().toISOString();
+          return rows;
+        }
+
+        errors.push(`${source.name}: parsed rows were not credible`);
+      } catch (error) {
+        errors.push(`${source.name}: ${error.message || error}`);
+      }
+    }
+  }
+
+  // Safe checked snapshot instead of showing bad sentence fragments.
+  state.dynamicTopScorers = LAST_CHECKED_TOP_SCORERS_V22;
+  state.dynamicTopScorersStatus = "fallback";
+  state.dynamicTopScorersSourceName = "checked snapshot";
+  state.dynamicTopScorersError = errors.join(" | ");
+  return state.dynamicTopScorers;
+}
+
+function renderTopScorers() {
+  const candidateRows = Array.isArray(state.dynamicTopScorers) && state.dynamicTopScorers.length
+    ? state.dynamicTopScorers
+    : LAST_CHECKED_TOP_SCORERS_V22;
+
+  const rows = rankTopScorersV22(candidateRows);
+  const topGoals = rows.length ? Number(rows[0].goals || 0) : null;
+
+  $("topScorers").innerHTML = rows.length
+    ? rows.map((player) =>
+        statItemHtml(
+          player.rank || "",
+          displayTopScorerNameV22(player),
+          topScorerValueLabelV22(player),
+          "stat-green",
+          Number(player.goals || 0) === topGoals
+        )
+      ).join("")
+    : statEmptyHtml("Top scorer data is not available yet.");
+}
+
+function renderPlayerOfTheMatchAwards() {
+  const rows = Array.isArray(state.dynamicMvpAwards) && state.dynamicMvpAwards.length
+    ? state.dynamicMvpAwards
+    : LAST_CHECKED_MVP_AWARDS_V22;
+
+  const cleanedRows = rows.map((player) => ({
+    ...player,
+    name: canonicalMvpNameV22(player.name)
+  }));
+
+  const topAwards = cleanedRows.length ? Number(cleanedRows[0].awards || 0) : null;
+
+  $("mostPlayerOfMatch").innerHTML = cleanedRows.length
+    ? cleanedRows.map((player) =>
+        statItemHtml(
+          player.rank || "",
+          player.name,
+          `${player.awards} ${plural(player.awards, "award")}`,
+          "stat-blue",
+          Number(player.awards || 0) === topAwards
+        )
+      ).join("")
+    : statEmptyHtml("No player has more than one MVP award yet.");
+}
+
+console.info("AssistAI WorldCup app v23 loaded: bad top-scorer sentence rows removed; logo header ready.");
