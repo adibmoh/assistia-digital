@@ -1,16 +1,14 @@
-WorldCup PWA v27 — desktop logo fix
+WorldCup PWA v28 — compact standings
 
 Fix:
-- Prevents AssistAI logo from appearing as a huge desktop banner.
-- Logo remains only as a small top-left header icon.
-- Service worker cache bumped to v27.
+- Removes the oversized standings cards on mobile.
+- Mobile standings are now compact rows:
+  # | Team | Pts | GD | Status
+- No wrapped/broken columns.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/
 
-Important after deployment:
-1. Desktop: Ctrl + F5.
-2. If huge logo still appears, unregister old service worker:
-   Chrome/Edge DevTools -> Application -> Service Workers -> Unregister
-   then reload.
-3. Mobile: clear site storage if old PWA cache remains.
+After deployment:
+- Desktop: Ctrl + F5
+- Mobile: clear site storage if old PWA cache remains.

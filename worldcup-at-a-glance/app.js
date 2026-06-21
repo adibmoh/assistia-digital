@@ -847,28 +847,26 @@ function renderGroups() {
         </tbody>
       </table>
 
-      <div class="standings-mobile-cards" aria-label="Group ${escapeHtml(groupName)} mobile standings">
+      <div class="standings-mobile-list" aria-label="Group ${escapeHtml(groupName)} mobile standings">
+        <div class="standing-mobile-header">
+          <span>#</span>
+          <span>Team</span>
+          <span>Pts</span>
+          <span>GD</span>
+          <span>Status</span>
+        </div>
+
         ${teams.map((team) => {
           const q = qualificationFor(groupName, team.name);
 
           return `
-            <section class="standing-mobile-card ${q.rowClass}">
-              <div class="standing-mobile-top">
-                <span class="standing-rank">${team.rank}</span>
-                <span class="standing-team">${escapeHtml(team.name)}</span>
-                <span class="standing-status ${q.textClass}">${escapeHtml(q.shortLabel || q.label)}</span>
-              </div>
-              <div class="standing-mobile-stats">
-                <span><b>${team.points}</b><small>Pts</small></span>
-                <span><b>${team.played}</b><small>P</small></span>
-                <span><b>${team.won}</b><small>W</small></span>
-                <span><b>${team.drawn}</b><small>D</small></span>
-                <span><b>${team.lost}</b><small>L</small></span>
-                <span><b>${team.gf}</b><small>GF</small></span>
-                <span><b>${team.ga}</b><small>GA</small></span>
-                <span><b>${team.diff}</b><small>GD</small></span>
-              </div>
-            </section>
+            <div class="standing-mobile-row ${q.rowClass}">
+              <span class="standing-rank">${team.rank}</span>
+              <span class="standing-team">${escapeHtml(team.name)}</span>
+              <span class="standing-pts">${team.points}</span>
+              <span class="standing-gd">${team.diff}</span>
+              <span class="standing-status ${q.textClass}">${escapeHtml(q.shortLabel || q.label)}</span>
+            </div>
           `;
         }).join("")}
       </div>
@@ -2405,3 +2403,6 @@ document.addEventListener("DOMContentLoaded", fixOversizedLogoV27);
 window.addEventListener("load", fixOversizedLogoV27);
 
 console.info("AssistAI WorldCup app v27 loaded: desktop oversized logo hidden.");
+
+
+console.info("AssistAI WorldCup app v28 loaded: compact mobile standings rows.");

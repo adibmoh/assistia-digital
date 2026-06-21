@@ -1762,3 +1762,148 @@ img.assist-logo:not(.assist-bar img):not(.assist-logo-link img) {
     max-height: 34px !important;
   }
 }
+
+
+/* =========================================================
+   v28 — compact mobile standings, no huge cards
+   ========================================================= */
+
+.standings-mobile-list {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .group-card {
+    padding: 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .group-card h2 {
+    font-size: 1rem !important;
+    margin: 0 0 8px !important;
+  }
+
+  .group-card table.standings-table,
+  .group-card table.standings-desktop-table,
+  .standings-mobile-cards,
+  .standing-mobile-card {
+    display: none !important;
+  }
+
+  .standings-mobile-list {
+    display: block !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    border-radius: 12px !important;
+    background: rgba(255,255,255,.018) !important;
+  }
+
+  .standing-mobile-header,
+  .standing-mobile-row {
+    display: grid !important;
+    grid-template-columns: 28px minmax(0, 1fr) 42px 42px 46px !important;
+    gap: 6px !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .standing-mobile-header {
+    padding: 7px 8px !important;
+    color: var(--muted) !important;
+    font-size: .58rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: .05em !important;
+    border-bottom: 1px solid rgba(255,255,255,.07) !important;
+  }
+
+  .standing-mobile-row {
+    padding: 8px 8px !important;
+    min-height: 42px !important;
+    border-bottom: 1px solid rgba(255,255,255,.055) !important;
+    background: transparent !important;
+  }
+
+  .standing-mobile-row:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .standing-rank,
+  .standing-team,
+  .standing-pts,
+  .standing-gd,
+  .standing-status {
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    line-height: 1.1 !important;
+  }
+
+  .standing-rank {
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    text-align: center !important;
+    font-size: .78rem !important;
+    font-weight: 800 !important;
+    color: var(--muted) !important;
+    display: block !important;
+  }
+
+  .standing-team {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: .80rem !important;
+    font-weight: 700 !important;
+    color: var(--text) !important;
+  }
+
+  .standing-pts {
+    text-align: right !important;
+    font-size: .82rem !important;
+    font-weight: 900 !important;
+    color: var(--accent-2) !important;
+  }
+
+  .standing-gd {
+    text-align: right !important;
+    font-size: .76rem !important;
+    font-weight: 700 !important;
+    color: var(--muted) !important;
+  }
+
+  .standing-status {
+    text-align: right !important;
+    font-size: .68rem !important;
+    font-weight: 900 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .standing-mobile-header,
+  .standing-mobile-row {
+    grid-template-columns: 24px minmax(0, 1fr) 34px 34px 38px !important;
+    gap: 4px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  .standing-team {
+    font-size: .74rem !important;
+  }
+
+  .standing-pts {
+    font-size: .78rem !important;
+  }
+
+  .standing-gd,
+  .standing-status {
+    font-size: .64rem !important;
+  }
+}
