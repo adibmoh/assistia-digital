@@ -1513,3 +1513,738 @@ function renderMatches() {
 
   body.innerHTML = html.join("");
 }
+
+
+/* =========================================================
+   Patch v15 — restore data with official API + GitHub raw fallback
+   Reason: the public API can sometimes return no JSON data, auth/CORS errors,
+   or temporary failures. This keeps the app populated instead of blank.
+   ========================================================= */
+
+const FALLBACK_DATA_SOURCES_V15 = {
+  "/get/games": [
+    "https://raw.githubusercontent.com/rezarahiminia/worldcup2026/refs/heads/main/football.matches.json",
+    "https://raw.githubusercontent.com/rezarahiminia/worldcup2026/main/football.matches.json"
+  ],
+  "/get/groups": [
+    "https://raw.githubusercontent.com/rezarahiminia/worldcup2026/refs/heads/main/football.matchtables.json",
+    "https://raw.githubusercontent.com/rezarahiminia/worldcup2026/main/football.matchtables.json"
+  ],
+  "/get/teams": [
+    "https://raw.githubusercontent.com/rezarahiminia/worldcup2026/refs/heads/main/football.teams.json",
+    "https://raw.githubusercontent.com/rezarahiminia/worldcup2026/main/football.teams.json"
+  ],
+  "/get/stadiums": [
+    "https://raw.githubusercontent.com/rezarahiminia/worldcup2026/refs/heads/main/football.stadiums.json",
+    "https://raw.githubusercontent.com/rezarahiminia/worldcup2026/main/football.stadiums.json"
+  ]
+};
+
+async function fetchJson(path) {
+  const officialUrl = `${API_BASE}${path}?t=${Date.now()}`;
+  const urls = [
+    officialUrl,
+    ...(FALLBACK_DATA_SOURCES_V15[path] || [])
+  ];
+
+  const errors = [];
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error(`${response.status} ${response.statusText}`);
+      }
+
+      const json = await response.json();
+      const arr = extractArray(json);
+
+      // Some failing API responses are valid JSON but contain no useful data.
+      // Treat them as failure and try the next source.
+      if (!arr.length) {
+        throw new Error("response contained no usable array data");
+      }
+
+      if (url !== officialUrl) {
+        console.warn(`WorldCup data fallback used for ${path}:`, url);
+      }
+
+      return json;
+    } catch (error) {
+      errors.push(`${url} → ${error.message || error}`);
+    }
+  }
+
+  throw new Error(`All data sources failed for ${path}: ${errors.join(" | ")}`);
+}
+
+const originalLoadDataV15 = loadData;
+loadData = async function patchedLoadDataV15() {
+  await originalLoadDataV15();
+
+  // Make the source state clearer for the visitor.
+  const hasData =
+    (state.matches && state.matches.length) ||
+    (state.groups && state.groups.length) ||
+    (state.teams && state.teams.length);
+
+  if (!hasData) {
+    setStatus("No WorldCup data could be loaded from the live API or fallback source.", true);
+    setLoadingState(
+      "has-error",
+      "No WorldCup data could be loaded. Please hard refresh or try again later.",
+      "Error"
+    );
+  }
+};
+
+
+/* =========================================================
+   Patch v17 — DYNAMIC top scorers
+   No hard-coded scorer table.
+   Sources tried on every refresh:
+   1) ESPN statistics leaderboard JSON
+   2) live/finished ESPN scoreboard goal events
+   3) public Golden Boot pages through Jina Reader
+   4) Wikipedia goalscorers module through MediaWiki API
+   Final fallback: the app's own match-event data only.
+   ========================================================= */
+
+state.dynamicTopScorers = [];
+state.dynamicTopScorersStatus = "idle";
+state.dynamicTopScorersSource = "";
+state.dynamicTopScorersUpdated = "";
+
+const TOP_SCORERS_MIN_GOALS_V17 = 2;
+
+const ESPN_TOP_SCORER_URLS_V17 = [
+  "https://site.web.api.espn.com/apis/common/v3/sports/soccer/fifa.world/statistics/byathlete?region=us&lang=en&contentorigin=espn&limit=100&category=scoring&sort=totalGoals:desc",
+  "https://site.web.api.espn.com/apis/common/v3/sports/soccer/fifa.world/statistics/byathlete?region=us&lang=en&contentorigin=espn&limit=100&category=general&sort=totalGoals:desc",
+  "https://site.web.api.espn.com/apis/common/v3/sports/soccer/fifa.world/statistics/byathlete?region=us&lang=en&contentorigin=espn&limit=100&sort=totalGoals:desc"
+];
+
+const TOP_SCORER_READER_SOURCES_V17 = [
+  {
+    name: "The Sun Golden Boot table",
+    url: "https://www.thesun.co.uk/sport/39367358/world-cup-2026-golden-boot-who-is-leading/"
+  },
+  {
+    name: "NBC Sports top goalscorers",
+    url: "https://www.nbcsports.com/soccer/news/2026-world-cup-top-goalscorers-full-list-latest-on-race-for-the-golden-boot"
+  },
+  {
+    name: "GOAL Golden Boot standings",
+    url: "https://www.goal.com/en/lists/world-cup-2026-golden-boot-standings-fifa-award/blt29fdba0896b8fd09"
+  }
+];
+
+const FIFA_COUNTRY_CODES_V17 = {
+  ALG: "Algeria", ARG: "Argentina", AUS: "Australia", AUT: "Austria", BEL: "Belgium",
+  BIH: "Bosnia and Herzegovina", BRA: "Brazil", CAN: "Canada", CIV: "Ivory Coast",
+  COD: "DR Congo", COL: "Colombia", CRO: "Croatia", CUW: "Curaçao", CZE: "Czech Republic",
+  ECU: "Ecuador", EGY: "Egypt", ENG: "England", FRA: "France", GER: "Germany",
+  GHA: "Ghana", HAI: "Haiti", IRN: "Iran", IRQ: "Iraq", JPN: "Japan", JOR: "Jordan",
+  KOR: "South Korea", KSA: "Saudi Arabia", MAR: "Morocco", MEX: "Mexico",
+  NED: "Netherlands", NOR: "Norway", NZL: "New Zealand", PAN: "Panama",
+  PAR: "Paraguay", POR: "Portugal", QAT: "Qatar", RSA: "South Africa",
+  SCO: "Scotland", SEN: "Senegal", ESP: "Spain", SUI: "Switzerland", SWE: "Sweden",
+  TUN: "Tunisia", TUR: "Turkey", URU: "Uruguay", USA: "USA", UZB: "Uzbekistan"
+};
+
+function normalizeTopScorerKeyV17(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’']/g, "")
+    .replace(/\./g, "")
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function cleanTopScorerNameV17(value) {
+  return String(value || "")
+    .replace(/[“”„«»]/g, '"')
+    .replace(/[‘’‚]/g, "'")
+    .replace(/^["'\s]+|["'\s]+$/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\[\[|\]\]/g, "")
+    .replace(/^[*#\-\s]+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function cleanWikiPlayerNameV17(value) {
+  let name = cleanTopScorerNameV17(value);
+  if (name.includes("|")) name = name.split("|").pop();
+  return cleanTopScorerNameV17(name);
+}
+
+function numberFromWordsV17(value) {
+  const text = String(value || "").trim().toLowerCase();
+  const map = {
+    zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5,
+    six: 6, seven: 7, eight: 8, nine: 9, ten: 10
+  };
+
+  const digit = text.match(/\d+/);
+  if (digit) return Number(digit[0]);
+
+  for (const [word, number] of Object.entries(map)) {
+    if (new RegExp(`\\b${word}\\b`, "i").test(text)) return number;
+  }
+
+  return null;
+}
+
+function mergeTopScorerRowsV17(rows, sourceName = "") {
+  const merged = new Map();
+
+  for (const row of rows || []) {
+    const name = cleanTopScorerNameV17(row.name);
+    const country = cleanTopScorerNameV17(row.country || row.team || "");
+    const goals = Number(row.goals);
+    const assists = Number(row.assists || 0);
+
+    if (!name || !Number.isFinite(goals) || goals < TOP_SCORERS_MIN_GOALS_V17) continue;
+
+    const key = `${normalizeTopScorerKeyV17(name)}|||${normalizeTopScorerKeyV17(country)}`;
+    const current = merged.get(key) || {
+      name,
+      country,
+      goals: 0,
+      assists: 0,
+      source: sourceName
+    };
+
+    current.name = name;
+    current.country = country || current.country;
+    current.goals = Math.max(Number(current.goals || 0), goals);
+    current.assists = Math.max(Number(current.assists || 0), assists);
+    current.source = sourceName || current.source;
+
+    merged.set(key, current);
+  }
+
+  return rankTopScorersV17([...merged.values()]);
+}
+
+function rankTopScorersV17(rows) {
+  const sorted = [...(rows || [])]
+    .filter((row) => Number(row.goals) >= TOP_SCORERS_MIN_GOALS_V17)
+    .sort((a, b) =>
+      Number(b.goals || 0) - Number(a.goals || 0) ||
+      Number(b.assists || 0) - Number(a.assists || 0) ||
+      String(a.name).localeCompare(String(b.name))
+    );
+
+  let previousKey = "";
+  let previousRank = 0;
+
+  return sorted.map((row, index) => {
+    const tieKey = `${Number(row.goals || 0)}|||${Number(row.assists || 0)}`;
+    const rank = tieKey === previousKey ? previousRank : index + 1;
+
+    previousKey = tieKey;
+    previousRank = rank;
+
+    const tiedCount = sorted.filter((item) =>
+      Number(item.goals || 0) === Number(row.goals || 0) &&
+      Number(item.assists || 0) === Number(row.assists || 0)
+    ).length;
+
+    return {
+      ...row,
+      rank: tiedCount > 1 ? `T-${rank}` : String(rank)
+    };
+  });
+}
+
+function topScorerValueLabelV17(player) {
+  const goals = Number(player.goals || 0);
+  const assists = Number(player.assists || 0);
+  const goalsLabel = `${goals} ${plural(goals, "goal")}`;
+  return assists ? `${goalsLabel} (${assists} ${plural(assists, "assist")})` : goalsLabel;
+}
+
+function displayTopScorerNameV17(player) {
+  return player.country ? `${player.name} (${player.country})` : player.name;
+}
+
+async function fetchJsonNoStoreV17(url, timeoutMs = 8000) {
+  const response = typeof fetchWithTimeout === "function"
+    ? await fetchWithTimeout(url, timeoutMs)
+    : await fetch(url, { cache: "no-store" });
+
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  return response.json();
+}
+
+async function fetchTextNoStoreV17(url, timeoutMs = 8000) {
+  const response = typeof fetchWithTimeout === "function"
+    ? await fetchWithTimeout(url, timeoutMs)
+    : await fetch(url, { cache: "no-store" });
+
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  return response.text();
+}
+
+async function loadDynamicTopScorersV17() {
+  state.dynamicTopScorersStatus = "loading";
+  state.dynamicTopScorersSource = "";
+  renderTopScorers();
+
+  const attempts = [
+    fetchTopScorersFromEspnLeaderboardV17,
+    fetchTopScorersFromEspnScoreboardV17,
+    fetchTopScorersFromReaderPagesV17,
+    fetchTopScorersFromWikipediaModuleV17
+  ];
+
+  const errors = [];
+
+  for (const attempt of attempts) {
+    try {
+      const result = await attempt();
+
+      if (result && Array.isArray(result.players) && result.players.length) {
+        state.dynamicTopScorers = result.players;
+        state.dynamicTopScorersStatus = "loaded";
+        state.dynamicTopScorersSource = result.source || "Dynamic source";
+        state.dynamicTopScorersUpdated = new Date().toISOString();
+        renderTopScorers();
+        return result;
+      }
+    } catch (error) {
+      errors.push(error.message || String(error));
+      console.warn("Top scorer source failed:", error);
+    }
+  }
+
+  state.dynamicTopScorers = [];
+  state.dynamicTopScorersStatus = "error";
+  state.dynamicTopScorersSource = "";
+  console.warn("All dynamic top scorer sources failed:", errors);
+  renderTopScorers();
+  return null;
+}
+
+async function fetchTopScorersFromEspnLeaderboardV17() {
+  for (const url of ESPN_TOP_SCORER_URLS_V17) {
+    try {
+      const json = await fetchJsonNoStoreV17(url, 8000);
+      const rows = extractTopScorerRowsFromUnknownJsonV17(json);
+
+      if (rows.length) {
+        return {
+          source: "ESPN dynamic statistics",
+          players: mergeTopScorerRowsV17(rows, "ESPN dynamic statistics")
+        };
+      }
+    } catch (error) {
+      console.warn("ESPN leaderboard URL failed:", url, error);
+    }
+  }
+
+  throw new Error("ESPN statistics leaderboard did not return usable top scorer rows.");
+}
+
+function extractTopScorerRowsFromUnknownJsonV17(payload) {
+  const rows = [];
+  const seen = new Set();
+
+  function visit(node, depth = 0) {
+    if (!node || depth > 12) return;
+
+    if (Array.isArray(node)) {
+      for (const item of node) visit(item, depth + 1);
+      return;
+    }
+
+    if (typeof node !== "object") return;
+
+    const athlete = node.athlete || node.player || node.person || node.participant;
+    const name = labelOf(athlete) || labelOf(node.athleteInfo) || labelOf(node.playerInfo) || labelOf(node);
+
+    const goals = statNumberFromAnyV17(node, [
+      "totalGoals", "goals", "goal", "G", "scoring", "goalsFor"
+    ]);
+
+    const assists = statNumberFromAnyV17(node, [
+      "goalAssists", "assists", "assist", "A"
+    ]) || 0;
+
+    const country =
+      labelOf(node.team) ||
+      labelOf(node.country) ||
+      labelOf(athlete?.team) ||
+      labelOf(athlete?.country) ||
+      labelOf(node.teamInfo);
+
+    if (name && Number.isFinite(goals) && goals >= TOP_SCORERS_MIN_GOALS_V17) {
+      const key = `${normalizeTopScorerKeyV17(name)}-${normalizeTopScorerKeyV17(country)}-${goals}-${assists}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        rows.push({ name, country, goals, assists });
+      }
+    }
+
+    for (const value of Object.values(node)) visit(value, depth + 1);
+  }
+
+  visit(payload);
+  return rows;
+}
+
+function statNumberFromAnyV17(node, names) {
+  const directKeys = [
+    ...names,
+    ...names.map((name) => String(name).toLowerCase()),
+    ...names.map((name) => String(name).toUpperCase())
+  ];
+
+  for (const key of directKeys) {
+    if (node && Object.prototype.hasOwnProperty.call(node, key)) {
+      const num = numberFromWordsV17(node[key]);
+      if (Number.isFinite(num)) return num;
+    }
+  }
+
+  let found = null;
+
+  function scan(value, depth = 0) {
+    if (found !== null || !value || depth > 5) return;
+
+    if (Array.isArray(value)) {
+      for (const item of value) scan(item, depth + 1);
+      return;
+    }
+
+    if (typeof value !== "object") return;
+
+    const labels = [
+      value.name,
+      value.abbreviation,
+      value.displayName,
+      value.shortDisplayName,
+      value.label,
+      value.type
+    ].map((x) => String(x || "").toLowerCase());
+
+    const matchesName = labels.some((label) => names.some((name) => label === String(name).toLowerCase()));
+
+    if (matchesName) {
+      const val = value.value ?? value.displayValue ?? value.total ?? value.count ?? value.stat;
+      const num = numberFromWordsV17(val);
+      if (Number.isFinite(num)) {
+        found = num;
+        return;
+      }
+    }
+
+    for (const child of Object.values(value)) scan(child, depth + 1);
+  }
+
+  scan(node);
+  return found;
+}
+
+async function fetchTopScorersFromEspnScoreboardV17() {
+  const rows = [];
+  const rangeUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=500&dates=${scoreboardDateRangeV17()}`;
+
+  try {
+    const json = await fetchJsonNoStoreV17(rangeUrl, 9000);
+    rows.push(...extractGoalRowsFromEspnScoreboardV17(json));
+  } catch (error) {
+    console.warn("ESPN scoreboard range failed, trying daily calls:", error);
+  }
+
+  if (!rows.length) {
+    const dates = scoreboardDailyDatesV17();
+
+    for (const day of dates) {
+      try {
+        const json = await fetchJsonNoStoreV17(
+          `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=100&dates=${day}`,
+          6000
+        );
+        rows.push(...extractGoalRowsFromEspnScoreboardV17(json));
+      } catch (error) {
+        console.warn("ESPN scoreboard daily call failed:", day, error);
+      }
+    }
+  }
+
+  if (!rows.length) throw new Error("ESPN scoreboard returned no scorer events.");
+
+  const counts = new Map();
+
+  for (const row of rows) {
+    const name = cleanTopScorerNameV17(row.name);
+    const country = cleanTopScorerNameV17(row.country);
+    if (!name) continue;
+
+    const key = row.athleteId
+      ? `espn-${row.athleteId}`
+      : `${normalizeTopScorerKeyV17(name)}|||${normalizeTopScorerKeyV17(country)}`;
+
+    const current = counts.get(key) || {
+      name,
+      country,
+      goals: 0,
+      assists: 0
+    };
+
+    current.goals += Number(row.goals || 1);
+    current.assists += Number(row.assists || 0);
+    current.country = current.country || country;
+
+    counts.set(key, current);
+  }
+
+  return {
+    source: "ESPN live match events",
+    players: rankTopScorersV17([...counts.values()])
+  };
+}
+
+function scoreboardDateRangeV17() {
+  const start = "20260611";
+  const today = new Date();
+  const tournamentEnd = new Date(Date.UTC(2026, 6, 20));
+  const endDate = today < tournamentEnd ? today : tournamentEnd;
+  return `${start}-${dateToYmdV17(endDate)}`;
+}
+
+function scoreboardDailyDatesV17() {
+  const dates = [];
+  const start = new Date(Date.UTC(2026, 5, 11));
+  const today = new Date();
+  const tournamentEnd = new Date(Date.UTC(2026, 6, 20));
+  const end = today < tournamentEnd ? today : tournamentEnd;
+
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    dates.push(dateToYmdV17(d));
+  }
+
+  return dates;
+}
+
+function dateToYmdV17(date) {
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, "0"),
+    String(date.getUTCDate()).padStart(2, "0")
+  ].join("");
+}
+
+function extractGoalRowsFromEspnScoreboardV17(json) {
+  const rows = [];
+
+  for (const event of json?.events || []) {
+    for (const competition of event?.competitions || []) {
+      const teamById = new Map();
+
+      for (const competitor of competition?.competitors || []) {
+        const team = competitor.team || {};
+        teamById.set(String(team.id || competitor.id || ""), team.displayName || team.shortDisplayName || team.name || competitor.displayName || "");
+      }
+
+      for (const detail of competition?.details || []) {
+        const typeText = `${detail?.type?.text || ""} ${detail?.type?.description || ""}`.toLowerCase();
+        const isGoal = detail?.scoringPlay === true || /goal/.test(typeText);
+
+        if (!isGoal || detail?.ownGoal === true || /own goal/.test(typeText)) continue;
+
+        const athlete = Array.isArray(detail.athletesInvolved) ? detail.athletesInvolved[0] : null;
+        const name = athlete?.displayName || athlete?.fullName || athlete?.shortName || "";
+
+        if (!name) continue;
+
+        const teamId = String(detail?.team?.id || athlete?.team?.id || "");
+        rows.push({
+          athleteId: athlete.id || "",
+          name,
+          country: teamById.get(teamId) || "",
+          goals: 1,
+          assists: 0
+        });
+      }
+    }
+  }
+
+  return rows;
+}
+
+async function fetchTopScorersFromReaderPagesV17() {
+  for (const source of TOP_SCORER_READER_SOURCES_V17) {
+    try {
+      const text = await fetchTextNoStoreV17(`https://r.jina.ai/${source.url}`, 9000);
+      const rows = parseTopScorerRowsFromTextV17(text);
+
+      if (rows.length) {
+        return {
+          source: source.name,
+          players: mergeTopScorerRowsV17(rows, source.name)
+        };
+      }
+    } catch (error) {
+      console.warn("Reader top scorer source failed:", source.name, error);
+    }
+  }
+
+  throw new Error("Reader pages returned no usable top scorer table.");
+}
+
+function parseTopScorerRowsFromTextV17(text) {
+  const rows = [];
+  const lines = String(text || "")
+    .split(/\r?\n/)
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  let currentGoals = null;
+
+  for (const line of lines) {
+    let m = line.match(/^(?:[#*\-\s]*)(?:\d+|T[-–]?\d+)\s+(.+?)\s*\(([^)]+)\)\s*[-–—]\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten)(?:\s*\((\d+|one|two|three|four|five)\s*assists?\))?/i);
+    if (m) {
+      rows.push({
+        name: cleanTopScorerNameV17(m[1]),
+        country: cleanTopScorerNameV17(m[2]),
+        goals: numberFromWordsV17(m[3]),
+        assists: numberFromWordsV17(m[4] || 0) || 0
+      });
+      continue;
+    }
+
+    m = line.match(/^#{1,4}\s*(?:\d+|T[-–]?\d+)?\s*([A-ZÀ-ÖØ-Þ][^|]+?)\s*\|\s*([^|]+?)\s*\|\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+goals?/i);
+    if (m) {
+      rows.push({
+        name: cleanTopScorerNameV17(m[1]),
+        country: cleanTopScorerNameV17(m[2]),
+        goals: numberFromWordsV17(m[3]),
+        assists: 0
+      });
+      continue;
+    }
+
+    m = line.match(/^#{1,5}\s*(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+goals?/i);
+    if (m) {
+      currentGoals = numberFromWordsV17(m[1]);
+      continue;
+    }
+
+    if (currentGoals) {
+      m = line.match(/^[-*]?\s*([A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ.'’ -]{2,60})\s*\(([^)]+)\)\s*$/);
+      if (m) {
+        rows.push({
+          name: cleanTopScorerNameV17(m[1]),
+          country: cleanTopScorerNameV17(m[2]),
+          goals: currentGoals,
+          assists: 0
+        });
+      }
+    }
+  }
+
+  return rows;
+}
+
+async function fetchTopScorersFromWikipediaModuleV17() {
+  const apiUrl = "https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=revisions&titles=Module:Goalscorers/data/2026_FIFA_World_Cup&rvprop=content&rvslots=main";
+  const json = await fetchJsonNoStoreV17(apiUrl, 9000);
+
+  const pages = json?.query?.pages || {};
+  const page = Object.values(pages)[0] || {};
+  const content =
+    page?.revisions?.[0]?.slots?.main?.["*"] ||
+    page?.revisions?.[0]?.["*"] ||
+    "";
+
+  const rows = [];
+  const regex = /\{\s*"\[\[([^\]]+)\]\]"\s*,\s*"([A-Z]{3})"\s*,\s*(\d+)\s*\}/g;
+  let match;
+
+  while ((match = regex.exec(content)) !== null) {
+    const name = cleanWikiPlayerNameV17(match[1]);
+    const country = FIFA_COUNTRY_CODES_V17[match[2]] || match[2];
+    const goals = Number(match[3]);
+
+    rows.push({ name, country, goals, assists: 0 });
+  }
+
+  if (!rows.length) throw new Error("Wikipedia goalscorers module returned no rows.");
+
+  return {
+    source: "Wikipedia goalscorers module",
+    players: mergeTopScorerRowsV17(rows, "Wikipedia goalscorers module")
+  };
+}
+
+function buildTopScorersFromMatchEventsOnlyV17() {
+  const counts = new Map();
+
+  for (const match of state.matches || []) {
+    const events = extractGoalScorers(match.original);
+
+    for (const scorer of events) {
+      const rawName = Array.isArray(scorer)
+        ? scorer[0]
+        : (scorer && typeof scorer === "object")
+          ? (scorer.name || scorer.player || scorer.scorer || scorer.player_name || scorer.fullName)
+          : scorer;
+
+      const name = cleanTopScorerNameV17(cleanPlayerName(rawName));
+      if (!name || isNoiseName(name)) continue;
+
+      const key = normalizeTopScorerKeyV17(name);
+      const current = counts.get(key) || { name, country: "", goals: 0, assists: 0 };
+
+      current.goals += 1;
+      counts.set(key, current);
+    }
+  }
+
+  return rankTopScorersV17([...counts.values()]);
+}
+
+function renderTopScorers() {
+  if (state.dynamicTopScorersStatus === "loading") {
+    $("topScorers").innerHTML = statEmptyHtml("Loading dynamic top scorers…");
+    return;
+  }
+
+  const dynamicRows = Array.isArray(state.dynamicTopScorers) ? state.dynamicTopScorers : [];
+  const rows = dynamicRows.length ? dynamicRows : buildTopScorersFromMatchEventsOnlyV17();
+  const topGoals = rows.length ? Number(rows[0].goals || 0) : null;
+
+  $("topScorers").innerHTML = rows.length
+    ? rows.map((player) =>
+        statItemHtml(
+          player.rank || "",
+          displayTopScorerNameV17(player),
+          topScorerValueLabelV17(player),
+          "stat-green",
+          Number(player.goals || 0) === topGoals
+        )
+      ).join("")
+    : statEmptyHtml("Dynamic top scorer data is not available yet.");
+}
+
+/* Hook dynamic top scorers into every manual and automatic refresh. */
+const originalLoadDataV17 = loadData;
+loadData = async function patchedLoadDataV17(...args) {
+  const result = await originalLoadDataV17(...args);
+
+  try {
+    await loadDynamicTopScorersV17();
+  } catch (error) {
+    console.warn("Dynamic top scorers refresh failed:", error);
+    state.dynamicTopScorersStatus = "error";
+    renderTopScorers();
+  }
+
+  return result;
+};

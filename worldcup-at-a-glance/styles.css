@@ -1293,3 +1293,9 @@ html, body { max-width:100%; overflow-x:hidden; }
   font-size: 0.8rem;
   white-space: nowrap;
 }
+
+
+/* v17 dynamic top scorer refresh note support */
+.stat-empty {
+  line-height: 1.35;
+}
