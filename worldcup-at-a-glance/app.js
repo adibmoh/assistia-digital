@@ -3710,3 +3710,239 @@ loadData = async function patchedLoadDataV37(...args) {
 };
 
 console.info("AssistAI WorldCup app v37 loaded: finished dates forced corrected; stats refresh; top scorer tiers limited.");
+
+
+/* =========================================================
+   v38 — exact scorer tiers + Mikel assist + forced date map
+   ========================================================= */
+
+const FIXTURE_DATE_OVERRIDES_V38 = {
+  "mexico|south africa": "2026-06-11T21:00:00",
+  "south korea|czechia": "2026-06-12T04:00:00",
+  "canada|bosnia and herzegovina": "2026-06-12T21:00:00",
+  "united states|paraguay": "2026-06-13T03:00:00",
+  "qatar|switzerland": "2026-06-13T21:00:00",
+  "brazil|morocco": "2026-06-14T00:00:00",
+  "haiti|scotland": "2026-06-14T03:00:00",
+  "australia|turkey": "2026-06-14T06:00:00",
+  "germany|curacao": "2026-06-14T19:00:00",
+  "germany|curaçao": "2026-06-14T19:00:00",
+  "netherlands|japan": "2026-06-14T22:00:00",
+  "ivory coast|ecuador": "2026-06-15T01:00:00",
+  "sweden|tunisia": "2026-06-15T04:00:00",
+  "spain|cape verde": "2026-06-15T18:00:00",
+  "belgium|egypt": "2026-06-15T21:00:00",
+  "saudi arabia|uruguay": "2026-06-16T00:00:00",
+  "iran|new zealand": "2026-06-16T03:00:00",
+  "france|senegal": "2026-06-16T21:00:00",
+  "iraq|norway": "2026-06-17T00:00:00",
+  "argentina|algeria": "2026-06-17T03:00:00",
+  "austria|jordan": "2026-06-17T06:00:00",
+  "portugal|dr congo": "2026-06-17T19:00:00",
+  "portugal|democratic republic of the congo": "2026-06-17T19:00:00",
+  "england|croatia": "2026-06-17T22:00:00",
+  "ghana|panama": "2026-06-18T01:00:00",
+  "uzbekistan|colombia": "2026-06-18T04:00:00",
+  "czechia|south africa": "2026-06-18T18:00:00",
+  "czech republic|south africa": "2026-06-18T18:00:00",
+  "switzerland|bosnia and herzegovina": "2026-06-18T21:00:00",
+  "canada|qatar": "2026-06-19T00:00:00",
+  "mexico|south korea": "2026-06-19T03:00:00",
+  "united states|australia": "2026-06-19T21:00:00",
+  "scotland|morocco": "2026-06-20T00:00:00",
+  "brazil|haiti": "2026-06-20T02:30:00",
+  "turkey|paraguay": "2026-06-20T05:00:00",
+  "netherlands|sweden": "2026-06-20T19:00:00",
+  "germany|ivory coast": "2026-06-20T22:00:00",
+  "ecuador|curacao": "2026-06-21T02:00:00",
+  "ecuador|curaçao": "2026-06-21T02:00:00",
+  "tunisia|japan": "2026-06-21T06:00:00",
+  "spain|saudi arabia": "2026-06-21T18:00:00",
+  "belgium|iran": "2026-06-21T21:00:00",
+  "uruguay|cape verde": "2026-06-22T00:00:00",
+  "new zealand|egypt": "2026-06-22T03:00:00",
+  "argentina|austria": "2026-06-22T19:00:00",
+  "france|iraq": "2026-06-22T23:00:00",
+  "norway|senegal": "2026-06-23T02:00:00",
+  "jordan|algeria": "2026-06-23T05:00:00",
+  "portugal|uzbekistan": "2026-06-23T19:00:00",
+  "england|ghana": "2026-06-23T22:00:00",
+  "panama|croatia": "2026-06-24T01:00:00",
+  "colombia|dr congo": "2026-06-24T04:00:00",
+  "colombia|democratic republic of the congo": "2026-06-24T04:00:00",
+  "switzerland|canada": "2026-06-24T21:00:00",
+  "bosnia and herzegovina|qatar": "2026-06-24T21:00:00",
+  "scotland|brazil": "2026-06-25T00:00:00",
+  "morocco|haiti": "2026-06-25T00:00:00",
+  "czechia|mexico": "2026-06-25T03:00:00",
+  "czech republic|mexico": "2026-06-25T03:00:00",
+  "south africa|south korea": "2026-06-25T03:00:00",
+  "ecuador|germany": "2026-06-25T22:00:00",
+  "curacao|ivory coast": "2026-06-25T22:00:00",
+  "curaçao|ivory coast": "2026-06-25T22:00:00",
+  "tunisia|netherlands": "2026-06-26T01:00:00",
+  "japan|sweden": "2026-06-26T01:00:00",
+  "turkey|united states": "2026-06-26T04:00:00",
+  "paraguay|australia": "2026-06-26T04:00:00",
+  "norway|france": "2026-06-26T21:00:00",
+  "senegal|iraq": "2026-06-26T21:00:00",
+  "uruguay|spain": "2026-06-27T02:00:00",
+  "cape verde|saudi arabia": "2026-06-27T02:00:00",
+  "new zealand|belgium": "2026-06-27T05:00:00",
+  "egypt|iran": "2026-06-27T05:00:00",
+  "panama|england": "2026-06-27T23:00:00",
+  "croatia|ghana": "2026-06-27T23:00:00",
+  "colombia|portugal": "2026-06-28T01:30:00",
+  "dr congo|uzbekistan": "2026-06-28T01:30:00",
+  "democratic republic of the congo|uzbekistan": "2026-06-28T01:30:00",
+  "jordan|argentina": "2026-06-28T04:00:00",
+  "algeria|austria": "2026-06-28T04:00:00"
+};
+
+const VERIFIED_TOP_SCORERS_V38 = [
+  { name: "Deniz Undav", country: "Germany", goals: 3, assists: 2 },
+  { name: "Lionel Messi", country: "Argentina", goals: 3, assists: 0 },
+  { name: "Jonathan David", country: "Canada", goals: 3, assists: 0 },
+  { name: "Ayase Ueda", country: "Japan", goals: 2, assists: 1 },
+  { name: "Crysencio Summerville", country: "Netherlands", goals: 2, assists: 1 },
+  { name: "Cody Gakpo", country: "Netherlands", goals: 2, assists: 1 },
+  { name: "Vinícius Júnior", country: "Brazil", goals: 2, assists: 1 },
+  { name: "Mikel Oyarzabal", country: "Spain", goals: 2, assists: 1 }
+];
+
+function fixtureKeyV38(home, away) {
+  return [home, away].map((name) =>
+    String(name || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/czech republic/g, "czechia")
+      .replace(/democratic republic of the congo/g, "dr congo")
+      .replace(/d r congo/g, "dr congo")
+      .replace(/usa/g, "united states")
+      .replace(/curaçao/g, "curacao")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim()
+  ).join("|");
+}
+
+function correctedFixtureDateV38(match) {
+  const iso = FIXTURE_DATE_OVERRIDES_V38[fixtureKeyV38(match?.home, match?.away)];
+  if (iso) {
+    const d = new Date(iso);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+  const parsed = parseDate(match?.rawDate);
+  if (parsed instanceof Date && !Number.isNaN(parsed.getTime())) return parsed;
+  return match?.date || null;
+}
+
+function correctedFixtureDateV37(match) { return correctedFixtureDateV38(match); }
+function correctedFixtureDateV36(match) { return correctedFixtureDateV38(match); }
+function correctedFixtureDateV34(match) { return correctedFixtureDateV38(match); }
+
+function formatFixtureDateV37(match) {
+  const d = correctedFixtureDateV38(match);
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return "—";
+  return formatDate(d, "");
+}
+
+function sortMatchesV33(matches, filter = "all") {
+  return [...(matches || [])].sort((a, b) => {
+    const adate = correctedFixtureDateV38(a);
+    const bdate = correctedFixtureDateV38(b);
+    const ad = adate instanceof Date && !Number.isNaN(adate.getTime()) ? adate.getTime() : Number.MAX_SAFE_INTEGER;
+    const bd = bdate instanceof Date && !Number.isNaN(bdate.getTime()) ? bdate.getTime() : Number.MAX_SAFE_INTEGER;
+    if (filter === "finished") return bd - ad;
+    return ad - bd;
+  });
+}
+
+function normalizeScorerNameV38(name) {
+  return String(name || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function mergeVerifiedScorersV38(dynamicRows = []) {
+  const map = new Map();
+  for (const row of dynamicRows || []) {
+    const key = normalizeScorerNameV38(row.name);
+    if (!key) continue;
+    map.set(key, {
+      ...row,
+      goals: Number(row.goals || 0),
+      assists: Number(row.assists || 0)
+    });
+  }
+
+  for (const verified of VERIFIED_TOP_SCORERS_V38) {
+    const key = normalizeScorerNameV38(verified.name);
+    const current = map.get(key);
+    map.set(key, {
+      ...(current || verified),
+      name: (current && current.name) || verified.name,
+      country: (current && current.country) || verified.country,
+      goals: Math.max(Number(current?.goals || 0), verified.goals),
+      assists: Math.max(Number(current?.assists || 0), verified.assists)
+    });
+  }
+  return [...map.values()];
+}
+
+function rankExactTop3V38(rows) {
+  return mergeVerifiedScorersV38(rows)
+    .filter((player) => {
+      const goals = Number(player.goals || 0);
+      const assists = Number(player.assists || 0);
+      return (
+        (goals === 3 && assists >= 2) ||
+        (goals === 3 && assists === 0) ||
+        (goals === 2 && assists >= 1)
+      );
+    })
+    .sort((a, b) =>
+      Number(b.goals || 0) - Number(a.goals || 0) ||
+      Number(b.assists || 0) - Number(a.assists || 0) ||
+      String(a.name || "").localeCompare(String(b.name || ""))
+    )
+    .map((player) => {
+      const goals = Number(player.goals || 0);
+      const assists = Number(player.assists || 0);
+      let rank = "T-3";
+      if (goals === 3 && assists >= 2) rank = "1";
+      else if (goals === 3) rank = "T-2";
+      return { ...player, rank };
+    });
+}
+
+function renderTopScorers() {
+  const dynamicRows = Array.isArray(state.dynamicTopScorers) ? state.dynamicTopScorers : [];
+  const rows = rankExactTop3V38(dynamicRows);
+  const topGoals = rows.length ? Number(rows[0].goals || 0) : null;
+  $("topScorers").innerHTML = rows.length
+    ? rows.map((player) =>
+        statItemHtml(
+          player.rank || "",
+          displayTopScorerNameV22(player),
+          topScorerValueLabelV22(player),
+          "stat-green",
+          Number(player.goals || 0) === topGoals
+        )
+      ).join("")
+    : statEmptyHtml("Top scorer data is not available yet.");
+}
+
+function refreshStatsV37() {
+  try {
+    renderTopScorers();
+    if (typeof renderPlayerOfTheMatchAwards === "function") renderPlayerOfTheMatchAwards();
+  } catch (error) {
+    console.warn("Stats refresh failed:", error);
+  }
+}
+
+console.info("AssistAI WorldCup app v38 loaded: Mikel assist fixed; exact top 3 scorer tiers only; dates forced.");

@@ -1,10 +1,14 @@
-WorldCup PWA v37
+WorldCup PWA v38
 
 Fixes:
-- Finished tab display uses corrected fixture dates directly.
-- Stats refresh after each data refresh.
-- Top scorers limited to 3 tiers only: 1, T-2, T-3.
-- Service worker cache bumped to v37.
+- Mikel Oyarzabal shows 2 goals + 1 assist.
+- Top scorers show only:
+  1: 3 goals + 2 assists
+  T-2: 3 goals
+  T-3: 2 goals + 1 assist
+- Anything below 2 goals + 1 assist is hidden.
+- Finished date map remains forced.
+- Service worker cache bumped to v38.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/
