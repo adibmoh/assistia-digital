@@ -3179,3 +3179,155 @@ function renderMatches() {
 }
 
 console.info("AssistAI WorldCup app v34 loaded: corrected group-stage fixture dates.");
+
+
+/* =========================================================
+   v35 — date-aware status correction
+   If kickoff is already in the past, the match is NOT Upcoming anymore,
+   even if the external source still says "upcoming".
+   ========================================================= */
+
+function matchHasScoreV35(match) {
+  const homeScore = Number(match?.homeScore);
+  const awayScore = Number(match?.awayScore);
+
+  if (Number.isFinite(homeScore) && Number.isFinite(awayScore)) return true;
+
+  const raw = match?.original || {};
+  const scoreKeys = [
+    "home_score", "away_score", "homeScore", "awayScore",
+    "home_goals", "away_goals", "homeGoals", "awayGoals"
+  ];
+
+  return scoreKeys.some((key) => raw[key] !== undefined && raw[key] !== null && String(raw[key]).trim() !== "");
+}
+
+function effectiveStatusV35(match, now = new Date()) {
+  const correctedDate = correctedFixtureDateV34(match);
+  const originalStatus = String(match?.status || "").toLowerCase();
+
+  if (originalStatus === "live") return "live";
+  if (originalStatus === "finished" || originalStatus === "complete" || originalStatus === "completed") return "finished";
+
+  if (correctedDate instanceof Date && !Number.isNaN(correctedDate.getTime())) {
+    // After about 2h 30m, a football match should no longer be listed as upcoming.
+    const kickoffPlusMatchWindow = correctedDate.getTime() + (150 * 60 * 1000);
+
+    if (kickoffPlusMatchWindow < now.getTime()) {
+      return matchHasScoreV35(match) ? "finished" : "result-pending";
+    }
+  }
+
+  return "upcoming";
+}
+
+function statusLabelV35(status) {
+  if (status === "result-pending") return "Result pending";
+  return statusLabel(status);
+}
+
+function statusClassV35(status) {
+  if (status === "result-pending") return "finished";
+  return status;
+}
+
+function shouldShowMatchV33(match, filter = "all") {
+  const homeTbd = isTbdTeamV33(match?.home);
+  const awayTbd = isTbdTeamV33(match?.away);
+
+  if (homeTbd && awayTbd) return false;
+
+  const group = String(match?.group || "").toLowerCase();
+  const matchday = String(match?.matchday || "").toLowerCase();
+  const knockoutLike = /r32|round|knockout|quarter|semi|final/.test(group) || /md4/.test(matchday);
+
+  if ((homeTbd || awayTbd) && knockoutLike && (filter === "all" || filter === "upcoming")) return false;
+
+  const effective = effectiveStatusV35(match);
+
+  if (filter === "upcoming") return effective === "upcoming";
+  if (filter === "live") return effective === "live";
+  if (filter === "finished") return effective === "finished" || effective === "result-pending";
+
+  return true;
+}
+
+function sortMatchesV33(matches, filter = "all") {
+  return [...(matches || [])].sort((a, b) => {
+    const adate = correctedFixtureDateV34(a);
+    const bdate = correctedFixtureDateV34(b);
+    const ad = adate instanceof Date && !Number.isNaN(adate.getTime()) ? adate.getTime() : Number.MAX_SAFE_INTEGER;
+    const bd = bdate instanceof Date && !Number.isNaN(bdate.getTime()) ? bdate.getTime() : Number.MAX_SAFE_INTEGER;
+    if (filter === "finished") return bd - ad;
+    return ad - bd;
+  });
+}
+
+function renderMatches() {
+  const body = $("matchesBody");
+  const rawMatches = filteredMatches();
+
+  const visibleMatches = rawMatches.filter((m) => shouldShowMatchV33(m, state.activeMatchFilter || "all"));
+
+  if (!visibleMatches.length) {
+    body.innerHTML = `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+    return;
+  }
+
+  const filter = state.activeMatchFilter || "all";
+
+  const liveRows = visibleMatches.filter((m) => effectiveStatusV35(m) === "live");
+  const upcomingRows = visibleMatches.filter((m) => effectiveStatusV35(m) === "upcoming");
+  const finishedRows = visibleMatches.filter((m) => {
+    const s = effectiveStatusV35(m);
+    return s === "finished" || s === "result-pending";
+  });
+
+  const groups = filter === "all"
+    ? [
+        { key: "live", title: "Live matches", rows: sortMatchesV33(liveRows, "live") },
+        { key: "upcoming", title: "Upcoming matches", rows: sortMatchesV33(upcomingRows, "upcoming") },
+        { key: "finished", title: "Finished / past matches", rows: sortMatchesV33(finishedRows, "finished") }
+      ]
+    : [
+        {
+          key: filter,
+          title: filter === "live" ? "Live matches" : filter === "upcoming" ? "Upcoming matches" : "Finished / past matches",
+          rows: sortMatchesV33(visibleMatches, filter)
+        }
+      ];
+
+  const html = [];
+
+  for (const group of groups) {
+    if (!group.rows.length) continue;
+
+    if (group.key !== "live") {
+      html.push(`
+        <tr class="match-section-row ${group.key}-section">
+          <td colspan="6">${escapeHtml(group.title)} · ${group.rows.length}</td>
+        </tr>
+      `);
+    }
+
+    html.push(...group.rows.map((m) => {
+      const displayDate = correctedFixtureDateV34(m);
+      const effective = effectiveStatusV35(m);
+
+      return `
+        <tr>
+          <td>${formatDate(displayDate, m.rawDate)}</td>
+          <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+          <td class="teams-cell">${displayTeamWithCountryV33(m.home, m.original, "home")} <span class="vs-label">vs</span> ${displayTeamWithCountryV33(m.away, m.original, "away")}</td>
+          <td class="score">${formatScore(m)}</td>
+          <td><span class="badge ${statusClassV35(effective)}">${escapeHtml(statusLabelV35(effective))}</span></td>
+          <td>${escapeHtml(cleanVenueV33(m.venue))}</td>
+        </tr>
+      `;
+    }));
+  }
+
+  body.innerHTML = html.length ? html.join("") : `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+}
+
+console.info("AssistAI WorldCup app v35 loaded: past fixtures no longer show as upcoming.");

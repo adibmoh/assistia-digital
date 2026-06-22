@@ -1,10 +1,10 @@
-WorldCup PWA v34 — corrected fixture dates
+WorldCup PWA v35 — date-aware status
 
 Fix:
-- Remaining wrong October/November/December dates are corrected using known group-stage fixture dates.
-- Example: Argentina vs Austria displays 22 June, not 06 October.
-- TBD-vs-TBD remains hidden.
-- Team country codes kept.
+- Matches with kickoff already in the past no longer show as Upcoming.
+- If the source has not published a score yet, past matches show as Result pending.
+- 21 June fixtures are removed from Upcoming when current date is after the match window.
+- Keeps corrected fixture dates, team codes, iPhone standings, install button.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/

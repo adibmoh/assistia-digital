@@ -1648,3 +1648,9 @@ main > img[src*="logo"] {
   font-weight: 700 !important;
   white-space: nowrap !important;
 }
+
+
+/* v35 */
+.badge.finished {
+  color: #93c5fd !important;
+}
