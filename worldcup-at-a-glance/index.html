@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
   <title>WorldCup at a Glance — Reliable Mode</title>
-  <link rel="stylesheet" href="styles.css?v=reliable1" />
+  <link rel="stylesheet" href="styles.css?v=reliable2" />
 </head>
 <body>
   <main class="app-shell">
@@ -21,14 +21,22 @@
     </header>
 
     <section class="status-card">
-      <div><span class="label">Data status</span><strong id="statusText">Loading…</strong></div>
-      <div><span class="label">Last updated</span><strong id="lastUpdated">—</strong></div>
+      <div>
+        <span class="label">Data status</span>
+        <strong id="statusText">Loading…</strong>
+      </div>
+      <div>
+        <span class="label">Last updated</span>
+        <strong id="lastUpdated">—</strong>
+      </div>
       <button id="refreshBtn" type="button">Refresh</button>
     </section>
 
     <section class="toolbar">
       <input id="searchInput" type="search" placeholder="Search team, group, venue…" />
-      <select id="groupFilter"><option value="all">All groups</option></select>
+      <select id="groupFilter">
+        <option value="all">All groups</option>
+      </select>
     </section>
 
     <section class="tabs" aria-label="Match filters">
@@ -39,22 +47,35 @@
     </section>
 
     <section class="card">
-      <div class="section-head"><h2>Matches</h2><small id="matchCount">—</small></div>
+      <div class="section-head">
+        <h2>Matches</h2>
+        <small id="matchCount">—</small>
+      </div>
       <div id="matchesList" class="match-list"></div>
     </section>
 
     <section class="card">
-      <div class="section-head"><h2>Group standings</h2><small>from live source when available</small></div>
+      <div class="section-head">
+        <h2>Group standings</h2>
+        <small>from live source when available</small>
+      </div>
       <div id="standingsList" class="standings-list"></div>
     </section>
 
     <section class="grid">
       <article class="card">
-        <div class="section-head"><h2>Top scorers</h2><small>dynamic only</small></div>
+        <div class="section-head">
+          <h2>Top scorers</h2>
+          <small>dynamic only</small>
+        </div>
         <div id="topScorers" class="stat-list"></div>
       </article>
+
       <article class="card">
-        <div class="section-head"><h2>Assists / MVP</h2><small>dynamic only</small></div>
+        <div class="section-head">
+          <h2>Assists / MVP</h2>
+          <small>dynamic only</small>
+        </div>
         <div id="extraStats" class="stat-list"></div>
       </article>
     </section>
@@ -64,6 +85,7 @@
       <p>Suggestions: <a href="mailto:hello@assistia.digital">hello@assistia.digital</a></p>
     </footer>
   </main>
-  <script src="app.js?v=reliable1"></script>
+
+  <script src="app.js?v=reliable2"></script>
 </body>
 </html>

@@ -1,20 +1,13 @@
-WorldCup at a Glance — Reliable Mode v1
+WorldCup Reliable Mode v2 — Refresh Fix
 
-Clean rebuild with no manual player/date touches.
+No hard-coded fixtures, dates, scorers, assists, or MVPs.
 
-Rules:
-- No hard-coded fixtures.
-- No hard-coded fixture date corrections.
-- No hard-coded player stats.
-- No hard-coded scorer/assist/MVP lists.
-- No service worker cache.
-- Refresh fetches source data with cache: no-store.
+Fixes:
+- Refresh uses a unique _refresh cache-buster for every network request.
+- Old UI is cleared before fetching.
+- Stats are recalculated from the newly fetched source payload every time.
+- Stats sections show refresh number even when source provides no scorer/assist/MVP data.
+- No service worker is included.
 
-Automatically updates if the source provides:
-- schedule
-- live status
-- results/scores
-- standings
-- scorer/assist/MVP events
-
-If a stat is not in the source, the app says unavailable instead of showing manual data.
+Replace all files in:
+assistia-digital/worldcup-at-a-glance/
