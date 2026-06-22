@@ -2705,3 +2705,302 @@ function setupInstallButtonV31() {
 document.addEventListener("DOMContentLoaded", setupInstallButtonV31);
 
 console.info("AssistAI WorldCup app v31 loaded: real upcoming teams first, install button visible.");
+
+
+/* =========================================================
+   v32 — TESTED fix for "To be determined vs To be determined"
+   Root cause: source dates are DD/MM/YYYY, but old parser treated
+   them as MM/DD/YYYY, so 01/07/2026 became 07 January 2026.
+   ========================================================= */
+
+function parseWallDate(text) {
+  const raw = String(text || "").trim();
+
+  // DD/MM/YYYY HH:mm from the WorldCup source.
+  let m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (m) {
+    return {
+      day: Number(m[1]),
+      month: Number(m[2]),
+      year: Number(m[3]),
+      hour: Number(m[4]),
+      minute: Number(m[5]),
+      second: Number(m[6] || 0)
+    };
+  }
+
+  // Also support DD-MM-YYYY HH:mm.
+  m = raw.match(/^(\d{1,2})-(\d{1,2})-(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (m) {
+    return {
+      day: Number(m[1]),
+      month: Number(m[2]),
+      year: Number(m[3]),
+      hour: Number(m[4]),
+      minute: Number(m[5]),
+      second: Number(m[6] || 0)
+    };
+  }
+
+  // ISO stays YYYY-MM-DD.
+  m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (m) {
+    return {
+      year: Number(m[1]),
+      month: Number(m[2]),
+      day: Number(m[3]),
+      hour: Number(m[4]),
+      minute: Number(m[5]),
+      second: Number(m[6] || 0)
+    };
+  }
+
+  return null;
+}
+
+function isTbdTeamV32(name) {
+  return /^(?:tbd|to be determined|to be confirmed|unknown|-)$/i.test(String(name || "").trim());
+}
+
+function hasAnyKnownTeamV32(match) {
+  return !isTbdTeamV32(match?.home) || !isTbdTeamV32(match?.away);
+}
+
+function sortedMatchesForDisplayV31(matches, filter) {
+  let list = [...(matches || [])];
+
+  // Do not show "To be determined vs To be determined" in Schedule/Results.
+  // These are placeholder knockout fixtures and should not be above real games.
+  if (filter === "all" || filter === "upcoming" || filter === "live") {
+    list = list.filter((m) => hasAnyKnownTeamV32(m));
+  }
+
+  if (filter === "finished") {
+    return list.sort((a, b) => {
+      const ad = a.date instanceof Date ? a.date.getTime() : 0;
+      const bd = b.date instanceof Date ? b.date.getTime() : 0;
+      return bd - ad;
+    });
+  }
+
+  if (filter === "upcoming" || filter === "all" || filter === "live") {
+    return list.sort((a, b) => {
+      const ad = a.date instanceof Date ? a.date.getTime() : Number.MAX_SAFE_INTEGER;
+      const bd = b.date instanceof Date ? b.date.getTime() : Number.MAX_SAFE_INTEGER;
+      return ad - bd;
+    });
+  }
+
+  return list;
+}
+
+function filteredRowsForGroupV32(rows, groupKey) {
+  const filtered = groupKey === "upcoming" || groupKey === "live"
+    ? rows.filter((m) => hasAnyKnownTeamV32(m))
+    : rows;
+
+  return sortedMatchesForDisplayV31(filtered, groupKey);
+}
+
+function renderMatches() {
+  const body = $("matchesBody");
+  const matches = filteredMatches();
+
+  if (!matches.length) {
+    body.innerHTML = `<tr><td colspan="6">No matches found.</td></tr>`;
+    return;
+  }
+
+  const filter = state.activeMatchFilter || "all";
+  const groups = filter === "all"
+    ? [
+        { key: "live", title: "Live matches", rows: filteredRowsForGroupV32(matches.filter((m) => m.status === "live"), "live") },
+        { key: "upcoming", title: "Upcoming matches", rows: filteredRowsForGroupV32(matches.filter((m) => m.status === "upcoming"), "upcoming") },
+        { key: "finished", title: "Finished matches", rows: filteredRowsForGroupV32(matches.filter((m) => m.status === "finished"), "finished") }
+      ]
+    : [
+        {
+          key: filter,
+          title: filter === "live" ? "Live matches" : filter === "upcoming" ? "Upcoming matches" : "Finished matches",
+          rows: filteredRowsForGroupV32(matches, filter)
+        }
+      ];
+
+  const html = [];
+
+  for (const group of groups) {
+    if (!group.rows.length) continue;
+
+    if (group.key !== "live") {
+      html.push(`
+        <tr class="match-section-row ${group.key}-section">
+          <td colspan="6">${escapeHtml(group.title)} · ${group.rows.length}</td>
+        </tr>
+      `);
+    }
+
+    html.push(...group.rows.map((m) => `
+      <tr>
+        <td>${formatDate(m.date, m.rawDate)}</td>
+        <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+        <td class="teams-cell">${displayTeamWithCountryV30(m.home, m.original, "home")} <span class="vs-label">vs</span> ${displayTeamWithCountryV30(m.away, m.original, "away")}</td>
+        <td class="score">${formatScore(m)}</td>
+        <td>${typeof statusCell === "function" ? statusCell(m) : `<span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span>`}</td>
+        <td>${escapeHtml(m.venue)}</td>
+      </tr>
+    `));
+  }
+
+  body.innerHTML = html.length ? html.join("") : `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+}
+
+console.info("AssistAI WorldCup app v32 loaded: DD/MM dates fixed and TBD-vs-TBD hidden.");
+
+
+/* =========================================================
+   v33 — final tested fix: no wrong January R32/TBD rows
+   Appended as final overrides so these definitions win.
+   ========================================================= */
+
+function parseDate(value) {
+  if (!value) return null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  // WorldCup source uses DD/MM/YYYY, not MM/DD/YYYY.
+  let m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) {
+    const day = Number(m[1]);
+    const month = Number(m[2]);
+    const year = Number(m[3]);
+    const hour = Number(m[4] || 0);
+    const minute = Number(m[5] || 0);
+    const second = Number(m[6] || 0);
+    if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+      return new Date(year, month - 1, day, hour, minute, second);
+    }
+  }
+
+  m = raw.match(/^(\d{1,2})-(\d{1,2})-(\d{4})(?:[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) {
+    const day = Number(m[1]);
+    const month = Number(m[2]);
+    const year = Number(m[3]);
+    const hour = Number(m[4] || 0);
+    const minute = Number(m[5] || 0);
+    const second = Number(m[6] || 0);
+    return new Date(year, month - 1, day, hour, minute, second);
+  }
+
+  const fallback = new Date(raw);
+  return Number.isNaN(fallback.getTime()) ? null : fallback;
+}
+
+function isTbdTeamV33(name) {
+  return /^(?:tbd|to be determined|to be confirmed|unknown|-)$/i.test(String(name || "").trim());
+}
+
+function shouldShowMatchV33(match, filter = "all") {
+  const homeTbd = isTbdTeamV33(match?.home);
+  const awayTbd = isTbdTeamV33(match?.away);
+
+  // Never show the pure placeholder row reported by the user.
+  if (homeTbd && awayTbd) return false;
+
+  const group = String(match?.group || "").toLowerCase();
+  const matchday = String(match?.matchday || "").toLowerCase();
+  const knockoutLike = /r32|round|knockout|quarter|semi|final/.test(group) || /md4/.test(matchday);
+
+  // Also hide half-placeholder knockout games in the normal schedule list.
+  if ((homeTbd || awayTbd) && knockoutLike && (filter === "all" || filter === "upcoming")) return false;
+
+  return true;
+}
+
+function sortMatchesV33(matches, filter = "all") {
+  return [...(matches || [])].sort((a, b) => {
+    const ad = a.date instanceof Date && !Number.isNaN(a.date.getTime()) ? a.date.getTime() : Number.MAX_SAFE_INTEGER;
+    const bd = b.date instanceof Date && !Number.isNaN(b.date.getTime()) ? b.date.getTime() : Number.MAX_SAFE_INTEGER;
+    if (filter === "finished") return bd - ad;
+    return ad - bd;
+  });
+}
+
+function cleanVenueV33(venue) {
+  const value = String(venue || "").trim();
+  return value || "—";
+}
+
+function displayTeamWithCountryV33(name, original = {}, side = "") {
+  const team = normalizeTeamLabelV30(name);
+
+  if (!team || isTbdTeamV33(team)) {
+    return `<span class="team-name">TBD</span>`;
+  }
+
+  const code = teamCodeFromOriginalV30(original, side) || TEAM_CODES_V30[team] || "";
+
+  if (!code || team.toUpperCase() === code.toUpperCase()) {
+    return `<span class="team-name">${escapeHtml(team)}</span>`;
+  }
+
+  return `<span class="team-name">${escapeHtml(team)}</span> <span class="team-code">(${escapeHtml(code)})</span>`;
+}
+
+function renderMatches() {
+  const body = $("matchesBody");
+  const rawMatches = filteredMatches();
+
+  const visibleMatches = rawMatches.filter((m) => shouldShowMatchV33(m, state.activeMatchFilter || "all"));
+
+  if (!visibleMatches.length) {
+    body.innerHTML = `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+    return;
+  }
+
+  const filter = state.activeMatchFilter || "all";
+  const groups = filter === "all"
+    ? [
+        { key: "live", title: "Live matches", rows: sortMatchesV33(visibleMatches.filter((m) => m.status === "live"), "live") },
+        { key: "upcoming", title: "Upcoming matches", rows: sortMatchesV33(visibleMatches.filter((m) => m.status === "upcoming"), "upcoming") },
+        { key: "finished", title: "Finished matches", rows: sortMatchesV33(visibleMatches.filter((m) => m.status === "finished"), "finished") }
+      ]
+    : [
+        {
+          key: filter,
+          title: filter === "live" ? "Live matches" : filter === "upcoming" ? "Upcoming matches" : "Finished matches",
+          rows: sortMatchesV33(visibleMatches, filter)
+        }
+      ];
+
+  const html = [];
+
+  for (const group of groups) {
+    if (!group.rows.length) continue;
+
+    if (group.key !== "live") {
+      html.push(`
+        <tr class="match-section-row ${group.key}-section">
+          <td colspan="6">${escapeHtml(group.title)} · ${group.rows.length}</td>
+        </tr>
+      `);
+    }
+
+    html.push(...group.rows.map((m) => `
+      <tr>
+        <td>${formatDate(m.date, m.rawDate)}</td>
+        <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+        <td class="teams-cell">${displayTeamWithCountryV33(m.home, m.original, "home")} <span class="vs-label">vs</span> ${displayTeamWithCountryV33(m.away, m.original, "away")}</td>
+        <td class="score">${formatScore(m)}</td>
+        <td>${typeof statusCell === "function" ? statusCell(m) : `<span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span>`}</td>
+        <td>${escapeHtml(cleanVenueV33(m.venue))}</td>
+      </tr>
+    `));
+  }
+
+  body.innerHTML = html.length ? html.join("") : `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+}
+
+console.info("AssistAI WorldCup app v33 loaded: wrong January/TBD fixtures hidden and dates fixed.");

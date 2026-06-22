@@ -1,14 +1,15 @@
-WorldCup PWA v31 — schedule names + install button
+WorldCup PWA v33 — final TBD/date fix
 
 Fixes:
-- Install app button is forced visible next to Refresh.
-- Schedule & Results shows real upcoming matches first.
-- Knockout TBD games are pushed after real team games.
-- Team names show country codes where known.
+- Final parseDate override reads DD/MM/YYYY correctly.
+- Never displays To be determined vs To be determined.
+- Hides incomplete R32/knockout placeholder fixtures from Schedule & Results.
+- Shows real upcoming group games first.
+- Keeps team country codes and iPhone standings.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/
 
-After deployment:
+After deploy:
 - Desktop: Ctrl + F5.
-- iPhone private browsing may cache less, but still reload the page.
+- iPhone: close tab and reopen. Clear website data if old cached version persists.

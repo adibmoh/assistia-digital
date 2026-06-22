@@ -1618,3 +1618,23 @@ main > img[src*="logo"] {
     font-size: .78em !important;
   }
 }
+
+
+/* v32 */
+.teams-cell .team-code,
+.team-code {
+  color: var(--muted) !important;
+  font-size: .86em !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+
+/* v33 */
+.teams-cell .team-code,
+.team-code {
+  color: var(--muted) !important;
+  font-size: .86em !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
