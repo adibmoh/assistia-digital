@@ -1,14 +1,17 @@
-WorldCup PWA v40 — cache-busted scorer display
+WorldCup v41 — no-cache final
+
+This package disables the old PWA/service-worker cache and uses renamed files:
+- app.v41.js
+- styles.v41.css
 
 Fixes:
-- index.html loads app.js?v=40 and styles.css?v=40 to avoid stale browser cache.
-- sw.js v40 no longer caches app.js/styles.css aggressively.
 - Mikel Oyarzabal appears under T-3.
-- Only rank 1 is green/highlighted; T-2 and T-3 are neutral.
+- Only rank 1 is green.
+- T-2 and T-3 are neutral.
+- Old cached app.js is bypassed.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/
 
-After deploy:
-- Desktop: Ctrl + F5.
-- If still old, unregister service worker once.
+IMPORTANT:
+Upload index.html too. It references app.v41.js and styles.v41.css.

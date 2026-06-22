@@ -6,7 +6,7 @@
   <title>WorldCup at a Glance</title>
   <meta name="description" content="A compact dashboard for World Cup 2026 schedule, results, standings, and statistics." />
   <link rel="canonical" href="https://assistia.digital/worldcup-at-a-glance/" />
-  <link rel="stylesheet" href="styles.css?v=40" />
+  <link rel="stylesheet" href="styles.v41.css" />
 
   <!-- Mobile app / PWA -->
   <link rel="manifest" href="manifest.webmanifest">
@@ -16,6 +16,26 @@
   <meta name="apple-mobile-web-app-title" content="WorldCup">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+
+<script>
+  // v41: remove old PWA/service-worker caches that kept serving previous app.js
+  (async function clearOldWorldCupCaches() {
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((reg) => reg.unregister()));
+      }
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+      localStorage.setItem("assistia_worldcup_cache_cleared_v41", "yes");
+    } catch (error) {
+      console.warn("Cache cleanup skipped:", error);
+    }
+  })();
+</script>
 
 </head>
 <body>
@@ -115,6 +135,6 @@
     <p>Data availability depends on live data sources.</p>
   </footer>
 
-  <script src="app.js?v=40"></script>
+  <script src="app.v41.js"></script>
 </body>
 </html>
