@@ -3004,3 +3004,178 @@ function renderMatches() {
 }
 
 console.info("AssistAI WorldCup app v33 loaded: wrong January/TBD fixtures hidden and dates fixed.");
+
+
+/* =========================================================
+   v34 — tested fixture date correction
+   Fixes remaining wrong months like October/November/December by using
+   known group-stage fixture date/time when the source date field is ambiguous.
+   ========================================================= */
+
+const FIXTURE_DATE_OVERRIDES_V34 = {
+  // 21 June
+  "spain|saudi arabia": "2026-06-21T18:00:00",
+  "belgium|iran": "2026-06-21T21:00:00",
+  "uruguay|cape verde": "2026-06-22T00:00:00",
+  "new zealand|egypt": "2026-06-22T03:00:00",
+
+  // 22 June
+  "argentina|austria": "2026-06-22T19:00:00",
+  "france|iraq": "2026-06-22T23:00:00",
+  "norway|senegal": "2026-06-23T02:00:00",
+  "jordan|algeria": "2026-06-23T05:00:00",
+
+  // 23 June
+  "portugal|uzbekistan": "2026-06-23T19:00:00",
+  "england|ghana": "2026-06-23T22:00:00",
+  "panama|croatia": "2026-06-24T01:00:00",
+  "colombia|dr congo": "2026-06-24T04:00:00",
+  "colombia|democratic republic of the congo": "2026-06-24T04:00:00",
+
+  // 24 June
+  "switzerland|canada": "2026-06-24T21:00:00",
+  "bosnia and herzegovina|qatar": "2026-06-24T21:00:00",
+  "scotland|brazil": "2026-06-25T00:00:00",
+  "morocco|haiti": "2026-06-25T00:00:00",
+  "czechia|mexico": "2026-06-25T03:00:00",
+  "czech republic|mexico": "2026-06-25T03:00:00",
+  "south africa|south korea": "2026-06-25T03:00:00",
+
+  // 25 June
+  "ecuador|germany": "2026-06-25T22:00:00",
+  "curacao|ivory coast": "2026-06-25T22:00:00",
+  "curaçao|ivory coast": "2026-06-25T22:00:00",
+  "tunisia|netherlands": "2026-06-26T01:00:00",
+  "japan|sweden": "2026-06-26T01:00:00",
+  "turkey|united states": "2026-06-26T04:00:00",
+  "paraguay|australia": "2026-06-26T04:00:00",
+
+  // 26 June
+  "norway|france": "2026-06-26T21:00:00",
+  "senegal|iraq": "2026-06-26T21:00:00",
+  "uruguay|spain": "2026-06-27T02:00:00",
+  "cape verde|saudi arabia": "2026-06-27T02:00:00",
+  "new zealand|belgium": "2026-06-27T05:00:00",
+  "egypt|iran": "2026-06-27T05:00:00",
+
+  // 27 June
+  "panama|england": "2026-06-27T23:00:00",
+  "croatia|ghana": "2026-06-27T23:00:00",
+  "colombia|portugal": "2026-06-28T01:30:00",
+  "dr congo|uzbekistan": "2026-06-28T01:30:00",
+  "democratic republic of the congo|uzbekistan": "2026-06-28T01:30:00",
+  "jordan|argentina": "2026-06-28T04:00:00",
+  "algeria|austria": "2026-06-28T04:00:00"
+};
+
+function fixtureKeyV34(home, away) {
+  return [home, away].map((name) =>
+    String(name || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/czech republic/g, "czechia")
+      .replace(/democratic republic of the congo/g, "dr congo")
+      .replace(/d r congo/g, "dr congo")
+      .replace(/usa/g, "united states")
+      .replace(/curacao/g, "curacao")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim()
+  ).join("|");
+}
+
+function correctedFixtureDateV34(match) {
+  const key = fixtureKeyV34(match?.home, match?.away);
+  const iso = FIXTURE_DATE_OVERRIDES_V34[key];
+
+  if (!iso) return match?.date || null;
+
+  const corrected = new Date(iso);
+  return Number.isNaN(corrected.getTime()) ? (match?.date || null) : corrected;
+}
+
+function shouldShowMatchV33(match, filter = "all") {
+  const homeTbd = isTbdTeamV33(match?.home);
+  const awayTbd = isTbdTeamV33(match?.away);
+
+  if (homeTbd && awayTbd) return false;
+
+  const group = String(match?.group || "").toLowerCase();
+  const matchday = String(match?.matchday || "").toLowerCase();
+  const knockoutLike = /r32|round|knockout|quarter|semi|final/.test(group) || /md4/.test(matchday);
+
+  if ((homeTbd || awayTbd) && knockoutLike && (filter === "all" || filter === "upcoming")) return false;
+
+  return true;
+}
+
+function sortMatchesV33(matches, filter = "all") {
+  return [...(matches || [])].sort((a, b) => {
+    const adate = correctedFixtureDateV34(a);
+    const bdate = correctedFixtureDateV34(b);
+    const ad = adate instanceof Date && !Number.isNaN(adate.getTime()) ? adate.getTime() : Number.MAX_SAFE_INTEGER;
+    const bd = bdate instanceof Date && !Number.isNaN(bdate.getTime()) ? bdate.getTime() : Number.MAX_SAFE_INTEGER;
+    if (filter === "finished") return bd - ad;
+    return ad - bd;
+  });
+}
+
+function renderMatches() {
+  const body = $("matchesBody");
+  const rawMatches = filteredMatches();
+
+  const visibleMatches = rawMatches.filter((m) => shouldShowMatchV33(m, state.activeMatchFilter || "all"));
+
+  if (!visibleMatches.length) {
+    body.innerHTML = `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+    return;
+  }
+
+  const filter = state.activeMatchFilter || "all";
+  const groups = filter === "all"
+    ? [
+        { key: "live", title: "Live matches", rows: sortMatchesV33(visibleMatches.filter((m) => m.status === "live"), "live") },
+        { key: "upcoming", title: "Upcoming matches", rows: sortMatchesV33(visibleMatches.filter((m) => m.status === "upcoming"), "upcoming") },
+        { key: "finished", title: "Finished matches", rows: sortMatchesV33(visibleMatches.filter((m) => m.status === "finished"), "finished") }
+      ]
+    : [
+        {
+          key: filter,
+          title: filter === "live" ? "Live matches" : filter === "upcoming" ? "Upcoming matches" : "Finished matches",
+          rows: sortMatchesV33(visibleMatches, filter)
+        }
+      ];
+
+  const html = [];
+
+  for (const group of groups) {
+    if (!group.rows.length) continue;
+
+    if (group.key !== "live") {
+      html.push(`
+        <tr class="match-section-row ${group.key}-section">
+          <td colspan="6">${escapeHtml(group.title)} · ${group.rows.length}</td>
+        </tr>
+      `);
+    }
+
+    html.push(...group.rows.map((m) => {
+      const displayDate = correctedFixtureDateV34(m);
+
+      return `
+        <tr>
+          <td>${formatDate(displayDate, m.rawDate)}</td>
+          <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+          <td class="teams-cell">${displayTeamWithCountryV33(m.home, m.original, "home")} <span class="vs-label">vs</span> ${displayTeamWithCountryV33(m.away, m.original, "away")}</td>
+          <td class="score">${formatScore(m)}</td>
+          <td>${typeof statusCell === "function" ? statusCell(m) : `<span class="badge ${m.status}">${escapeHtml(statusLabel(m.status))}</span>`}</td>
+          <td>${escapeHtml(cleanVenueV33(m.venue))}</td>
+        </tr>
+      `;
+    }));
+  }
+
+  body.innerHTML = html.length ? html.join("") : `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+}
+
+console.info("AssistAI WorldCup app v34 loaded: corrected group-stage fixture dates.");

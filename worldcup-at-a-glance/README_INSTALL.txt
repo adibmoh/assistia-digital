@@ -1,15 +1,10 @@
-WorldCup PWA v33 — final TBD/date fix
+WorldCup PWA v34 — corrected fixture dates
 
-Fixes:
-- Final parseDate override reads DD/MM/YYYY correctly.
-- Never displays To be determined vs To be determined.
-- Hides incomplete R32/knockout placeholder fixtures from Schedule & Results.
-- Shows real upcoming group games first.
-- Keeps team country codes and iPhone standings.
+Fix:
+- Remaining wrong October/November/December dates are corrected using known group-stage fixture dates.
+- Example: Argentina vs Austria displays 22 June, not 06 October.
+- TBD-vs-TBD remains hidden.
+- Team country codes kept.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/
-
-After deploy:
-- Desktop: Ctrl + F5.
-- iPhone: close tab and reopen. Clear website data if old cached version persists.
