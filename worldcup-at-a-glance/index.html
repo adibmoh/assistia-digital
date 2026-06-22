@@ -2,68 +2,139 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#07111f" />
-  <title>WorldCup at a Glance — Reliable Mode</title>
-  <link rel="stylesheet" href="styles.css?v=reliable1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WorldCup at a Glance</title>
+  <meta name="description" content="A compact dashboard for World Cup 2026 schedule, results, standings, and statistics." />
+  <link rel="canonical" href="https://assistia.digital/worldcup-at-a-glance/" />
+  <link rel="stylesheet" href="styles.v41.css" />
+
+  <!-- Mobile app / PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#07111f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="WorldCup">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+
+<script>
+  // v41: remove old PWA/service-worker caches that kept serving previous app.js
+  (async function clearOldWorldCupCaches() {
+    try {
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((reg) => reg.unregister()));
+      }
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+      localStorage.setItem("assistia_worldcup_cache_cleared_v41", "yes");
+    } catch (error) {
+      console.warn("Cache cleanup skipped:", error);
+    }
+  })();
+</script>
+
 </head>
 <body>
-  <main class="app-shell">
-    <header class="hero">
-      <a class="brand" href="https://assistia.digital/" aria-label="AssistAI">
-        <img src="assistia-logo.png" alt="AssistAI logo" />
-      </a>
-      <div>
-        <p class="eyebrow">Reliable Mode</p>
-        <h1>WorldCup at a Glance</h1>
-        <p class="subtitle">Only live-source data is shown. If the source does not provide a stat, it is marked unavailable.</p>
-      </div>
-    </header>
+  <header class="assist-bar" aria-label="Site navigation">
+    <a href="https://assistia.digital/" class="assist-brand assist-logo-link" aria-label="AssistAI home">
+      <img src="assistia-logo.png" alt="AssistAI" class="assist-logo" width="34" height="34" style="width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important;object-fit:cover!important;display:block!important;border-radius:10px!important;" />
+    </a>
+    <nav>
+      <a href="../">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../contact.html">Contact</a>
+    </nav>
+  </header>
 
+  <header class="hero">
+    <div class="hero-text">
+      <h1>WorldCup at a Glance</h1>
+      <p class="subtitle">A compact dashboard for World Cup 2026 schedule, results, standings, and statistics.</p>
+    </div>
+    <div class="actions">
+      <div class="action-row"><button id="refreshBtn">Refresh</button><button id="installAppBtn" type="button">Install app</button></div>
+      <input id="autoRefresh" type="checkbox" hidden aria-hidden="true" />
+    </div>
+  </header>
+
+  <main>
     <section class="status-card">
-      <div><span class="label">Data status</span><strong id="statusText">Loading…</strong></div>
-      <div><span class="label">Last updated</span><strong id="lastUpdated">—</strong></div>
-      <button id="refreshBtn" type="button">Refresh</button>
+      <div><strong>Status</strong><p id="statusText">Starting…</p></div>
+      <div><strong>Last updated</strong><p id="lastUpdated">—</p></div>
+      <div><strong>Displayed time zone</strong><p id="userTimezone">—</p></div>
+    </section>
+
+    <section id="loadingPanel" class="loading-panel is-loading">
+      <div class="loading-row">
+        <span id="loadingText">Loading live World Cup data…</span>
+        <span id="loadingHint">Please wait</span>
+      </div>
+      <div class="loading-bar"><span></span></div>
     </section>
 
     <section class="toolbar">
-      <input id="searchInput" type="search" placeholder="Search team, group, venue…" />
-      <select id="groupFilter"><option value="all">All groups</option></select>
+      <input id="searchInput" type="search" placeholder="Search team, group, stadium…" />
+      <div class="status-buttons" id="statusButtons">
+        <button class="status-filter active" data-filter="all">All</button>
+        <button class="status-filter" data-filter="live">Live</button>
+        <button class="status-filter" data-filter="upcoming">Upcoming</button>
+        <button class="status-filter" data-filter="finished">Finished</button>
+      </div>
     </section>
 
-    <section class="tabs" aria-label="Match filters">
-      <button class="tab active" data-filter="all">All</button>
-      <button class="tab" data-filter="live">Live</button>
-      <button class="tab" data-filter="upcoming">Upcoming</button>
-      <button class="tab" data-filter="finished">Finished</button>
+    <nav class="tabs">
+      <button class="tab active" data-tab="matches">Schedule & Results</button>
+      <button class="tab" data-tab="groups">Standings</button>
+      <button class="tab" data-tab="stats">Stats</button>
+    </nav>
+
+    <section id="matches" class="panel active">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Local date/time</th>
+              <th>Group</th>
+              <th>Match</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Venue</th>
+            </tr>
+          </thead>
+          <tbody id="matchesBody"></tbody>
+        </table>
+      </div>
     </section>
 
-    <section class="card">
-      <div class="section-head"><h2>Matches</h2><small id="matchCount">—</small></div>
-      <div id="matchesList" class="match-list"></div>
+    <section id="groups" class="panel">
+      <div class="qualification-legend standings-legend">
+        <span><i class="dot q-auto"></i> Top 2 qualify</span>
+        <span><i class="dot q-third"></i> 8 best third-place teams qualify</span>
+        <span><i class="dot q-out"></i> Not currently qualified</span>
+        <span class="legend-note">Provisional based on loaded results</span>
+      </div>
+      <div id="groupsBody" class="groups-grid"></div>
     </section>
 
-    <section class="card">
-      <div class="section-head"><h2>Group standings</h2><small>from live source when available</small></div>
-      <div id="standingsList" class="standings-list"></div>
+    <section id="stats" class="panel">
+      <div class="stats-grid">
+        <article class="wide"><h2>Top scorers</h2><ol id="topScorers" class="stat-list"></ol></article>
+        <article class="wide"><h2>MVP award</h2><ol id="mostPlayerOfMatch" class="stat-list"></ol></article>
+      </div>
     </section>
-
-    <section class="grid">
-      <article class="card">
-        <div class="section-head"><h2>Top scorers</h2><small>dynamic only</small></div>
-        <div id="topScorers" class="stat-list"></div>
-      </article>
-      <article class="card">
-        <div class="section-head"><h2>Assists / MVP</h2><small>dynamic only</small></div>
-        <div id="extraStats" class="stat-list"></div>
-      </article>
-    </section>
-
-    <footer>
-      <p>Data source: worldcup26.ir API with GitHub raw fallback for basic match files. No manual player/date corrections are used.</p>
-      <p>Suggestions: <a href="mailto:hello@assistia.digital">hello@assistia.digital</a></p>
-    </footer>
   </main>
-  <script src="app.js?v=reliable1"></script>
+
+  <footer>
+    <p>Match times are converted to the time zone of the device opening this application.</p>
+    <p>Data availability depends on live data sources.</p>
+  </footer>
+
+  <script src="app.v41.js"></script>
 </body>
 </html>
