@@ -1,9 +1,10 @@
-WorldCup PWA v36 — full fixture-date correction
+WorldCup PWA v37
 
-Fix:
-- Finished and Upcoming tabs use corrected group-stage fixture dates.
-- Removes wrong August/July/October/November/December dates caused by ambiguous source dates.
-- Keeps date-aware status, team codes, iPhone standings, install button.
+Fixes:
+- Finished tab display uses corrected fixture dates directly.
+- Stats refresh after each data refresh.
+- Top scorers limited to 3 tiers only: 1, T-2, T-3.
+- Service worker cache bumped to v37.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/

@@ -3471,3 +3471,242 @@ function correctedFixtureDateV36(match) {
 }
 
 console.info("AssistAI WorldCup app v36 loaded: all group-stage fixture dates corrected.");
+
+
+/* =========================================================
+   v37 — final table display overrides
+   1) Finished tab displays corrected fixture dates, not broken source dates.
+   2) Stats refresh after every data refresh.
+   3) Top scorers limited to 3 scorer tiers: 1, T-2, T-3.
+   ========================================================= */
+
+function fixtureKeyV37(home, away) {
+  return [home, away].map((name) =>
+    String(name || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/czech republic/g, "czechia")
+      .replace(/democratic republic of the congo/g, "dr congo")
+      .replace(/d r congo/g, "dr congo")
+      .replace(/usa/g, "united states")
+      .replace(/curaçao/g, "curacao")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim()
+  ).join("|");
+}
+
+function correctedFixtureDateV37(match) {
+  // Use v36 map when available.
+  if (typeof FIXTURE_DATE_OVERRIDES_V36 === "object" && FIXTURE_DATE_OVERRIDES_V36) {
+    const direct = FIXTURE_DATE_OVERRIDES_V36[fixtureKeyV37(match?.home, match?.away)];
+    if (direct) {
+      const d = new Date(direct);
+      if (!Number.isNaN(d.getTime())) return d;
+    }
+  }
+
+  // Fall back to v34 map if present.
+  if (typeof FIXTURE_DATE_OVERRIDES_V34 === "object" && FIXTURE_DATE_OVERRIDES_V34) {
+    const direct = FIXTURE_DATE_OVERRIDES_V34[fixtureKeyV37(match?.home, match?.away)];
+    if (direct) {
+      const d = new Date(direct);
+      if (!Number.isNaN(d.getTime())) return d;
+    }
+  }
+
+  // Last fallback: parse raw DD/MM safely, then existing normalized date.
+  const parsed = parseDate(match?.rawDate);
+  if (parsed instanceof Date && !Number.isNaN(parsed.getTime())) return parsed;
+
+  return match?.date || null;
+}
+
+function correctedFixtureDateV34(match) {
+  return correctedFixtureDateV37(match);
+}
+
+function correctedFixtureDateV36(match) {
+  return correctedFixtureDateV37(match);
+}
+
+function formatFixtureDateV37(match) {
+  const d = correctedFixtureDateV37(match);
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return "—";
+  return formatDate(d, "");
+}
+
+function shouldShowMatchV33(match, filter = "all") {
+  const homeTbd = isTbdTeamV33(match?.home);
+  const awayTbd = isTbdTeamV33(match?.away);
+
+  if (homeTbd && awayTbd) return false;
+
+  const group = String(match?.group || "").toLowerCase();
+  const matchday = String(match?.matchday || "").toLowerCase();
+  const knockoutLike = /r32|round|knockout|quarter|semi|final/.test(group) || /md4/.test(matchday);
+
+  if ((homeTbd || awayTbd) && knockoutLike && (filter === "all" || filter === "upcoming")) return false;
+
+  const effective = typeof effectiveStatusV35 === "function" ? effectiveStatusV35(match) : String(match?.status || "upcoming");
+  if (filter === "upcoming") return effective === "upcoming";
+  if (filter === "live") return effective === "live";
+  if (filter === "finished") return effective === "finished" || effective === "result-pending";
+
+  return true;
+}
+
+function sortMatchesV33(matches, filter = "all") {
+  return [...(matches || [])].sort((a, b) => {
+    const adate = correctedFixtureDateV37(a);
+    const bdate = correctedFixtureDateV37(b);
+    const ad = adate instanceof Date && !Number.isNaN(adate.getTime()) ? adate.getTime() : Number.MAX_SAFE_INTEGER;
+    const bd = bdate instanceof Date && !Number.isNaN(bdate.getTime()) ? bdate.getTime() : Number.MAX_SAFE_INTEGER;
+    if (filter === "finished") return bd - ad;
+    return ad - bd;
+  });
+}
+
+function renderMatches() {
+  const body = $("matchesBody");
+  const rawMatches = filteredMatches();
+
+  const visibleMatches = rawMatches.filter((m) => shouldShowMatchV33(m, state.activeMatchFilter || "all"));
+
+  if (!visibleMatches.length) {
+    body.innerHTML = `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+    return;
+  }
+
+  const filter = state.activeMatchFilter || "all";
+
+  const liveRows = visibleMatches.filter((m) => (typeof effectiveStatusV35 === "function" ? effectiveStatusV35(m) : m.status) === "live");
+  const upcomingRows = visibleMatches.filter((m) => (typeof effectiveStatusV35 === "function" ? effectiveStatusV35(m) : m.status) === "upcoming");
+  const finishedRows = visibleMatches.filter((m) => {
+    const s = typeof effectiveStatusV35 === "function" ? effectiveStatusV35(m) : m.status;
+    return s === "finished" || s === "result-pending";
+  });
+
+  const groups = filter === "all"
+    ? [
+        { key: "live", title: "Live matches", rows: sortMatchesV33(liveRows, "live") },
+        { key: "upcoming", title: "Upcoming matches", rows: sortMatchesV33(upcomingRows, "upcoming") },
+        { key: "finished", title: "Finished / past matches", rows: sortMatchesV33(finishedRows, "finished") }
+      ]
+    : [
+        {
+          key: filter,
+          title: filter === "live" ? "Live matches" : filter === "upcoming" ? "Upcoming matches" : "Finished / past matches",
+          rows: sortMatchesV33(visibleMatches, filter)
+        }
+      ];
+
+  const html = [];
+
+  for (const group of groups) {
+    if (!group.rows.length) continue;
+
+    if (group.key !== "live") {
+      html.push(`
+        <tr class="match-section-row ${group.key}-section">
+          <td colspan="6">${escapeHtml(group.title)} · ${group.rows.length}</td>
+        </tr>
+      `);
+    }
+
+    html.push(...group.rows.map((m) => {
+      const effective = typeof effectiveStatusV35 === "function" ? effectiveStatusV35(m) : m.status;
+
+      return `
+        <tr>
+          <td>${formatFixtureDateV37(m)}</td>
+          <td>${escapeHtml(m.group)}${m.matchday ? `<br><small>MD${escapeHtml(m.matchday)}</small>` : ""}</td>
+          <td class="teams-cell">${displayTeamWithCountryV33(m.home, m.original, "home")} <span class="vs-label">vs</span> ${displayTeamWithCountryV33(m.away, m.original, "away")}</td>
+          <td class="score">${formatScore(m)}</td>
+          <td><span class="badge ${typeof statusClassV35 === "function" ? statusClassV35(effective) : effective}">${escapeHtml(typeof statusLabelV35 === "function" ? statusLabelV35(effective) : statusLabel(effective))}</span></td>
+          <td>${escapeHtml(cleanVenueV33(m.venue))}</td>
+        </tr>
+      `;
+    }));
+  }
+
+  body.innerHTML = html.length ? html.join("") : `<tr><td colspan="6">No real team fixtures found for this filter.</td></tr>`;
+}
+
+function topScorerTierKeyV37(player) {
+  return `${Number(player.goals || 0)}|||${Number(player.assists || 0)}`;
+}
+
+function limitTopScorerTiersV37(rows, maxTiers = 3) {
+  const tiers = [];
+  const output = [];
+
+  for (const player of rows || []) {
+    const key = topScorerTierKeyV37(player);
+    if (!tiers.includes(key)) tiers.push(key);
+    if (tiers.length <= maxTiers) output.push(player);
+  }
+
+  return output.map((player) => {
+    const tier = tiers.indexOf(topScorerTierKeyV37(player)) + 1;
+    return {
+      ...player,
+      rank: tier === 1 ? "1" : `T-${tier}`
+    };
+  });
+}
+
+function renderTopScorers() {
+  const candidateRows = Array.isArray(state.dynamicTopScorers) && state.dynamicTopScorers.length
+    ? state.dynamicTopScorers
+    : LAST_CHECKED_TOP_SCORERS_V22;
+
+  const rankedRows = typeof rankTopScorersV22 === "function"
+    ? rankTopScorersV22(candidateRows)
+    : candidateRows;
+
+  const rows = limitTopScorerTiersV37(rankedRows, 3);
+  const topGoals = rows.length ? Number(rows[0].goals || 0) : null;
+
+  $("topScorers").innerHTML = rows.length
+    ? rows.map((player) =>
+        statItemHtml(
+          player.rank || "",
+          displayTopScorerNameV22(player),
+          topScorerValueLabelV22(player),
+          "stat-green",
+          Number(player.goals || 0) === topGoals
+        )
+      ).join("")
+    : statEmptyHtml("Top scorer data is not available yet.");
+}
+
+function refreshStatsV37() {
+  try {
+    if (typeof renderTopScorers === "function") renderTopScorers();
+    if (typeof renderPlayerOfTheMatchAwards === "function") renderPlayerOfTheMatchAwards();
+  } catch (error) {
+    console.warn("Stats refresh failed:", error);
+  }
+}
+
+const originalLoadDataV37 = loadData;
+loadData = async function patchedLoadDataV37(...args) {
+  const result = await originalLoadDataV37(...args);
+
+  try {
+    if (typeof loadDynamicTopScorersV22 === "function") {
+      await loadDynamicTopScorersV22();
+    } else if (typeof loadDynamicTopScorers === "function") {
+      await loadDynamicTopScorers();
+    }
+  } catch (error) {
+    console.warn("Top scorer refresh source failed, keeping fallback/current data:", error);
+  }
+
+  refreshStatsV37();
+  renderMatches();
+  return result;
+};
+
+console.info("AssistAI WorldCup app v37 loaded: finished dates forced corrected; stats refresh; top scorer tiers limited.");
