@@ -1,9 +1,7 @@
-const CACHE_NAME = "assistia-worldcup-pwa-v39";
+const CACHE_NAME = "assistia-worldcup-pwa-v40";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
   "./manifest.webmanifest",
   "./assistia-logo.png",
   "./icon-192.png",
@@ -29,6 +27,13 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
+  // Always fetch fresh JS/CSS so future fixes actually appear.
+  if (url.pathname.endsWith("/app.js") || url.pathname.endsWith("/styles.css")) {
+    event.respondWith(fetch(request, { cache: "no-store" }));
+    return;
+  }
+
+  // Keep live/dynamic data fresh.
   if (
     url.hostname.includes("worldcup26.ir") ||
     url.hostname.includes("r.jina.ai") ||

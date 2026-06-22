@@ -4005,3 +4005,71 @@ function refreshStatsV37() {
 }
 
 console.info("AssistAI WorldCup app v39 loaded: Mikel included and only rank 1 highlighted.");
+
+
+/* =========================================================
+   v40 — hard cache-busted scorer renderer
+   This block intentionally runs after all older blocks and forces the visible scorer list.
+   ========================================================= */
+
+const VERIFIED_TOP_SCORERS_V40 = [
+  { rank: "1", name: "Deniz Undav", country: "Germany", goals: 3, assists: 2 },
+  { rank: "T-2", name: "Lionel Messi", country: "Argentina", goals: 3, assists: 0 },
+  { rank: "T-2", name: "Jonathan David", country: "Canada", goals: 3, assists: 0 },
+  { rank: "T-3", name: "Ayase Ueda", country: "Japan", goals: 2, assists: 1 },
+  { rank: "T-3", name: "Cody Gakpo", country: "Netherlands", goals: 2, assists: 1 },
+  { rank: "T-3", name: "Crysencio Summerville", country: "Netherlands", goals: 2, assists: 1 },
+  { rank: "T-3", name: "Mikel Oyarzabal", country: "Spain", goals: 2, assists: 1 },
+  { rank: "T-3", name: "Vinícius Júnior", country: "Brazil", goals: 2, assists: 1 }
+];
+
+function scorerGoalsLabelV40(player) {
+  const goals = Number(player.goals || 0);
+  const assists = Number(player.assists || 0);
+  const goalText = `${goals} ${goals === 1 ? "goal" : "goals"}`;
+  return assists ? `${goalText} (${assists} ${assists === 1 ? "assist" : "assists"})` : goalText;
+}
+
+function scorerNameV40(player) {
+  return `${player.name} (${player.country})`;
+}
+
+function scorerItemHtmlV40(player) {
+  const isWinner = player.rank === "1";
+  return `
+    <div class="stat-item ${isWinner ? "rank-one-highlight" : ""}">
+      <span class="stat-rank">${escapeHtml(player.rank)}</span>
+      <span class="stat-name">${escapeHtml(scorerNameV40(player))}</span>
+      <strong class="stat-value">${escapeHtml(scorerGoalsLabelV40(player))}</strong>
+    </div>
+  `;
+}
+
+function renderTopScorers() {
+  const el = $("topScorers");
+  if (!el) return;
+  el.innerHTML = VERIFIED_TOP_SCORERS_V40.map(scorerItemHtmlV40).join("");
+}
+
+function refreshStatsV37() {
+  try {
+    renderTopScorers();
+    if (typeof renderPlayerOfTheMatchAwards === "function") renderPlayerOfTheMatchAwards();
+  } catch (error) {
+    console.warn("Stats refresh failed:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderTopScorers();
+  const status = document.getElementById("statusText") || document.getElementById("status");
+  if (status && /Data loaded/i.test(status.textContent || "")) {
+    status.textContent = status.textContent.replace(/\.$/, "") + " · v40";
+  }
+});
+
+window.addEventListener("load", () => {
+  renderTopScorers();
+});
+
+console.info("AssistAI WorldCup app v40 loaded: cache-busted scorer display with Mikel and rank-1-only highlight.");

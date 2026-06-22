@@ -1,13 +1,14 @@
-WorldCup PWA v39
+WorldCup PWA v40 — cache-busted scorer display
 
 Fixes:
-- Mikel Oyarzabal appears under T-3 with 2 goals and 1 assist.
-- Only rank 1 is highlighted green.
-- T-2 is no longer highlighted green.
-- Top scorers are locked to requested top 3 tiers:
-  1: 3 goals + 2 assists
-  T-2: 3 goals
-  T-3: 2 goals + 1 assist
+- index.html loads app.js?v=40 and styles.css?v=40 to avoid stale browser cache.
+- sw.js v40 no longer caches app.js/styles.css aggressively.
+- Mikel Oyarzabal appears under T-3.
+- Only rank 1 is green/highlighted; T-2 and T-3 are neutral.
 
 Replace all files in:
 assistia-digital/worldcup-at-a-glance/
+
+After deploy:
+- Desktop: Ctrl + F5.
+- If still old, unregister service worker once.

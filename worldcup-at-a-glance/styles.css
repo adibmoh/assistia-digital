@@ -1654,3 +1654,34 @@ main > img[src*="logo"] {
 .badge.finished {
   color: #93c5fd !important;
 }
+
+
+/* =========================================================
+   v40 — scorer highlight fix
+   Only rank 1 is green. T-2/T-3 are neutral.
+   ========================================================= */
+
+#topScorers .stat-item {
+  background: rgba(15, 23, 42, .74) !important;
+  border-color: rgba(148, 163, 184, .18) !important;
+  color: var(--text) !important;
+}
+
+#topScorers .stat-item.rank-one-highlight {
+  background: rgba(16, 185, 129, .18) !important;
+  border-color: rgba(34, 197, 94, .78) !important;
+}
+
+#topScorers .stat-item:not(.rank-one-highlight) .stat-rank {
+  background: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+#topScorers .stat-item.rank-one-highlight .stat-rank {
+  background: #4ade80 !important;
+  color: #052e16 !important;
+}
+
+#topScorers .stat-item:not(.rank-one-highlight) .stat-value {
+  color: #e5e7eb !important;
+}
