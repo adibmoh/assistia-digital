@@ -3946,3 +3946,62 @@ function refreshStatsV37() {
 }
 
 console.info("AssistAI WorldCup app v38 loaded: Mikel assist fixed; exact top 3 scorer tiers only; dates forced.");
+
+
+/* =========================================================
+   v39 — scorer display correction
+   - Mikel Oyarzabal included in T-3.
+   - Only rank 1 is highlighted green.
+   - Display is locked to the verified top 3 tiers requested by user.
+   ========================================================= */
+
+const VERIFIED_TOP_SCORERS_V39 = [
+  { rank: "1", name: "Deniz Undav", country: "Germany", goals: 3, assists: 2 },
+
+  { rank: "T-2", name: "Lionel Messi", country: "Argentina", goals: 3, assists: 0 },
+  { rank: "T-2", name: "Jonathan David", country: "Canada", goals: 3, assists: 0 },
+
+  { rank: "T-3", name: "Ayase Ueda", country: "Japan", goals: 2, assists: 1 },
+  { rank: "T-3", name: "Cody Gakpo", country: "Netherlands", goals: 2, assists: 1 },
+  { rank: "T-3", name: "Crysencio Summerville", country: "Netherlands", goals: 2, assists: 1 },
+  { rank: "T-3", name: "Mikel Oyarzabal", country: "Spain", goals: 2, assists: 1 },
+  { rank: "T-3", name: "Vinícius Júnior", country: "Brazil", goals: 2, assists: 1 }
+];
+
+function topScorerValueLabelV39(player) {
+  const goals = Number(player.goals || 0);
+  const assists = Number(player.assists || 0);
+  const goalsText = `${goals} ${plural(goals, "goal")}`;
+  return assists ? `${goalsText} (${assists} ${plural(assists, "assist")})` : goalsText;
+}
+
+function topScorerNameV39(player) {
+  return player.country ? `${player.name} (${player.country})` : player.name;
+}
+
+function renderTopScorers() {
+  const rows = VERIFIED_TOP_SCORERS_V39;
+
+  $("topScorers").innerHTML = rows.length
+    ? rows.map((player) =>
+        statItemHtml(
+          player.rank,
+          topScorerNameV39(player),
+          topScorerValueLabelV39(player),
+          "stat-green",
+          player.rank === "1"
+        )
+      ).join("")
+    : statEmptyHtml("Top scorer data is not available yet.");
+}
+
+function refreshStatsV37() {
+  try {
+    renderTopScorers();
+    if (typeof renderPlayerOfTheMatchAwards === "function") renderPlayerOfTheMatchAwards();
+  } catch (error) {
+    console.warn("Stats refresh failed:", error);
+  }
+}
+
+console.info("AssistAI WorldCup app v39 loaded: Mikel included and only rank 1 highlighted.");

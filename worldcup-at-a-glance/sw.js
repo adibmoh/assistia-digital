@@ -1,4 +1,4 @@
-const CACHE_NAME = "assistia-worldcup-pwa-v38";
+const CACHE_NAME = "assistia-worldcup-pwa-v39";
 const APP_SHELL = [
   "./",
   "./index.html",
