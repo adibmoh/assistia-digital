@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <title>WorldCup at a Glance — Reliable Mode</title>
+  <link rel="stylesheet" href="styles.css?v=reliable1" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <a class="brand" href="https://assistia.digital/" aria-label="AssistAI">
+        <img src="assistia-logo.png" alt="AssistAI logo" />
+      </a>
+      <div>
+        <p class="eyebrow">Reliable Mode</p>
+        <h1>WorldCup at a Glance</h1>
+        <p class="subtitle">Only live-source data is shown. If the source does not provide a stat, it is marked unavailable.</p>
+      </div>
+    </header>
+
+    <section class="status-card">
+      <div><span class="label">Data status</span><strong id="statusText">Loading…</strong></div>
+      <div><span class="label">Last updated</span><strong id="lastUpdated">—</strong></div>
+      <button id="refreshBtn" type="button">Refresh</button>
+    </section>
+
+    <section class="toolbar">
+      <input id="searchInput" type="search" placeholder="Search team, group, venue…" />
+      <select id="groupFilter"><option value="all">All groups</option></select>
+    </section>
+
+    <section class="tabs" aria-label="Match filters">
+      <button class="tab active" data-filter="all">All</button>
+      <button class="tab" data-filter="live">Live</button>
+      <button class="tab" data-filter="upcoming">Upcoming</button>
+      <button class="tab" data-filter="finished">Finished</button>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h2>Matches</h2><small id="matchCount">—</small></div>
+      <div id="matchesList" class="match-list"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h2>Group standings</h2><small>from live source when available</small></div>
+      <div id="standingsList" class="standings-list"></div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="section-head"><h2>Top scorers</h2><small>dynamic only</small></div>
+        <div id="topScorers" class="stat-list"></div>
+      </article>
+      <article class="card">
+        <div class="section-head"><h2>Assists / MVP</h2><small>dynamic only</small></div>
+        <div id="extraStats" class="stat-list"></div>
+      </article>
+    </section>
+
+    <footer>
+      <p>Data source: worldcup26.ir API with GitHub raw fallback for basic match files. No manual player/date corrections are used.</p>
+      <p>Suggestions: <a href="mailto:hello@assistia.digital">hello@assistia.digital</a></p>
+    </footer>
+  </main>
+  <script src="app.js?v=reliable1"></script>
+</body>
+</html>
