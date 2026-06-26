@@ -1,20 +1,17 @@
-WorldCup at a Glance — Reliable Mode v1
+WorldCup Golden Boot — Free Source v1
 
-Clean rebuild with no manual player/date touches.
+Focuses only on Golden Boot data.
+
+Sources:
+1. FIFA public player-statistics page through Jina Reader.
+2. FIFA statistics overview through Jina Reader.
+3. Jina Search fallback for Golden Boot text.
 
 Rules:
-- No hard-coded fixtures.
-- No hard-coded fixture date corrections.
-- No hard-coded player stats.
-- No hard-coded scorer/assist/MVP lists.
+- No hard-coded player names.
+- No hard-coded goals or assists.
+- No manual Golden Boot table.
 - No service worker cache.
-- Refresh fetches source data with cache: no-store.
+- Every refresh fetches fresh public-source text with a cache-buster.
 
-Automatically updates if the source provides:
-- schedule
-- live status
-- results/scores
-- standings
-- scorer/assist/MVP events
-
-If a stat is not in the source, the app says unavailable instead of showing manual data.
+If the public source cannot be parsed, the app shows an error instead of fake data.

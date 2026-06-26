@@ -1,6 +1,6 @@
 {
-  "name": "WorldCup at a Glance",
-  "short_name": "WorldCup",
+  "name": "WorldCup Golden Boot",
+  "short_name": "GoldenBoot",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#07111f",
