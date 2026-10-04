@@ -1,0 +1,17 @@
+Full Ranking display-only column reorder
+
+New order around the momentum section:
+% since open
+5 min
+15 min
+% last hour
+Vol 5m
+Sector ETF
+Rel. sector
+VWAP Δ
+RSI 14
+ATR %
+
+Only the Full Ranking column display order changed.
+No data calculations, ranking logic, AssitAI logic, Conviction, Buy/Sell formulas,
+signal persistence, or market-data formulas were changed.
